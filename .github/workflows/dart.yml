@@ -73,5 +73,4 @@ jobs:
             <p>Hello,</p>
             <p>The Amax ERP system is ready for download. If you find any bugs, please ping me on WhatsApp at <strong>8460624920</strong>.</p>
             <p>You can also reach me at: <a href="mailto:patelankit70466@gmail.com">patelankit70466@gmail.com</a></p>
-            <p>Thank you!</p>
             <p><strong>Download APK here:</strong> <a href="${{ env.DOWNLOAD_LINK }}">Click to download</a></p>
