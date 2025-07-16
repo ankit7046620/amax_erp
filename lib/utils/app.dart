@@ -8,12 +8,71 @@ class HeadersKey {
   static const String iOS = "iOS";
 }
 
-class LocalKeys{
+
+class LocalKeys {
+  static const String sid = 'sid';
+  static const String fullName = 'fullName';
+  static const String userId = 'userId';
+  static const String userImage = 'userImage';
+  static const String systemUser = 'systemUser';
+  static const String cookieHeader = 'cookieHeader';
   static const String onboardingSeen= "onboarding_seen";
-  static const String sid= "sid";
+
   static const String eid= "eid";
-  static const String fullName= "full_name";
+
 }
+
+
+enum Module {
+  accounts("Accounts"),
+  assets("Assets"),
+  automation("Automation"),
+  bulkTransaction("Bulk Transaction"),
+  buying("Buying"),
+  communication("Communication"),
+  contacts("Contacts"),
+  core("Core"),
+  crm("CRM"),
+  custom("Custom"),
+  desk("Desk"),
+  email("Email"),
+  erpNextIntegrations("ERPNext Integrations"),
+  geo("Geo"),
+  healthcare("Healthcare"),
+  hr("HR"),
+  integrations("Integrations"),
+  maintenance("Maintenance"),
+  manufacturing("Manufacturing"),
+  paymentGateways("Payment Gateways"),
+  payments("Payments"),
+  payroll("Payroll"),
+  portal("Portal"),
+  printing("Printing"),
+  projects("Projects"),
+  qualityManagement("Quality Management"),
+  regional("Regional"),
+  selling("Selling"),
+  setup("Setup"),
+  social("Social"),
+  stock("Stock"),
+  subcontracting("Subcontracting"),
+  support("Support"),
+  telephony("Telephony"),
+  utilities("Utilities"),
+  website("Website"),
+  workflow("Workflow");
+
+  final String value;
+  const Module(this.value);
+}
+
+
+
+
+
+
+
+
 
 class EdgeInsetType {
   static const double xxxxxxxs = 2;

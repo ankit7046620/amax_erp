@@ -18,7 +18,7 @@ class SplashController extends GetxController {
 
     if (seen) {
 
-      AppFunction.goToAndReplace(Routes.LOGIN);
+      AppFunction.goToNextScreen(Routes.LOGIN);
     } else {
       AppFunction.goToAndReplace(Routes.ONBOARDING);
     }

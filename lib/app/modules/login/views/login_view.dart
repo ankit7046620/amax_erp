@@ -139,7 +139,7 @@ LoginController _loginController=Get.put(LoginController());
         text: 'Login',
         width: double.infinity,
         isLoading: controller.isLoading.value,
-        onPressed: controller.isLoading.value ? null : controller.login,
+        onPressed:  controller.login,
         child: SizedBox(),
       ),
     );

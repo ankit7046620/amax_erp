@@ -8,6 +8,9 @@ abstract class Routes {
   static const L_OGIN = _Paths.L_OGIN;
   static const LOGIN = _Paths.LOGIN;
   static const BOTTAM = _Paths.BOTTAM;
+  static const CRM = _Paths.CRM;
+  static const SALES = _Paths.SALES;
+  static const LEAD_DETAILS = _Paths.LEAD_DETAILS;
 }
 
 abstract class _Paths {
@@ -17,4 +20,7 @@ abstract class _Paths {
   static const L_OGIN = '/l-ogin';
   static const LOGIN = '/login';
   static const BOTTAM = '/bottam';
+  static const CRM = '/crm';
+  static const SALES = '/sales';
+  static const LEAD_DETAILS = '/lead-details';
 }

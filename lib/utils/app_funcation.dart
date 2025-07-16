@@ -9,6 +9,9 @@ import 'app.dart';
 
 class AppFunction {
   static void goToAndReplace(String routeName, {dynamic arguments}) {
+    Get.offAllNamed(routeName, arguments: arguments); // ✅ FIXED
+  }
+  static void goToNextScreen(String routeName, {dynamic arguments}) {
     Get.offNamed(routeName, arguments: arguments);
   }
 

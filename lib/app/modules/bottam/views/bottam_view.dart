@@ -26,14 +26,19 @@ class BottamView extends GetView<BottamController> {
             childAspectRatio: 3, // adjust height
           ),
           itemBuilder: (context, index) {
-            return Card(
-              elevation: 2,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-              child: Center(
-                child: Text(
-                  controller.moduleNames[index],
-                  textAlign: TextAlign.center,
-                  style: TextStyle(fontSize: 16),
+            return GestureDetector(
+              onTap: (){
+                controller.handleModule(controller.moduleNames[index]);
+              },
+              child: Card(
+                elevation: 2,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                child: Center(
+                  child: Text(
+                    controller.moduleNames[index],
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 16),
+                  ),
                 ),
               ),
             );

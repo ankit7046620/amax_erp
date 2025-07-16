@@ -1,4 +1,6 @@
 import 'package:amax_hr/app/routes/app_pages.dart';
+import 'package:amax_hr/manager/api_service.dart';
+import 'package:amax_hr/manager/shared_pref_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/utils/app_funcation.dart';
 import 'package:flutter/cupertino.dart';
@@ -51,7 +53,7 @@ class LoginController extends GetxController {
     super.onInit();
       frappeClient = FrappeV15(
         // baseUrl: 'https://192.168.1.7:8003/',
-        baseUrl: 'https://hims.techcloudamax.ai/',
+        baseUrl: 'https://plastic.techcloudamax.ai/',
     );
   }
 
@@ -72,60 +74,51 @@ class LoginController extends GetxController {
   //   }
 
   login() async {
+    EasyLoading.show();
 
-EasyLoading.show();
-    print("======##>>>${frappeClient.baseUrl}");
     final authResponse = await frappeClient.login(
       LoginRequest(
-        usr: 'bob@yopmail.com',
-        pwd: 'Test@123',
-
-        // usr: 'vignesh@amaxconsultancyservices.com',
-        // pwd: 'Welcome@123#',
+        usr: 'vignesh@amaxconsultancyservices.com',
+        pwd: 'Welcome@@123#',
       ),
-
     );
-EasyLoading.dismiss();
-    print("====111==##>>>${authResponse.toJson()}");
 
-    print("======##>>>${authResponse.fullName}");
-    print("======##>>>${authResponse.homePage}");
-    print("======##>>>${authResponse.userId}");
-    print("======##>>>${authResponse.userId}");
-    print("======##>>>${authResponse.toJson()}");
+    EasyLoading.dismiss();
 
-    final regex = RegExp(r'sid=([a-f0-9]+)');
-    final match = regex.firstMatch(authResponse.toJson().toString());
+    final cookieString = authResponse.toJson().toString();
 
-final fullNameMatch = RegExp(r'full_name=([^;]+)').firstMatch(authResponse.toJson().toString());
-final fullName = fullNameMatch?.group(1)??'';
-String sid='';
-    if (match != null) {
-      String sessionId = match.group(1)!;
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      prefs.setString(LocalKeys.onboardingSeen, sid);
-      prefs.setString(LocalKeys.fullName, fullName);
+    final cookieRegex = RegExp(r'(full_name|sid|system_user|user_id|user_image)=([^;]+)');
+    final matches = cookieRegex.allMatches(cookieString);
 
-      sid= sessionId ;
-      print('Session ID: $sessionId');
-      AppFunction.setSessionFromLoginResponse(authResponse.toJson().toString());
-    } else {
-      print('Session ID not found');
+    Map<String, String> cookieMap = {};
+    for (final match in matches) {
+      cookieMap[match.group(1)!] = match.group(2)!;
     }
 
-    if(sid !=''){
+    // Build cookie header
+    final cookieHeader = cookieMap.entries.map((e) => '${e.key}=${e.value}').join('; ');
+
+    // Save to SharedPreferences
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(LocalKeys.cookieHeader, cookieHeader);
+
+    print('✅ Stored Cookie: $cookieHeader');
+
+    ApiService.dio.options.headers['cookie'] = cookieHeader;
+
+
+
+    print('✅ Dio cookie set!');
+
+    if (cookieMap['sid']?.isNotEmpty ?? false) {
       AppFunction.goToAndReplace(Routes.BOTTAM);
+    } else {
+      print('❌ Session ID not found');
     }
-
-
   }
 
-getUserInfo(){
-  FrappeV15   frappeClient = FrappeV15(
-    baseUrl: ''
-        '',
-  );
-     }
+
+
 
   void forgotPassword() {
     Get.snackbar(

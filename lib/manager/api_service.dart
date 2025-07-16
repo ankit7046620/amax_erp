@@ -6,7 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class ApiService {
   static final Dio dio = Dio(
     BaseOptions(
-      baseUrl: 'https://hims.techcloudamax.ai/',
+      baseUrl: 'https://plastic.techcloudamax.ai/',
       connectTimeout: Duration(seconds: 10),
       receiveTimeout: Duration(seconds: 10),
       headers: {
