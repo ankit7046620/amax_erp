@@ -1,0 +1,53 @@
+ name: Flutter CI
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Checkout the source code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Determine Flutter version from .flutter-version or pubspec.yaml
+      - name: Get Flutter version
+        run: |
+          if [ -f ".flutter-version" ]; then
+            echo "Using FVM version"
+            FLUTTER_VERSION=$(cat .flutter-version)
+          else
+            echo "Using pubspec.yaml version"
+            FLUTTER_VERSION=$(grep 'flutter:' pubspec.yaml | awk '{print $2}' | tr -d '"')
+          fi
+          echo "Flutter version: $FLUTTER_VERSION"
+          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> $GITHUB_ENV
+
+      # Set up Flutter
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+
+      # Install dependencies
+      - name: Install dependencies
+        run: flutter pub get
+
+      # Analyze code (won't fail the build)
+      - name: Analyze code
+        run: flutter analyze || true
+
+      # Build the release APK
+      - name: Build APK
+        run: flutter build apk --release
+
+      # Upload the built APK
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
