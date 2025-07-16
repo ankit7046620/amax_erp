@@ -53,10 +53,10 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
 
-      - name: Upload APK to Google Drive folder (ID: DUMMY_FOLDER_ID_12345)
+      - name: Upload APK to Google Drive folder (ID: 1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk)
         run: |
-          rclone copy "$APK_PATH" "gdrive:DUMMY_FOLDER_ID_12345"
-          echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/DUMMY_FOLDER_ID_12345" >> $GITHUB_ENV
+          rclone copy "$APK_PATH" "gdrive:1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk"
+          echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk" >> $GITHUB_ENV
 
       - name: Send Email with APK Link
         uses: dawidd6/action-send-mail@v3
