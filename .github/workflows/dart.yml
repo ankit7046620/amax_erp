@@ -63,8 +63,8 @@ jobs:
         with:
           server_address: smtp.gmail.com
           server_port: 587
-          username: ${{ secrets.EMAIL_USERNAME }}
-          password: ${{ secrets.EMAIL_PASSWORD }}
+          username: ${{ patelankit70466@gmail.com }}
+          password: ${{ imun iisz qado grjm }}
           subject: "🚀 Demo App APK - ${{ env.APK_NAME }}"
           to: user1@example.com, user2@example.com, user3@example.com
           from: "Flutter Bot <${{ secrets.EMAIL_USERNAME }}>"
