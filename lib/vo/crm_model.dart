@@ -33,6 +33,7 @@ class Data {
   String creation;
   String modified;
   String source;
+  String territory;
 
   Data({
     required this.name,
@@ -43,6 +44,7 @@ class Data {
     required this.creation,
     required this.modified,
     required this.source,
+    required this.territory,
   });
 
   factory Data.fromJson(Map<String, dynamic> json) {
@@ -55,6 +57,7 @@ class Data {
       creation: json['creation'] ?? '',
       modified: json['modified'] ?? '',
       source: json['source'] ?? '',
+      territory: json['territory'] ?? '',
     );
   }
 
@@ -68,6 +71,7 @@ class Data {
       'creation': creation,
       'modified': modified,
       'source': source,
+      'territory': territory,
     };
   }
 }

@@ -81,7 +81,7 @@ class BottamController extends GetxController {
         '/api/resource/Lead',
         params: {
           'fields':
-              '["name","lead_name","email_id","company_name","status","creation","modified","source"]',
+              '["name","lead_name","email_id","company_name","status","creation","modified","source","territory"]',
           'limit_page_length': '1000',
         },
       );

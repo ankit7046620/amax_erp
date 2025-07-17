@@ -52,7 +52,7 @@ class LoginController extends GetxController {
   void onInit() {
     super.onInit();
       frappeClient = FrappeV15(
-        // baseUrl: 'https://192.168.1.7:8003/',
+        // baseUrl: 'https://192.168.1.7:8003/',  //local
         baseUrl: 'https://plastic.techcloudamax.ai/',
     );
       setData();
