@@ -45,7 +45,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CRM,
-      page: () => const CrmView(),
+      page: () =>   CrmView(),
       binding: CrmBinding(),
     ),
     GetPage(

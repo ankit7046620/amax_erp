@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -14,6 +15,18 @@ class AppFunction {
   static void goToNextScreen(String routeName, {dynamic arguments}) {
     Get.offNamed(routeName, arguments: arguments);
   }
+
+
+
+  static  Future<T?> goToScreen<T>(Widget page, {Map<String, dynamic>? args}) async {
+    return Get.to<T>(() => page, arguments: args);
+  }
+
+  /// Go back with result
+ static void goBackWithResult<T>(T result) {
+    Get.back(result: result);
+  }
+
 
   static Map<String, String> defaultHeaders() {
     Map<String, String> headers = {};

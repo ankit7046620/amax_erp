@@ -1,3 +1,4 @@
+import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
@@ -22,12 +23,8 @@ class BottamController extends GetxController {
   void increment() => count.value++;
 
   Module? moduleFromString(String value) {
-    return Module.values.firstWhere(
-          (e) => e.value == value,
-    );
+    return Module.values.firstWhere((e) => e.value == value);
   }
-
-
 
   void handleModule(String moduleName) {
     final module = moduleFromString(moduleName);
@@ -41,25 +38,18 @@ class BottamController extends GetxController {
         fetchLeadData();
         break;
 
-    // Add remaining cases as needed
+      // Add remaining cases as needed
       default:
         print("Module ${module.value} is not yet handled.");
     }
   }
 
-
-
-
-
-
-
-
   Future<void> fetchAndStoreModules() async {
     try {
-      final response = await ApiService.get('/api/resource/Module Def', params: {
-        'fields': '["module_name"]',
-        'limit_page_length': '1000',
-      });
+      final response = await ApiService.get(
+        '/api/resource/Module Def',
+        params: {'fields': '["module_name"]', 'limit_page_length': '1000'},
+      );
 
       if (response != null && response.statusCode == 200) {
         final List modules = response.data['data'];
@@ -76,26 +66,26 @@ class BottamController extends GetxController {
       isLoading.value = false; // ✅ Stop loader in any case
     }
   }
+
   Future<void> fetchLeadData() async {
     try {
-      final response = await ApiService.get('/api/resource/Lead', params: {
-        'fields': '["name","lead_name","email_id","company_name","status","creation","modified","source"]',
-        'limit_page_length': '1000',
-      });
+      final response = await ApiService.get(
+        '/api/resource/Lead',
+        params: {
+          'fields':
+              '["name","lead_name","email_id","company_name","status","creation","modified","source"]',
+          'limit_page_length': '1000',
+        },
+      );
 
       if (response != null && response.statusCode == 200) {
         final List modules = response.data['data'];
-
 
         final CrmModel crmModel = CrmModel.fromJson({'data': modules});
 
         logger.d('crmModel===>#${crmModel.data.length}');
 
-
-        AppFunction.goToNextScreen(Routes.CRM, arguments: {
-          'module': 'crm',
-          'model': crmModel,
-        });
+        Get.to(()=>CrmView(), arguments: {'module': 'crm', 'model': crmModel});
       } else {
         print('❌ Failed to fetch leads');
       }
@@ -105,9 +95,4 @@ class BottamController extends GetxController {
       isLoading.value = false;
     }
   }
-
-
-
-
-
 }

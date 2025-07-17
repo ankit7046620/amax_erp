@@ -1,11 +1,13 @@
 import 'dart:math';
-import 'package:amax_hr/app/modules/leadDetails/views/lead_details_view.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:amax_hr/app/modules/crm/controllers/crm_controller.dart';
 
 class CrmView extends GetView<CrmController> {
-  const CrmView({super.key});
+  CrmView({super.key});
+
+  CrmController crmController = Get.put(CrmController());
 
   @override
   Widget build(BuildContext context) {
@@ -17,25 +19,8 @@ class CrmView extends GetView<CrmController> {
           builder: (controller) {
             return Column(
               children: [
-                // Responsive Total Count Card
-                Card(
-                  color: Colors.deepPurple.shade100,
-                  elevation: 3,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                  child: SizedBox(
-                    height: 100,
-                    width: double.infinity,
-                    child: Center(
-                      child: Text(
-                        "Total Leads: ${controller.crmModel.data.length}",
-                        style: TextStyle(
-                          fontSize: MediaQuery.of(context).size.width * 0.05, // responsive font
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
+                _topCard(),
+
                 const SizedBox(height: 20),
 
                 // Responsive GridView
@@ -58,8 +43,10 @@ class CrmView extends GetView<CrmController> {
                           childAspectRatio: 1,
                         ),
                         itemBuilder: (context, index) {
-                          final status = controller.leadsGroupedByStatus.keys.elementAt(index);
-                          final count = controller.leadsGroupedByStatus[index] ?? 0;
+                          final status = controller.leadsGroupedByStatus.keys
+                              .elementAt(index);
+                          final count =
+                              controller.leadsGroupedByStatus[index] ?? 0;
 
                           // 🟠 Random orange shade
                           final randomShade = _getRandomShade();
@@ -94,6 +81,39 @@ class CrmView extends GetView<CrmController> {
     );
   }
 
+  //top code
+  Widget _topCard() {
+    return Card(
+      elevation: 3,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Container(
+        height: 100,
+        width: double.infinity,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: [
+              Color(0xFF2C3E50), // dark blue-gray
+              Color(0xFF4CA1AF), // lighter blue
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            "Total Leads: ${controller.crmModel.data.length}",
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white, // important for contrast
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
   /// 🔥 Generate random shade from predefined Material orange shades
   int _getRandomShade() {
     final shades = [50, 100, 200, 300, 400, 500, 600, 700, 800, 900];
@@ -110,10 +130,18 @@ class CrmView extends GetView<CrmController> {
     final width = MediaQuery.of(context).size.width;
 
     return Card(
-      color: color,
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Padding(
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          gradient: LinearGradient(
+            colors: [Color(0xFF2C3E50), Color(0xFF4CA1AF)],
+            // Replace with any above
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
         padding: const EdgeInsets.all(12),
         child: Center(
           child: Column(
@@ -126,7 +154,7 @@ class CrmView extends GetView<CrmController> {
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
-                    fontSize: width * 0.035, // responsive font
+                    fontSize: width * 0.035,
                     color: Colors.white,
                   ),
                 ),
