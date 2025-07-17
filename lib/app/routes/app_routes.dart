@@ -11,6 +11,7 @@ abstract class Routes {
   static const CRM = _Paths.CRM;
   static const SALES = _Paths.SALES;
   static const LEAD_DETAILS = _Paths.LEAD_DETAILS;
+  static const CRM_GRAPH = _Paths.CRM_GRAPH;
 }
 
 abstract class _Paths {
@@ -23,4 +24,5 @@ abstract class _Paths {
   static const CRM = '/crm';
   static const SALES = '/sales';
   static const LEAD_DETAILS = '/lead-details';
+  static const CRM_GRAPH = '/crm-graph';
 }

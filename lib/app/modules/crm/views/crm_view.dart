@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'package:amax_hr/app/modules/crmGraph/views/crm_graph_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:amax_hr/app/modules/crm/controllers/crm_controller.dart';
@@ -19,7 +20,9 @@ class CrmView extends GetView<CrmController> {
           builder: (controller) {
             return Column(
               children: [
-                _topCard(),
+                _topCard(text: "Total Leads: ${controller.crmModel.data.length}"),
+                const SizedBox(height: 20),
+                _topCard(text: "Graph"),
 
                 const SizedBox(height: 20),
 
@@ -82,31 +85,37 @@ class CrmView extends GetView<CrmController> {
   }
 
   //top code
-  Widget _topCard() {
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        height: 100,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: [
-              Color(0xFF2C3E50), // dark blue-gray
-              Color(0xFF4CA1AF), // lighter blue
-            ],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
+  Widget _topCard({required String text}) {
+    return GestureDetector(
+      onTap: (){
+        Get.to(() => CrmGraphView(), arguments: controller.allLeads);
+
+      },
+      child: Card(
+        elevation: 3,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        child: Container(
+          height: 100,
+          width: double.infinity,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            gradient: LinearGradient(
+              colors: [
+                Color(0xFF2C3E50), // dark blue-gray
+                Color(0xFF4CA1AF), // lighter blue
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
           ),
-        ),
-        child: Center(
-          child: Text(
-            "Total Leads: ${controller.crmModel.data.length}",
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.white, // important for contrast
+          child: Center(
+            child: Text(
+              text,
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white, // important for contrast
+              ),
             ),
           ),
         ),

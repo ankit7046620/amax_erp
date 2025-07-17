@@ -55,23 +55,17 @@ class LoginController extends GetxController {
         // baseUrl: 'https://192.168.1.7:8003/',
         baseUrl: 'https://plastic.techcloudamax.ai/',
     );
+      setData();
   }
 
 
-  // Future<void> login() async {
-  //   //if (!formKey.currentState!.validate()) return;
-  //   Map<String, dynamic> data={
-  //     'usr': "rock@yopmail.com",
-  //     'pwd':"rock@123",
-  //   };
-  //
-  //
-  //   final response =  ApiService.post("https://ankit.frappehr.com/app", data);
-  //
-  //   print("object=====>>$response");
-  //   AppFunction.goToAndReplace(Routes.BOTTAM);
-  //
-  //   }
+
+
+  void setData(){
+    emailController.text="vignesh@amaxconsultancyservices.com";
+    passwordController.text="Welcome@@123#";
+    update();
+  }
 
   login() async {
     EasyLoading.show();
