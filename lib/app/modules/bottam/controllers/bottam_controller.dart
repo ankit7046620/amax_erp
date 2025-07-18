@@ -123,7 +123,9 @@ class BottamController extends GetxController {
 
         logger.d('saleModel===>#${sale.data?.length}');
         logger.d('saleJason===>#${sale.toJson()}');
+
         Get.to(()=>SaleDashboardView(), arguments: {'module': 'sale', 'model': sale});
+
       } else {
         EasyLoading.dismiss();
         print('❌ Failed to fetch leads');
