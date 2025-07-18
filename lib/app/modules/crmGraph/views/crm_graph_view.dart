@@ -192,6 +192,44 @@ class CrmGraphView extends GetView<CrmGraphController> {
               );
             }),
 
+            sectionHeaderWithFilter(
+              title: 'Sales Performance',
+              selectedValue: controller.chartTypeMap['Sales Performance']!,
+              onFilterTap: (type) {
+                controller.updateChartTypeFor('Sales Performance', type);
+              },
+            ),
+            const SizedBox(height: 10),
+            Obx(() {
+              final data = controller.barChartData;
+
+              return SizedBox(
+                height: 350,
+                child: data.isEmpty
+                    ? const Center(child: Text("No Sales Performance data"))
+                    : SfCartesianChart(
+                  title: ChartTitle(
+                    text:
+                    'Sales Performance (${controller.chartTypeMap['Sales Performance']!.value.capitalizeFirst})',
+                  ),
+                  legend: Legend(
+                    isVisible: true,
+                    overflowMode: LegendItemOverflowMode.wrap,
+                  ),
+                  tooltipBehavior: TooltipBehavior(enable: true),
+                  primaryXAxis: CategoryAxis(
+                    title: AxisTitle(text: 'Time Period'),
+                    labelRotation: 45,
+                  ),
+                  primaryYAxis: NumericAxis(
+                    title: AxisTitle(text: 'Lead Count'),
+                  ),
+                  series: controller.buildSalesBarSeries(),
+                ),
+              );
+            }),
+
+
 
           ],
         ),

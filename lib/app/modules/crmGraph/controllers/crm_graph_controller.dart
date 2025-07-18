@@ -2,6 +2,7 @@ import 'package:amax_hr/main.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:get/get.dart';
 import 'package:amax_hr/vo/crm_model.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 class CrmGraphController extends GetxController {
   List<Data> allLeads = [];
@@ -12,6 +13,7 @@ class CrmGraphController extends GetxController {
 
   RxList<ChartData> wonChartData = <ChartData>[].obs;
 
+  RxList<SalesChart> barChartData = <SalesChart>[].obs;
   // Observable count: total won leads
   RxInt wonLeadCount = 0.obs;
 
@@ -36,6 +38,7 @@ class CrmGraphController extends GetxController {
     'Line Chart':ChartFilterType.monthly.obs,
     'Territory Chart':ChartFilterType.monthly.obs,
     'Source Chart':ChartFilterType.monthly.obs,
+    'Sales Performance':ChartFilterType.monthly.obs,
   }.obs;
 
   @override
@@ -49,6 +52,7 @@ class CrmGraphController extends GetxController {
     _generateWonChartData(ChartFilterType.monthly); // 3. Won leads month-wise (bar chart)
     generateTerritoryChartData(ChartFilterType.monthly);
     generateSourceChartData(ChartFilterType.monthly);
+    generateLeadTypeBarChartData(ChartFilterType.monthly);
   }
 
   /// Filter and store 'Won' leads ==>converted means won
@@ -220,6 +224,7 @@ class CrmGraphController extends GetxController {
   }
 
   void generateSourceChartData(String chartType) {
+    logger.d("fillter call111111");
     final Map<String, int> sourceCounts = {};
 
     for (var lead in allLeads) {
@@ -232,26 +237,26 @@ class CrmGraphController extends GetxController {
           bool include = false;
 
           switch (chartType.toLowerCase()) {
-            case ChartFilterType.yearly:
+            case  'yearly':
               include = date.year == DateTime.now().year;
               break;
-            case ChartFilterType.quarterly:
+            case 'quarterly':
               final nowQuarter = ((DateTime.now().month - 1) ~/ 3) + 1;
               final leadQuarter = ((date.month - 1) ~/ 3) + 1;
               include = (date.year == DateTime.now().year && leadQuarter == nowQuarter);
               break;
-            case ChartFilterType.monthly:
+            case 'monthly':
               include = date.year == DateTime.now().year &&
                   date.month == DateTime.now().month;
               break;
-            case ChartFilterType.weekly:
+            case 'weekly':
               final now = DateTime.now();
               final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
               final endOfWeek = startOfWeek.add(const Duration(days: 6));
               include = date.isAfter(startOfWeek.subtract(const Duration(days: 1))) &&
                   date.isBefore(endOfWeek.add(const Duration(days: 1)));
               break;
-            case ChartFilterType.daily:
+            case 'daily':
               final now = DateTime.now();
               include = date.day == now.day &&
                   date.month == now.month &&
@@ -326,12 +331,101 @@ class CrmGraphController extends GetxController {
         generateSourceChartData(selectedType);
         break;
 
+      case 'Sales Performance':
+        generateLeadTypeBarChartData(selectedType);
+        break;
+
+
       default:
         print('⚠️ Unknown chart name: $chartName');
     }
   }
 
+  void generateLeadTypeBarChartData(String chartType) {
+    final Map<String, Map<String, int>> periodWiseLeadTypeCounts = {};
 
+    for (var lead in allLeads) {
+      final creation = lead.creation;
+      final leadType = (lead.leadName ?? 'Unknown').trim();
+
+      if (creation != null && creation.isNotEmpty) {
+        final date = DateTime.tryParse(creation);
+        if (date != null) {
+          String periodKey;
+
+          switch (chartType.toLowerCase()) {
+            case 'yearly':
+              periodKey = "${date.year}";
+              break;
+            case 'quarterly':
+              final quarter = ((date.month - 1) ~/ 3) + 1;
+              periodKey = "Q$quarter ${date.year}";
+              break;
+            case 'monthly':
+              periodKey = "${_getMonthName(date.month)} ${date.year}";
+              break;
+            case 'weekly':
+              final week = ((date.day - 1) ~/ 7) + 1;
+              periodKey = "Week $week ${_getMonthName(date.month)} ${date.year}";
+              break;
+            case 'daily':
+              periodKey = "${date.day.toString().padLeft(2, '0')} ${_getMonthName(date.month)} ${date.year}";
+              break;
+            default:
+              periodKey = "${_getMonthName(date.month)} ${date.year}";
+          }
+
+          // Create nested map entry
+          if (!periodWiseLeadTypeCounts.containsKey(periodKey)) {
+            periodWiseLeadTypeCounts[periodKey] = {};
+          }
+
+          periodWiseLeadTypeCounts[periodKey]![leadType] =
+              (periodWiseLeadTypeCounts[periodKey]![leadType] ?? 0) + 1;
+        }
+      }
+    }
+
+    final List<SalesChart> tempList = [];
+
+    // Flatten map into SalesChart list
+    periodWiseLeadTypeCounts.forEach((period, leadTypeMap) {
+      leadTypeMap.forEach((leadType, count) {
+        tempList.add(SalesChart(period, leadType, count));
+      });
+    });
+
+    // Sort by period
+    tempList.sort((a, b) => a.month.compareTo(b.month));
+
+    barChartData.value = tempList;
+
+    print("📊 Lead Type Bar Chart ($chartType):");
+    for (var entry in barChartData) {
+      print(" ➤ ${entry.month} | ${entry.leadType}: ${entry.count}");
+    }
+
+    update();
+  }
+
+
+  List<CartesianSeries<SalesChart, String>> buildSalesBarSeries() {
+    final Map<String, List<SalesChart>> grouped = {};
+
+    for (var item in barChartData) {
+      grouped.putIfAbsent(item.leadType, () => []).add(item);
+    }
+
+    return grouped.entries.map((entry) {
+      return ColumnSeries<SalesChart, String>(
+        name: entry.key,
+        dataSource: entry.value,
+        xValueMapper: (SalesChart data, _) => data.month,
+        yValueMapper: (SalesChart data, _) => data.count,
+        dataLabelSettings: const DataLabelSettings(isVisible: true),
+      );
+    }).toList();
+  }
 
 
 }
@@ -342,4 +436,12 @@ class ChartData {
   final int count;
 
   ChartData(this.month, this.count);
+}
+
+class SalesChart {
+  final String month;
+  final String leadType;
+  final int count;
+
+  SalesChart(this.month,this.leadType ,this.count);
 }

@@ -1,36 +1,134 @@
+import 'package:amax_hr/main.dart';
+import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/vo/customer_list_model.dart';
 import 'package:amax_hr/vo/sales_order.dart';
 import 'package:get/get.dart';
-
-import '../../../../main.dart';
 import '../../../../manager/api_service.dart';
 
 class SaleDashboardController extends GetxController {
-  //TODO: Implement SaleDashboardController
-  var salesOrders = <SalesOrder>[].obs;
-  var customerCount = 0.obs;
-  var quarterlySalesTotal = 0.0.obs;
   final isLoading = true.obs;
+  final customerCount = 0.obs;
+  final totalSales = 0.0.obs;
+  int customerListLenth = 0;
 
-    int customerListLenth=0;
-  final count = 0.obs;
+  // Sale data extracted from model
+  List<Map<String, dynamic>> saleData = [];
+
+  // Chart filter options
+  static const List<String> chartFilters = [
+    ChartFilterType.yearly,
+    ChartFilterType.quarterly,
+    ChartFilterType.monthly,
+    ChartFilterType.weekly,
+    ChartFilterType.daily,
+  ];
+
+  // Dropdown values for each card
+  final RxMap<String, RxString> chartTypeMap = {
+    'ANNUAL SALES': ChartFilterType.monthly.obs,
+    'SALES ORDERS TO DELIVER': ChartFilterType.monthly.obs,
+    'SALES ORDERS TO BILL': ChartFilterType.monthly.obs,
+    'ACTIVE CUSTOMERS': ChartFilterType.monthly.obs,
+  }.obs;
+
   @override
   void onInit() {
-  //  fetchSalesOrders();
-    fetchCustomerData();
     super.onInit();
-
+    _loadPassedData();
+    fetchCustomerData();
   }
 
-  void onReady() {
-    super.onReady();
+  /// ✅ Load data passed via Get.arguments
+  void _loadPassedData() {
+    final args = Get.arguments;
+    logger.d('✅ Sale data args: $args');
+
+    if (args is Map && args.containsKey('model')) {
+      final salesOrder = args['model'];
+      if (salesOrder is SalesOrder && salesOrder.data != null) {
+        saleData = salesOrder.data!.map((e) => e.toJson()).toList();
+        totalSales.value = calculateFilteredTotal(saleData, ChartFilterType.monthly);
+        logger.d('✅ Loaded ${saleData.length} sale items');
+      } else {
+        logger.e('❌ SalesOrder model is invalid or missing data');
+      }
+    } else {
+      logger.e('❌ Invalid or missing sale data in arguments');
+    }
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+  /// Update dropdown filter for a specific card
+  void updateChartType(String key, String? value) {
+    if (value != null && chartTypeMap.containsKey(key)) {
+      chartTypeMap[key]?.value = value;
+    }
   }
 
+  /// Get filtered total base_net_total for a specific card
+  double getFilteredTotalForCard(String cardTitle) {
+    final filterType = chartTypeMap[cardTitle]?.value ?? ChartFilterType.monthly;
+    return calculateFilteredTotal(saleData, filterType);
+  }
+
+  /// ✅ Calculate total base_net_total by selected filter
+  double calculateFilteredTotal(List<Map<String, dynamic>> salesData, String filterType) {
+    double total = 0.0;
+    final now = DateTime.now();
+
+    for (var item in salesData) {
+      final date = DateTime.tryParse(item['transaction_date'].toString());
+      final baseNetTotal = item['base_net_total'];
+
+      if (date == null || baseNetTotal == null) continue;
+
+      switch (filterType.toLowerCase()) {
+        case 'monthly':
+          if (date.month == now.month && date.year == now.year) total += baseNetTotal;
+          break;
+
+        case 'weekly':
+          final weekStart = now.subtract(Duration(days: now.weekday - 1));
+          final weekEnd = weekStart.add(const Duration(days: 6));
+          if (!date.isBefore(weekStart) && !date.isAfter(weekEnd)) total += baseNetTotal;
+          break;
+
+        case 'quarterly':
+          final quarter = ((now.month - 1) ~/ 3) + 1;
+          final dateQuarter = ((date.month - 1) ~/ 3) + 1;
+          if (date.year == now.year && dateQuarter == quarter) total += baseNetTotal;
+          break;
+
+        case 'yearly':
+          if (date.year == now.year) total += baseNetTotal;
+          break;
+
+        case 'daily':
+          if (date.year == now.year && date.month == now.month && date.day == now.day) {
+            total += baseNetTotal;
+          }
+          break;
+      }
+    }
+
+    logger.d("💰 Filtered Total for [$filterType]: ₹$total");
+    return total;
+  }
+
+  /// ✅ Total sales without any filters
+  double getOverallTotal() {
+    double total = 0.0;
+
+    for (var item in saleData) {
+      final baseNetTotal = item['base_net_total'];
+      if (baseNetTotal != null && baseNetTotal is num) {
+        total += baseNetTotal;
+      }
+    }
+
+    return total;
+  }
+
+  /// ✅ Fetch total active customers
   Future<void> fetchCustomerData() async {
     try {
       final response = await ApiService.get(
@@ -43,23 +141,15 @@ class SaleDashboardController extends GetxController {
       );
 
       if (response != null && response.statusCode == 200) {
-        final List modules = response.data['data'];
-
-         CustomerList customerList = CustomerList.fromJson({'data': modules});
-
-        logger.d('customerListModel===>#${customerList.data?.length}');
-        logger.d('customerListJason===>#${customerList.toJson()}');
-        customerListLenth=customerList.data!.length;
+        final modules = response.data['data'];
+        final customerList = CustomerList.fromJson({'data': modules});
+        customerListLenth = customerList.data?.length ?? 0;
         update();
-        //  Get.to(()=>CrmView(), arguments: {'module': 'crm', 'model': sale});
-      } else {
-        print('❌ Failed to fetch leads');
       }
     } catch (e) {
-      print("❌ Error fetching leads: $e");
+      logger.e("❌ Error fetching customers: $e");
     } finally {
       isLoading.value = false;
     }
   }
-
 }
