@@ -12,6 +12,8 @@ import '../modules/leadDetails/bindings/lead_details_binding.dart';
 import '../modules/leadDetails/views/lead_details_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/saleGraph/bindings/sale_graph_binding.dart';
+import '../modules/saleGraph/views/sale_graph_view.dart';
 import '../modules/sales/bindings/sales_binding.dart';
 import '../modules/sales/views/sales_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
@@ -47,7 +49,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.CRM,
-      page: () =>   CrmView(),
+      page: () => CrmView(),
       binding: CrmBinding(),
     ),
     GetPage(
@@ -59,6 +61,11 @@ class AppPages {
       name: _Paths.LEAD_DETAILS,
       page: () => const LeadDetailsView(),
       binding: LeadDetailsBinding(),
+    ),
+    GetPage(
+      name: _Paths.SALE_GRAPH,
+      page: () => const SaleGraphView(),
+      binding: SaleGraphBinding(),
     ),
   ];
 }
