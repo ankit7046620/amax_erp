@@ -1,81 +1,78 @@
-
 import 'package:amax_hr/app/modules/saleGraph/views/sale_graph_view.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/sale_dashboard_controller.dart';
 
-class SaleDashboardView extends GetView<SaleDashboardController> {
+class SaleDashboardView extends StatelessWidget {
   const SaleDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(SaleDashboardController());
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Selling Dashboard'),
-        centerTitle: true,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: Obx(() => Column(
-          children: [
-
-
-
-            GestureDetector(
-
-              onTap: (){
-
-                Get.to(()=>SaleGraphView(), arguments: {'module': 'sale', 'model': controller.saleData});
-
-              },
-              child: _buildStatusCard(
-                context: context,
-                title: 'ANNUAL SALES',
-                count: controller.totalSales.value, // ✅ Using observable value
-                color: Colors.blue,
-                currency: true,
-                selectedItem: controller.chartTypeMap['ANNUAL SALES']!,
-                onChanged: (value) => controller.updateChartType('ANNUAL SALES', value),
-              ),
+    return GetBuilder<SaleDashboardController>(
+      init: SaleDashboardController(),
+      builder: (controller) {
+        return Scaffold(
+          appBar: AppBar(
+            title: const Text('Selling Dashboard'),
+            centerTitle: true,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(12),
+            child: Column(
+              children: [
+                GestureDetector(
+                  onTap: () {
+                    Get.to(() => const SaleGraphView(),
+                        arguments: {'module': 'sale', 'model': controller.saleData});
+                  },
+                  child: _buildStatusCard(
+                    context: context,
+                    title: 'ANNUAL SALES',
+                    count: controller.totalSales.value,
+                    color: Colors.blue,
+                    currency: true,
+                    selectedItem: controller.chartTypeMap['ANNUAL SALES']!,
+                    onChanged: (value) => controller.updateChartType('ANNUAL SALES', value),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildStatusCard(
+                  context: context,
+                  title: 'SALES ORDERS TO DELIVER',
+                  count: controller.toOrdersToDeliver,
+                  color: Colors.orange,
+                  selectedItem: controller.chartTypeMap['SALES ORDERS TO DELIVER']!,
+                  onChanged: (value) => controller.updateChartType('SALES ORDERS TO DELIVER', value),
+                ),
+                const SizedBox(height: 12),
+                _buildStatusCard(
+                  context: context,
+                  title: 'SALES ORDERS TO BILL',
+                  count: controller.todeliverandbill,
+                  color: Colors.purple,
+                  selectedItem: controller.chartTypeMap['SALES ORDERS TO BILL']!,
+                  onChanged: (value) => controller.updateChartType('SALES ORDERS TO BILL', value),
+                ),
+                const SizedBox(height: 12),
+                _buildStatusCard(
+                  context: context,
+                  title: 'ACTIVE CUSTOMERS',
+                  count: controller.customerCount.value,
+                  color: Colors.green,
+                  selectedItem: controller.chartTypeMap['ACTIVE CUSTOMERS']!,
+                  onChanged: (value) => controller.updateChartType('ACTIVE CUSTOMERS', value),
+                ),
+              ],
             ),
-            const SizedBox(height: 12),
-            _buildStatusCard(
-              context: context,
-              title: 'SALES ORDERS TO DELIVER',
-              count: 0,
-              color: Colors.orange,
-              selectedItem: controller.chartTypeMap['SALES ORDERS TO DELIVER']!,
-              onChanged: (value) => controller.updateChartType('SALES ORDERS TO DELIVER', value),
-            ),
-            const SizedBox(height: 12),
-            _buildStatusCard(
-              context: context,
-              title: 'SALES ORDERS TO BILL',
-              count: 0,
-              color: Colors.purple,
-              selectedItem: controller.chartTypeMap['SALES ORDERS TO BILL']!,
-              onChanged: (value) => controller.updateChartType('SALES ORDERS TO BILL', value),
-            ),
-            const SizedBox(height: 12),
-            _buildStatusCard(
-              context: context,
-              title: 'ACTIVE CUSTOMERS',
-              count: controller.customerCount.value, // ✅ Using observable customerCount
-              color: Colors.green,
-              selectedItem: controller.chartTypeMap['ACTIVE CUSTOMERS']!,
-              onChanged: (value) => controller.updateChartType('ACTIVE CUSTOMERS', value),
-            ),
-          ],
-        )),
-      ),
+          ),
+        );
+      },
     );
   }
 
   Widget _buildStatusCard({
     required String title,
-    required var count,
+    required dynamic count,
     required Color color,
     required BuildContext context,
     required RxString selectedItem,
@@ -101,7 +98,7 @@ class SaleDashboardView extends GetView<SaleDashboardController> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Title + Plain Dropdown
+            // Title + Dropdown
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [

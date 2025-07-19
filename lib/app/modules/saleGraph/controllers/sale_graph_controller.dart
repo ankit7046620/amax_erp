@@ -1,15 +1,16 @@
 import 'package:amax_hr/main.dart';
 import 'package:get/get.dart';
-import 'package:amax_hr/vo/sales_order.dart';
 import 'package:amax_hr/utils/app.dart';
 
-
+/// Model class to represent chart data
 class ChartDataSales {
   final String label;
   final double value;
 
   ChartDataSales(this.label, this.value);
 }
+
+/// Sales Order model
 class SalesOrder {
   String? transaction_date;
   double? base_net_total;
@@ -34,12 +35,28 @@ class SalesOrder {
   }
 }
 
-
-
+/// Controller for generating chart data from Sales Orders
 class SaleGraphController extends GetxController {
   List<SalesOrder> salesOrderList = [];
   RxList<ChartDataSales> lineChartData = <ChartDataSales>[].obs;
-  RxString selectedFilter = 'yearly'.obs;
+
+  List<String> chartTypes = [
+    ChartFilterType.yearly,
+    ChartFilterType.quarterly,
+    ChartFilterType.monthly,
+    ChartFilterType.weekly,
+    ChartFilterType.daily,
+  ];
+
+  var selectedChartType = ChartFilterType.monthly.obs;
+
+  var chartTypeMap = <String, RxString>{
+    'Bar Chart': ChartFilterType.monthly.obs,
+    'Line Chart': ChartFilterType.monthly.obs,
+    'Territory Chart': ChartFilterType.monthly.obs,
+    'Source Chart': ChartFilterType.monthly.obs,
+    'Sales Performance': ChartFilterType.monthly.obs,
+  }.obs;
 
   @override
   void onInit() {
@@ -52,28 +69,36 @@ class SaleGraphController extends GetxController {
     if (args is Map && args.containsKey('model')) {
       final rawList = args['model'];
       if (rawList is List) {
-        salesOrderList = rawList
-            .map((e) => SalesOrder.fromJson(e))
-            .toList();
+        salesOrderList = rawList.map((e) => SalesOrder.fromJson(e)).toList();
 
         logger.d('📅 Passed Dates: ${salesOrderList.map((e) => e.transactionDate).toList()}');
-        salesOrderList.sort((a, b) => DateTime.tryParse(a.transactionDate ?? '')!
-            .compareTo(DateTime.tryParse(b.transactionDate ?? '')!));
 
-        generateLineChart();
+        salesOrderList.sort((a, b) =>
+            DateTime.tryParse(a.transactionDate ?? '')!
+                .compareTo(DateTime.tryParse(b.transactionDate ?? '') ?? DateTime(1970)));
+
+        // Default chart data for selected filter
+        generateLineChart(filter: ChartFilterType.monthly);
       }
     }
   }
 
-  void onFilterChanged(String newFilter) {
-    selectedFilter.value = newFilter;
-    generateLineChart();
+  void updateChartTypeFor(String chartName, String selectedType) {
+    if (!chartTypeMap.containsKey(chartName)) return;
+
+    chartTypeMap[chartName]!.value = selectedType;
+    logger.d('📊 Updated Chart: $chartName - $selectedType');
+
+    if (chartName == 'Line Chart') {
+      generateLineChart(filter: selectedType);
+    }
   }
 
-  void generateLineChart() {
-    final filteredData = _generateFilteredChartData(salesOrderList, selectedFilter.value);
-    lineChartData.value = filteredData;
-    logger.d("📈 Chart Points for [${selectedFilter.value}]: ${filteredData.length}");
+  void generateLineChart({required String filter}) {
+    final filteredData = _generateFilteredChartData(salesOrderList, filter);
+    lineChartData.assignAll(filteredData); // assignAll ensures observable update
+    logger.d("📈 Chart Points for [$filter]: ${filteredData.length}");
+    update();
   }
 
   List<ChartDataSales> _generateFilteredChartData(List<SalesOrder> orders, String filterType) {
@@ -87,7 +112,7 @@ class SaleGraphController extends GetxController {
       final value = order.baseNetTotal ?? 0.0;
       String key = '';
 
-      switch (filterType) {
+      switch (filterType.toLowerCase()) {
         case 'daily':
           if (date.year == now.year && date.month == now.month && date.day == now.day) {
             key = '${date.year}-${date.month}-${date.day}';
@@ -146,4 +171,13 @@ class SaleGraphController extends GetxController {
     } catch (_) {}
     return DateTime(1970);
   }
+}
+
+/// Constants for chart filter types
+class ChartFilterType {
+  static const String yearly = 'yearly';
+  static const String quarterly = 'quarterly';
+  static const String monthly = 'monthly';
+  static const String weekly = 'weekly';
+  static const String daily = 'daily';
 }

@@ -9,77 +9,101 @@ class SaleGraphView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final SaleGraphController controller = Get.put(SaleGraphController());
+    return GetBuilder<SaleGraphController>(
+      init: SaleGraphController(),
+      builder: (controller) {
+        return Scaffold(
+          appBar: AppBar(title: const Text('Sales Line Chart'), centerTitle: true),
+          body: Column(
+            children: [
+              const SizedBox(height: 16),
 
-    final List<String> filterOptions = [
-      'daily',
-      'weekly',
-      'monthly',
-      'quarterly',
-      'yearly',
-    ];
-
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Sales Line Chart'),
-        centerTitle: true,
-      ),
-      body:   Column(
-        children: [
-          const SizedBox(height: 16),
-
-          // /// Filter Dropdown
-          // Padding(
-          //   padding: const EdgeInsets.symmetric(horizontal: 16),
-          //   child: Row(
-          //     children: [
-          //       const Text("Filter: "),
-          //       const SizedBox(width: 12),
-          //       DropdownButton<String>(
-          //         value: controller.selectedFilter.value,
-          //         items: filterOptions
-          //             .map((filter) => DropdownMenuItem(
-          //           value: filter,
-          //           child: Text(filter.capitalizeFirst!),
-          //         ))
-          //             .toList(),
-          //         onChanged: (value) {
-          //           if (value != null) {
-          //             controller.onFilterChanged(value);
-          //           }
-          //         },
-          //       ),
-          //     ],
-          //   ),
-          // ),
-
-          const SizedBox(height: 16),
-
-          /// Line Chart
-          SizedBox(
-            height: 250,
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: SfCartesianChart(
-                title: ChartTitle(text: 'Sales Trends'),
-                tooltipBehavior: TooltipBehavior(enable: true),
-                primaryXAxis: CategoryAxis(),
-                series: <CartesianSeries>[
-                  LineSeries<ChartDataSales, String>(
-                    dataSource: controller.lineChartData,
-                    xValueMapper: (ChartDataSales data, _) => data.label,
-                    yValueMapper: (ChartDataSales data, _) => data.value,
-                    name: 'Sales',
-                    markerSettings: const MarkerSettings(isVisible: true),
-                    dataLabelSettings:
-                    const DataLabelSettings(isVisible: true),
-                  ),
-                ],
+              // Header with filter dropdown
+              sectionHeaderWithFilter(
+                title: "Sales Trends",
+                selectedValue: controller.chartTypeMap['Line Chart']!.value,
+                onFilterTap: (newFilter) {
+                  controller.updateChartTypeFor('Line Chart', newFilter);
+                  controller.update(); // Trigger rebuild
+                },
               ),
+
+              const SizedBox(height: 12),
+
+              // Line Chart
+              SizedBox(
+                height: 250,
+                child: Padding(
+                  padding: const EdgeInsets.all(16),
+                  child: SfCartesianChart(
+                    title: ChartTitle(text: 'Sales Trends'),
+                    tooltipBehavior: TooltipBehavior(enable: true),
+                    primaryXAxis: CategoryAxis(),
+                    series: <CartesianSeries>[
+                      LineSeries<ChartDataSales, String>(
+                        dataSource: controller.lineChartData,
+                        xValueMapper: (ChartDataSales data, _) => data.label,
+                        yValueMapper: (ChartDataSales data, _) => data.value,
+                        name: 'Sales',
+                        markerSettings: const MarkerSettings(isVisible: true),
+                        dataLabelSettings: const DataLabelSettings(isVisible: true),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  /// Header with dropdown filter
+  Widget sectionHeaderWithFilter({
+    required String title,
+    required String selectedValue,
+    required ValueChanged<String> onFilterTap,
+  }) {
+    final SaleGraphController controller = Get.find();
+
+    final currentValue = controller.chartTypes.contains(selectedValue)
+        ? selectedValue
+        : 'Monthly';
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Flexible(
+            child: Text(
+              '$title ($currentValue)',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
             ),
           ),
+          DropdownButton<String>(
+            value: currentValue,
+            icon: const Icon(Icons.arrow_drop_down),
+            underline: Container(height: 1, color: Colors.transparent),
+            style: const TextStyle(fontSize: 14, color: Colors.black),
+            items: controller.chartTypes.map((String type) {
+              return DropdownMenuItem<String>(
+                value: type,
+                child: Text(type),
+              );
+            }).toList(),
+            onChanged: (value) {
+              if (value != null) {
+                onFilterTap(value);
+                print('$title - $value');
+              }
+            },
+          ),
         ],
-      )
+      ),
     );
   }
 }

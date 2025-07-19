@@ -64,7 +64,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.SALE_GRAPH,
-      page: () => const SaleGraphView(),
+      page: () =>   SaleGraphView(),
       binding: SaleGraphBinding(),
     ),
   ];
