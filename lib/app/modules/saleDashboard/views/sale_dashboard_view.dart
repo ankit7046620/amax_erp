@@ -234,8 +234,9 @@ class SaleDashboardView extends GetView<SaleDashboardController> {
                 Obx(() => DropdownButton<String>(
                   dropdownColor: Colors.white,
                   value: selectedItem.value,
-                  style: const TextStyle(color: Colors.black),
+                  style: const TextStyle(color: Colors.white),
                   onChanged: onChanged,
+                  iconEnabledColor: Colors.white,
                   items: SaleDashboardController.chartFilters.map((item) {
                     return DropdownMenuItem<String>(
                       value: item,
