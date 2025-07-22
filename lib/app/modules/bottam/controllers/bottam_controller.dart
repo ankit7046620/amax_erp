@@ -1,4 +1,5 @@
 import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
+import 'package:amax_hr/app/modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
@@ -6,6 +7,7 @@ import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/utils/app_funcation.dart';
 import 'package:amax_hr/vo/crm_model.dart';
 import 'package:amax_hr/vo/customer_list_model.dart';
+import 'package:amax_hr/vo/purchase_order_model.dart';
 import 'package:amax_hr/vo/sales_order.dart';
 import 'package:amax_hr/vo/sell_order_list.dart';
 import 'package:flutter/cupertino.dart';
@@ -45,8 +47,11 @@ class BottamController extends GetxController {
         break;
       case Module.selling:
         fetchSellData();
-
         break;
+      case Module.buying:
+        fetchPurchaseData();
+        break;
+
       // Add remaining cases as needed
       default:
         print("Module ${module.value} is not yet handled.");
@@ -139,5 +144,36 @@ class BottamController extends GetxController {
       isLoading.value = false;
     }
   }
+  Future<void> fetchPurchaseData() async {
+    EasyLoading.show();
 
+    try {
+      final response = await ApiService.get(
+        '/api/resource/Purchase Order?',
+        params: {
+          'fields':
+          '["name", "base_net_total", "transaction_date"]',
+          'limit_page_length': '1000',
+        },
+      );
+      EasyLoading.dismiss();
+      if (response != null && response.statusCode == 200) {
+         List<PurchaseOrder> purchaselist = (response.data['data'] as List)
+            .map((e) => PurchaseOrder.fromJson(e))
+            .toList();
+        logger.d("purchaselist===${purchaselist.length}");
+        Get.to(()=>PurchaseOrdersDashboardView(), arguments: {'module': 'purchase', 'model': purchaselist});
+
+      } else {
+        EasyLoading.dismiss();
+        print('❌ Failed to fetch leads');
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      print("❌ Error fetching leads: $e");
+    } finally {
+      EasyLoading.dismiss();
+      isLoading.value = false;
+    }
+  }
 }

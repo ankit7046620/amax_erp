@@ -15,6 +15,8 @@ abstract class Routes {
   static const SALE_DASHBOARD = _Paths.SALE_DASHBOARD;
   static const CRM_GRAPH = _Paths.CRM_GRAPH;
   static const SALE_GRAPH = _Paths.SALE_GRAPH;
+  static const PURCHASEORDERS = _Paths.PURCHASEORDERS;
+  static const PURCHASE_ORDERS_DASHBOARD = _Paths.PURCHASE_ORDERS_DASHBOARD;
 }
 
 abstract class _Paths {
@@ -31,4 +33,6 @@ abstract class _Paths {
   static const SALE_DASHBOARD = '/sale-dashboard';
   static const CRM_GRAPH = '/crm-graph';
   static const SALE_GRAPH = '/sale-graph';
+  static const PURCHASEORDERS = '/purchaseOrdersDashboard';
+  static const PURCHASE_ORDERS_DASHBOARD = '/purchase-orders-dashboard';
 }
