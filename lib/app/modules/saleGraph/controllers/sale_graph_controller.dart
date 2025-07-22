@@ -1,4 +1,5 @@
 import 'package:amax_hr/main.dart';
+import 'package:amax_hr/vo/sell_order_list.dart';
 import 'package:get/get.dart';
 import 'package:amax_hr/utils/app.dart';
 
@@ -10,34 +11,10 @@ class ChartDataSales {
   ChartDataSales(this.label, this.value);
 }
 
-/// Sales Order model
-class SalesOrder {
-  String? transaction_date;
-  double? base_net_total;
-
-  String? get transactionDate => transaction_date;
-  double? get baseNetTotal => base_net_total;
-
-  SalesOrder({this.transaction_date, this.base_net_total});
-
-  factory SalesOrder.fromJson(Map<String, dynamic> json) {
-    return SalesOrder(
-      transaction_date: json['transaction_date'],
-      base_net_total: (json['base_net_total'] ?? 0).toDouble(),
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'transaction_date': transaction_date,
-      'base_net_total': base_net_total,
-    };
-  }
-}
 
 /// Controller for generating chart data from Sales Orders
 class SaleGraphController extends GetxController {
-  List<SalesOrder> salesOrderList = [];
+
   RxList<ChartDataSales> lineChartData = <ChartDataSales>[].obs;
 
   List<String> chartTypes = [
@@ -58,6 +35,7 @@ class SaleGraphController extends GetxController {
     'Sales Performance': ChartFilterType.monthly.obs,
   }.obs;
 
+    List<SellOrderDataList> receivedList=[];
   @override
   void onInit() {
     super.onInit();
@@ -67,18 +45,20 @@ class SaleGraphController extends GetxController {
   void _loadPassedData() {
     final args = Get.arguments;
     if (args is Map && args.containsKey('model')) {
-      final rawList = args['model'];
-      if (rawList is List) {
-        salesOrderList = rawList.map((e) => SalesOrder.fromJson(e)).toList();
+      final args = Get.arguments;
+      logger.d('✅ Sale data args: $args');
 
-        logger.d('📅 Passed Dates: ${salesOrderList.map((e) => e.transactionDate).toList()}');
+      if (args is Map && args.containsKey('model')) {
+        final List receivedRaw = args['model'] as List;
+       receivedList = receivedRaw
+            .map((e) => SellOrderDataList.fromJson(e as Map<String, dynamic>))
+            .toList();
 
-        salesOrderList.sort((a, b) =>
-            DateTime.tryParse(a.transactionDate ?? '')!
-                .compareTo(DateTime.tryParse(b.transactionDate ?? '') ?? DateTime(1970)));
-
-        // Default chart data for selected filter
         generateLineChart(filter: ChartFilterType.monthly);
+        generateCustomerSalesChartData(receivedList,ChartFilterType.monthly);
+
+        logger.d("receivedList>>>${receivedList.length}");
+
       }
     }
   }
@@ -92,16 +72,19 @@ class SaleGraphController extends GetxController {
     if (chartName == 'Line Chart') {
       generateLineChart(filter: selectedType);
     }
+    if (chartName == 'Bar Chart') {
+      generateCustomerSalesChartData(receivedList,selectedType);
+    }
   }
 
   void generateLineChart({required String filter}) {
-    final filteredData = _generateFilteredChartData(salesOrderList, filter);
+    final filteredData = _generateFilteredChartData(receivedList, filter);
     lineChartData.assignAll(filteredData); // assignAll ensures observable update
     logger.d("📈 Chart Points for [$filter]: ${filteredData.length}");
     update();
   }
 
-  List<ChartDataSales> _generateFilteredChartData(List<SalesOrder> orders, String filterType) {
+  List<ChartDataSales> _generateFilteredChartData(List<SellOrderDataList> orders, String filterType) {
     final now = DateTime.now();
     final Map<String, double> grouped = {};
 
@@ -171,7 +154,84 @@ class SaleGraphController extends GetxController {
     } catch (_) {}
     return DateTime(1970);
   }
+
+
+  RxList<CustomerChartData> customerSalesChartData = <CustomerChartData>[].obs;
+
+  // void generateCustomerSalesChartData(List<SellOrderDataList> orders) {
+  //   final Map<String, double> salesMap = {};
+  //
+  //   for (var order in orders) {
+  //     final name = order.customerName ?? 'Unknown';
+  //     final amount = order.baseNetTotal ?? 0.0;
+  //
+  //     salesMap[name] = (salesMap[name] ?? 0) + amount;
+  //   }
+  //
+  //   customerSalesChartData.value = salesMap.entries
+  //       .map((entry) => CustomerChartData(entry.key, entry.value))
+  //       .toList();
+  // }
+  void generateCustomerSalesChartData(List<SellOrderDataList> orders, String filterType) {
+    final now = DateTime.now();
+    final Map<String, double> salesMap = {};
+
+    for (var order in orders) {
+      final date = DateTime.tryParse(order.transactionDate ?? '');
+      if (date == null) continue;
+
+      bool include = false;
+
+      switch (filterType.toLowerCase()) {
+        case 'daily':
+          include = date.year == now.year &&
+              date.month == now.month &&
+              date.day == now.day;
+          break;
+
+        case 'weekly':
+          final weekStart = now.subtract(Duration(days: now.weekday - 1));
+          final weekEnd = weekStart.add(const Duration(days: 6));
+          include = !date.isBefore(weekStart) && !date.isAfter(weekEnd);
+          break;
+
+        case 'monthly':
+          include = date.year == now.year && date.month == now.month;
+          break;
+
+        case 'quarterly':
+          final quarter = ((now.month - 1) ~/ 3) + 1;
+          final orderQuarter = ((date.month - 1) ~/ 3) + 1;
+          include = date.year == now.year && orderQuarter == quarter;
+          break;
+
+        case 'yearly':
+          include = date.year == now.year;
+          break;
+
+        default:
+          include = true;
+      }
+
+      if (include) {
+        final name = order.customerName ?? 'Unknown';
+        final amount = order.baseNetTotal ?? 0.0;
+        salesMap[name] = (salesMap[name] ?? 0) + amount;
+      }
+    }
+
+    customerSalesChartData.value = salesMap.entries
+        .map((entry) => CustomerChartData(entry.key, entry.value))
+        .toList();
+
+    update();
+  }
+
+
 }
+
+
+
 
 /// Constants for chart filter types
 class ChartFilterType {
@@ -181,3 +241,13 @@ class ChartFilterType {
   static const String weekly = 'weekly';
   static const String daily = 'daily';
 }
+
+class CustomerChartData {
+  final String customerName;
+  final double totalSales;
+
+  CustomerChartData(this.customerName, this.totalSales);
+}
+
+
+

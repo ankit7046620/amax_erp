@@ -47,18 +47,20 @@ class SaleDashboardController extends GetxController {
     logger.d('✅ Sale data args: $args');
 
     if (args is Map && args.containsKey('model')) {
-      final salesOrder = args['model'];
-      if (salesOrder is SalesOrder && salesOrder.data != null) {
-        saleData = salesOrder.data!.map((e) => e.toJson()).toList();
-        totalSales.value = calculateFilteredTotal(saleData, ChartFilterType.monthly);
-        logger.d('✅ Loaded ${saleData.length} sale items');
-      } else {
-        logger.e('❌ SalesOrder model is invalid or missing data');
-      }
+      final String module = args['module'];
+      final List<SellOrderDataList> receivedList = List<SellOrderDataList>.from(args['model']);
+
+      // Convert SellOrderDataList to List<Map<String, dynamic>> for chart/total use
+      saleData = receivedList.map((e) => e.toJson()).toList();
+
+      totalSales.value = calculateFilteredTotal(saleData, ChartFilterType.monthly);
+
+      logger.d('✅ Loaded ${saleData.length} sale items for module: $module');
     } else {
       logger.e('❌ Invalid or missing sale data in arguments');
     }
   }
+
 
   void updateChartType(String key, String? value) {
     if (value != null && chartTypeMap.containsKey(key)) {

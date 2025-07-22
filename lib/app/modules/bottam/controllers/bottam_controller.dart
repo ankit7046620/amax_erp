@@ -7,6 +7,7 @@ import 'package:amax_hr/utils/app_funcation.dart';
 import 'package:amax_hr/vo/crm_model.dart';
 import 'package:amax_hr/vo/customer_list_model.dart';
 import 'package:amax_hr/vo/sales_order.dart';
+import 'package:amax_hr/vo/sell_order_list.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
@@ -111,7 +112,7 @@ class BottamController extends GetxController {
         '/api/resource/Sales Order?',
         params: {
           'fields':
-              '["name", "base_net_total", "transaction_date"]',
+              '["*"]',
           'limit_page_length': '1000',
         },
       );
@@ -119,12 +120,12 @@ class BottamController extends GetxController {
       if (response != null && response.statusCode == 200) {
         final List modules = response.data['data'];
 
-        final SalesOrder sale = SalesOrder.fromJson({'data': modules});
+        List<SellOrderDataList>sellOrderDataList = (response.data['data'] as List)
+            .map((e) => SellOrderDataList.fromJson(e))
+            .toList();
+        logger.d("sellOrderDataList::==>>${sellOrderDataList.length}");
 
-        logger.d('saleModel===>#${sale.data?.length}');
-        logger.d('saleJason===>#${sale.toJson()}');
-
-        Get.to(()=>SaleDashboardView(), arguments: {'module': 'sale', 'model': sale});
+        Get.to(()=>SaleDashboardView(), arguments: {'module': 'sale', 'model': sellOrderDataList});
 
       } else {
         EasyLoading.dismiss();
