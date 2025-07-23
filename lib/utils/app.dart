@@ -13,6 +13,10 @@ class CrmLeadStatus{
   static const String converted ='converted';
 }
 
+class CardStatus{
+  static const String toReceiveAndBill= "To Receive and Bill";
+}
+
 class ChartFilterType{
   static const String yearly ='Yearly';
   static const String quarterly ='Quarterly';

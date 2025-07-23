@@ -66,7 +66,7 @@ class SaleDashboardController extends GetxController {
     if (value != null && chartTypeMap.containsKey(key)) {
       chartTypeMap[key]?.value = value;
 
-      if (key == 'ANNUAL SALES') {
+      if (key == 'ANNUA saleData = receivedList.map((e) => e.toJson()).toList();SALES') {
         totalSales.value = calculateFilteredTotal(saleData, value);
       }
     }

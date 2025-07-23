@@ -12,6 +12,8 @@ import '../modules/leadDetails/bindings/lead_details_binding.dart';
 import '../modules/leadDetails/views/lead_details_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/purchaseGraph/bindings/purchase_graph_binding.dart';
+import '../modules/purchaseGraph/views/purchase_graph_view.dart';
 import '../modules/purchaseOrdersDashboard/bindings/purchase_orders_dashboard_binding.dart';
 import '../modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
 import '../modules/saleGraph/bindings/sale_graph_binding.dart';
@@ -73,6 +75,11 @@ class AppPages {
       name: _Paths.PURCHASE_ORDERS_DASHBOARD,
       page: () => const PurchaseOrdersDashboardView(),
       binding: PurchaseOrdersDashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.PURCHASE_GRAPH,
+      page: () => const PurchaseGraphView(),
+      binding: PurchaseGraphBinding(),
     ),
   ];
 }

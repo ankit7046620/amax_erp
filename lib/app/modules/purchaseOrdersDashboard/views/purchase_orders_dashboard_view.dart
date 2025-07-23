@@ -1,75 +1,95 @@
+import 'package:amax_hr/app/modules/purchaseGraph/views/purchase_graph_view.dart';
+import 'package:amax_hr/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/purchase_orders_dashboard_controller.dart';
 
-class PurchaseOrdersDashboardView extends GetView<PurchaseOrdersDashboardController> {
+class PurchaseOrdersDashboardView extends StatelessWidget {
   const PurchaseOrdersDashboardView({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return GetBuilder<PurchaseOrdersDashboardController>(
-      init: PurchaseOrdersDashboardController(),
-      builder: (controller) {
-        return Scaffold(
-          appBar: AppBar(
-            title: const Text('Purchase Orders Dashboard'),
-            centerTitle: true,
-          ),
-          body: SingleChildScrollView(
-            padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    // Get.to(() => const PurchaseGraphView(),
-                    //     arguments: {'module': 'purchase', 'model': controller.purchaseOrders});
-                  },
-                  child: _buildStatusCard(
-                    context: context,
-                    title: 'ANNUAL PURCHASES',
-                    count: controller.totalPurchaseAmount.value, // Access .value for RxDouble
-                    color: Colors.blue,
-                    currency: true,
-                    selectedItem: controller.chartTypeMap['ANNUAL PURCHASES']!,
-                    onChanged: (value) => controller.updateChartFilter('ANNUAL PURCHASES', value!),
+    final controller = Get.put(PurchaseOrdersDashboardController());
 
-                  ),
-                ),
-                const SizedBox(height: 12),
-                _buildStatusCard(
-                  context: context,
-                  title: 'Purchase Orders to Receive',
-                  count: controller.getPendingOrdersToReceive().length, // Get actual count
-                  color: Colors.orange,
-                  selectedItem: controller.chartTypeMap['Purchase Orders to Receive']!,
-                  onChanged: (value) => controller.updateChartFilter('Purchase Orders to Receive', value!),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Purchase Orders Dashboard'),
+        centerTitle: true,
+        actions: [
+          IconButton(onPressed: () async {
 
-                ),
-                const SizedBox(height: 12),
-                _buildStatusCard(
-                  context: context,
-                  title: 'Purchase Orders to Bill',
-                  count: controller.getPendingOrdersToBill().length, // Get actual count
-                  color: Colors.purple,
-                  selectedItem: controller.chartTypeMap['Purchase Orders to Bill']!,
-                  onChanged: (value) => controller.updateChartFilter('Purchase Orders to Bill', value!),
+            logger.d("calll=======1");
+         await   Get.to(()=>PurchaseGraphView(), arguments: {'module': 'purchase', 'model': controller.purchaseOrders});
+          }, icon: Icon(Icons.arrow_circle_right))
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          children: [
+            // ANNUAL PURCHASES Card (Reactive)
+            Obx(() => _buildStatusCard(
+              context: context,
+              title: 'ANNUAL PURCHASES',
+              count: controller.totalPurchaseAmount.value,
+              color: Colors.blue,
+              currency: true,
+              selectedItem: controller.filterTypeMap ['PURCHASES']!,
+              onChanged: (value) {
+                controller.filterTypeMap ['PURCHASES']!.value = value!;
+                controller.updateChartTypeFor("PURCHASES", value);
+                controller.update();
+              },
+            )),
 
-                ),
-                const SizedBox(height: 12),
-                _buildStatusCard(
-                  context: context,
-                  title: 'Active Suppliers',
-                  count: controller.getActiveSuppliers().length, // Get actual count
-                  color: Colors.green,
-                  selectedItem: controller.chartTypeMap['Active Suppliers']!,
-                  onChanged: (value) => controller.updateChartFilter('Active Suppliers', value!),
+            const SizedBox(height: 12),
 
-                ),
-              ],
-            ),
-          ),
-        );
-      },
+            // Purchase Orders to Receive
+            Obx(() => _buildStatusCard(
+              context: context,
+              title: 'Purchase Orders to Receive',
+              count: controller.pOrdersToReceive,
+              color: Colors.orange,
+              selectedItem: controller.filterTypeMap ['Purchase Orders to Receive']!,
+              onChanged: (value) {
+                controller.filterTypeMap ['Purchase Orders to Receive']!.value = value!;
+             controller.updateChartTypeFor("Purchase Orders to Receive", value);
+             controller.update();
+              },
+            )),
+
+            const SizedBox(height: 12),
+
+            // Purchase Orders to Bill
+            Obx(() => _buildStatusCard(
+              context: context,
+              title: 'Purchase Orders to Bill',
+              count: controller.pOrdersToBill,
+              color: Colors.purple,
+              selectedItem: controller.filterTypeMap ['Purchase Orders to Bill']!,
+              onChanged: (value) {
+                controller.filterTypeMap ['Purchase Orders to Bill']!.value = value!;
+                controller.updateChartTypeFor("Purchase Orders to Bill", value);
+                controller.update();
+              },
+            )),
+
+            const SizedBox(height: 12),
+
+            // Active Suppliers (Static for now)
+            Obx(() => _buildStatusCard(
+              context: context,
+              title: 'Active Suppliers',
+              count: 1,
+              color: Colors.green,
+              selectedItem: controller.filterTypeMap ['Active Suppliers']!,
+              onChanged: (value) {
+                controller.filterTypeMap ['Active Suppliers']!.value = value!;
+              },
+            )),
+          ],
+        ),
+      ),
     );
   }
 }
@@ -85,10 +105,8 @@ Widget _buildStatusCard({
 }) {
   final width = MediaQuery.of(context).size.width;
 
-  // Helper function to format the count properly
   String formatCount(dynamic value, bool isCurrency) {
     if (isCurrency) {
-      // For currency values, ensure it's a number and format it
       if (value is num) {
         return "₹ ${value.toStringAsFixed(2)}";
       } else if (value is String) {
@@ -97,7 +115,6 @@ Widget _buildStatusCard({
       }
       return "₹ 0.00";
     } else {
-      // For non-currency values, just return as string
       return value.toString();
     }
   }
@@ -133,7 +150,6 @@ Widget _buildStatusCard({
                   ),
                 ),
               ),
-            //  Future dropdown implementation can go here
               Obx(() => DropdownButton<String>(
                 dropdownColor: color,
                 value: selectedItem.value,

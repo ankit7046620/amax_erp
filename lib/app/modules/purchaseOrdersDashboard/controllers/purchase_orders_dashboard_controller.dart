@@ -1,6 +1,7 @@
-import 'package:get/get.dart';
 import 'package:amax_hr/main.dart';
+import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/vo/purchase_order_model.dart';
+import 'package:get/get.dart';
 
 class ChartFilterType {
   static const String yearly = 'Yearly';
@@ -11,14 +12,17 @@ class ChartFilterType {
 }
 
 class PurchaseOrdersDashboardController extends GetxController {
-  // Observable variables
-  final count = 0.obs;
+  // Observables
+  final RxInt count = 0.obs;
   final RxDouble totalPurchaseAmount = 0.0.obs;
 
-  // Purchase order data
-  List<Datum> purchaseOrders = [];
+  final RxInt pOrdersToReceive = 0.obs;
+  final RxInt pOrdersToBill = 0.obs;
+  final RxInt activeSuppliers = 0.obs;
 
-  // Chart filter types
+  List<PurchaseOrderDataList> purchaseOrders = [];
+  List<Map<String, dynamic>> purchaseOrdersData = [];
+
   static const List<String> chartFilters = [
     ChartFilterType.yearly,
     ChartFilterType.quarterly,
@@ -27,9 +31,8 @@ class PurchaseOrdersDashboardController extends GetxController {
     ChartFilterType.daily,
   ];
 
-  // Chart type mapping for each card
-  final RxMap<String, RxString> chartTypeMap = {
-    'ANNUAL PURCHASES': ChartFilterType.monthly.obs,
+  final RxMap<String, RxString> filterTypeMap = {
+    'PURCHASES': ChartFilterType.monthly.obs,
     'Purchase Orders to Receive': ChartFilterType.monthly.obs,
     'Purchase Orders to Bill': ChartFilterType.monthly.obs,
     'Active Suppliers': ChartFilterType.monthly.obs,
@@ -46,236 +49,177 @@ class PurchaseOrdersDashboardController extends GetxController {
     logger.d('✅ Purchase data args: $args');
 
     if (args is Map && args.containsKey('model')) {
-      final purchaseOrderModel = args['model'];
-      if (purchaseOrderModel is PurchaseOrder && purchaseOrderModel.data != null) {
-        purchaseOrders = purchaseOrderModel.data!;
-        _calculateInitialValues();
-        logger.d('✅ Loaded ${purchaseOrders.length} purchase order items');
-      } else {
-        logger.e('❌ PurchaseOrder model is invalid or missing data');
-      }
+      final String module = args['module'];
+      final List<PurchaseOrderDataList> receivedList =
+      List<PurchaseOrderDataList>.from(args['model']);
+
+      purchaseOrders = receivedList;
+      purchaseOrdersData = receivedList.map((e) => e.toJson()).toList();
+
+      totalPurchaseAmount.value = calculateTotalPurchase(
+        purchaseOrders,
+        ChartFilterType.monthly,
+      );
+
+      // calculateCounts( ChartFilterType.monthly);
+      calculateOrdersToReceive(ChartFilterType.monthly); // default
+      calculateOrdersToBill(ChartFilterType.monthly);
+
+      logger.d('✅ Loaded ${purchaseOrders.length} purchase items for module: $module');
     } else {
       logger.e('❌ Invalid or missing purchase data in arguments');
     }
   }
 
-  void _calculateInitialValues() {
-    // Calculate initial total purchase amount with default monthly filter
-    totalPurchaseAmount.value = calculateFilteredTotal(
-        purchaseOrders,
-        ChartFilterType.monthly
-    );
-  }
-
-  // Calculate filtered total based on chart type
-  double calculateFilteredTotal(List<Datum> orders, String filterType) {
-    double total = 0.0;
+  double calculateTotalPurchase(List<PurchaseOrderDataList> orders, String filterType) {
+    double total = 0.0; 
     final now = DateTime.now();
 
     for (var order in orders) {
-      if (order.transactionDate == null || order.baseNetTotal == null) continue;
+      final date = order.transactionDate;
+      final baseNetTotal = order.baseNetTotal;
 
-      final date = order.transactionDate!;
-      final baseNetTotal = order.baseNetTotal?.toDouble() ?? 0.0;
-
-      bool includeInTotal = false;
+      if (date == null || baseNetTotal == null) continue;
 
       switch (filterType.toLowerCase()) {
-        case 'monthly':
-          includeInTotal = date.month == now.month && date.year == now.year;
+        case 'daily':
+          if (date.year == now.year && date.month == now.month && date.day == now.day) {
+            total += baseNetTotal;
+          }
           break;
         case 'weekly':
-          final weekStart = now.subtract(Duration(days: now.weekday - 1));
-          final weekEnd = weekStart.add(const Duration(days: 6));
-          includeInTotal = !date.isBefore(weekStart) && !date.isAfter(weekEnd);
+          final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+          final endOfWeek = startOfWeek.add(const Duration(days: 6));
+          if (!date.isBefore(startOfWeek) && !date.isAfter(endOfWeek)) {
+            total += baseNetTotal;
+          }
+          break;
+        case 'monthly':
+          if (date.year == now.year && date.month == now.month) {
+            total += baseNetTotal;
+          }
           break;
         case 'quarterly':
-          final quarter = ((now.month - 1) ~/ 3) + 1;
-          final dateQuarter = ((date.month - 1) ~/ 3) + 1;
-          includeInTotal = date.year == now.year && dateQuarter == quarter;
+          final currentQuarter = ((now.month - 1) ~/ 3) + 1;
+          final orderQuarter = ((date.month - 1) ~/ 3) + 1;
+          if (date.year == now.year && orderQuarter == currentQuarter) {
+            total += baseNetTotal;
+          }
           break;
         case 'yearly':
-          includeInTotal = date.year == now.year;
+          if (date.year == now.year) {
+            total += baseNetTotal;
+          }
           break;
-        case 'daily':
-          includeInTotal = date.year == now.year &&
-              date.month == now.month &&
-              date.day == now.day;
+        default:
+          print("⚠️ Unsupported filter type: $filterType");
           break;
-      }
-
-      if (includeInTotal) {
-        total += baseNetTotal;
       }
     }
 
-    logger.d("💰 Filtered Purchase Total for [$filterType]: ₹$total");
+    logger.d("💰 Total Purchase for [$filterType]: ₹${total.toStringAsFixed(2)}");
     return total;
   }
 
-  // Get pending orders to receive
-  List<Datum> getPendingOrdersToReceive() {
-    return purchaseOrders.where((order) {
-      return order.status == Status.TO_RECEIVE_AND_BILL ||
-          (order.perReceived != null && order.perReceived! < 100);
-    }).toList();
-  }
+  // void _calculateCounts() {
+  //   pOrdersToReceive.value = 0;
+  //   pOrdersToBill.value = 0;
+  //
+  //   for (var item in purchaseOrdersData) {
+  //     final status = item['status']?.toString().toLowerCase().trim();
+  //     if (status == "to receive and bill") {
+  //       pOrdersToReceive.value++;
+  //     }
+  //     if (status == "to bill") {
+  //       pOrdersToBill.value++;
+  //     }
+  //   }
+  //
+  //   logger.d("📦 Orders to Receive: ${pOrdersToReceive.value}");
+  //   logger.d("🧾 Orders to Bill: ${pOrdersToBill.value}");
+  // }
 
-  // Get pending orders to bill
-  List<Datum> getPendingOrdersToBill() {
-    return purchaseOrders.where((order) {
-      return order.status == Status.TO_RECEIVE_AND_BILL ||
-          (order.perBilled != null && order.perBilled! < 100);
-    }).toList();
-  }
-
-  // Get active suppliers
-  List<String> getActiveSuppliers() {
-    final suppliers = <String>{};
-    for (var order in purchaseOrders) {
-      if (order.supplier != null &&
-          order.status != Status.CANCELLED &&
-          order.status != Status.DRAFT) {
-        suppliers.add(order.supplier!);
-      }
-    }
-    return suppliers.toList();
-  }
-
-  // Get filtered pending orders to receive based on chart type
-  List<Datum> getFilteredPendingOrdersToReceive(String filterType) {
-    final pendingOrders = getPendingOrdersToReceive();
-    return _filterOrdersByDateRange(pendingOrders, filterType);
-  }
-
-  // Get filtered pending orders to bill based on chart type
-  List<Datum> getFilteredPendingOrdersToBill(String filterType) {
-    final pendingOrders = getPendingOrdersToBill();
-    return _filterOrdersByDateRange(pendingOrders, filterType);
-  }
-
-  // Get filtered active suppliers based on chart type
-  List<String> getFilteredActiveSuppliers(String filterType) {
-    final filteredOrders = _filterOrdersByDateRange(purchaseOrders, filterType);
-    final suppliers = <String>{};
-
-    for (var order in filteredOrders) {
-      if (order.supplier != null &&
-          order.status != Status.CANCELLED &&
-          order.status != Status.DRAFT) {
-        suppliers.add(order.supplier!);
-      }
-    }
-    return suppliers.toList();
-  }
-
-  // Helper method to filter orders by date range
-  List<Datum> _filterOrdersByDateRange(List<Datum> orders, String filterType) {
-    final now = DateTime.now();
-
-    return orders.where((order) {
-      if (order.transactionDate == null) return false;
-
-      final date = order.transactionDate!;
-
-      switch (filterType.toLowerCase()) {
-        case 'monthly':
-          return date.month == now.month && date.year == now.year;
-        case 'weekly':
-          final weekStart = now.subtract(Duration(days: now.weekday - 1));
-          final weekEnd = weekStart.add(const Duration(days: 6));
-          return !date.isBefore(weekStart) && !date.isAfter(weekEnd);
-        case 'quarterly':
-          final quarter = ((now.month - 1) ~/ 3) + 1;
-          final dateQuarter = ((date.month - 1) ~/ 3) + 1;
-          return date.year == now.year && dateQuarter == quarter;
-        case 'yearly':
-          return date.year == now.year;
-        case 'daily':
-          return date.year == now.year &&
-              date.month == now.month &&
-              date.day == now.day;
-        default:
-          return true;
-      }
-    }).toList();
-  }
-
-  // Update chart filter and recalculate values
-  void updateChartFilter(String cardTitle, String newFilter) {
-    chartTypeMap[cardTitle]?.value = newFilter;
-
-    // Update values based on the card that changed
-    switch (cardTitle) {
-      case 'ANNUAL PURCHASES':
-        totalPurchaseAmount.value = calculateFilteredTotal(purchaseOrders, newFilter);
-        break;
-      case 'Purchase Orders to Receive':
-      // The view will automatically update by calling getFilteredPendingOrdersToReceive
-        break;
-      case 'Purchase Orders to Bill':
-      // The view will automatically update by calling getFilteredPendingOrdersToBill
-        break;
-      case 'Active Suppliers':
-      // The view will automatically update by calling getFilteredActiveSuppliers
-        break;
-    }
-
-    logger.d("📊 Updated $cardTitle filter to: $newFilter");
-    update(); // Trigger UI update
-  }
-
-  // Get count for specific card with current filter
-  dynamic getCountForCard(String cardTitle) {
-    final currentFilter = chartTypeMap[cardTitle]?.value ?? ChartFilterType.monthly;
-
-    switch (cardTitle) {
-      case 'ANNUAL PURCHASES':
-        return totalPurchaseAmount.value;
-      case 'Purchase Orders to Receive':
-        return getFilteredPendingOrdersToReceive(currentFilter).length;
-      case 'Purchase Orders to Bill':
-        return getFilteredPendingOrdersToBill(currentFilter).length;
-      case 'Active Suppliers':
-        return getFilteredActiveSuppliers(currentFilter).length;
+  DateTime getStartDate(String selectedType) {
+    DateTime now = DateTime.now();
+    switch (selectedType.toLowerCase()) {
+      case 'daily':
+        return DateTime(now.year, now.month, now.day);
+      case 'weekly':
+        return now.subtract(Duration(days: now.weekday - 1));
+      case 'monthly':
+        return DateTime(now.year, now.month, 1);
+      case 'quarterly':
+        int currentQuarter = ((now.month - 1) ~/ 3) + 1;
+        int startMonth = (currentQuarter - 1) * 3 + 1;
+        return DateTime(now.year, startMonth, 1);
+      case 'yearly':
+        return DateTime(now.year, 1, 1);
       default:
-        return 0;
+        return DateTime(2000);
     }
   }
 
-  // Get purchase orders by status
-  List<Datum> getPurchaseOrdersByStatus(Status status) {
-    return purchaseOrders.where((order) => order.status == status).toList();
+  void calculateOrdersToReceive(String selectedType) {
+    pOrdersToReceive.value = 0;
+    final startDate = getStartDate(selectedType);
+
+    for (var item in purchaseOrdersData) {
+      final status = item['status']?.toString().toLowerCase().trim();
+      final dateStr = item['creation'] ?? item['transaction_date'];
+      if (dateStr == null) continue;
+
+      final creationDate = DateTime.tryParse(dateStr);
+      if (creationDate == null || creationDate.isBefore(startDate)) continue;
+
+      if (status == "to receive and bill") {
+        pOrdersToReceive.value++;
+      }
+    }
+update();
+    logger.d("📦 Orders to Receive ($selectedType): ${pOrdersToReceive.value}");
   }
 
-  // Get purchase orders by supplier
-  List<Datum> getPurchaseOrdersBySupplier(String supplier) {
-    return purchaseOrders.where((order) => order.supplier == supplier).toList();
+  void calculateOrdersToBill(String selectedType) {
+    pOrdersToBill.value = 0;
+    final startDate = getStartDate(selectedType);
+
+    for (var item in purchaseOrdersData) {
+      final status = item['status']?.toString().toLowerCase().trim();
+      final dateStr = item['creation'] ?? item['transaction_date'];
+      if (dateStr == null) continue;
+
+      final creationDate = DateTime.tryParse(dateStr);
+      if (creationDate == null || creationDate.isBefore(startDate)) continue;
+
+      if (status == "to bill") {
+        pOrdersToBill.value++;
+      }
+    }
+    update();
+
+    logger.d("🧾 Orders to Bill ($selectedType): ${pOrdersToBill.value}");
   }
 
-  // Get purchase orders by date range
-  List<Datum> getPurchaseOrdersByDateRange(DateTime startDate, DateTime endDate) {
-    return purchaseOrders.where((order) {
-      if (order.transactionDate == null) return false;
-      return order.transactionDate!.isAfter(startDate.subtract(const Duration(days: 1))) &&
-          order.transactionDate!.isBefore(endDate.add(const Duration(days: 1)));
-    }).toList();
-  }
 
-  // Get total amount for specific supplier
-  double getTotalAmountBySupplier(String supplier, String filterType) {
-    final supplierOrders = purchaseOrders.where((order) => order.supplier == supplier).toList();
-    return calculateFilteredTotal(supplierOrders, filterType);
-  }
 
-  @override
-  void onReady() {
-    super.onReady();
-  }
+  void updateChartTypeFor(String tileName, String selectedType) {
+    if (!filterTypeMap.containsKey(tileName)) {
+      logger.e('⚠️ Unknown chart name: $tileName');
+      return;
+    }
 
-  @override
-  void onClose() {
-    super.onClose();
+    filterTypeMap[tileName]!.value = selectedType;
+    logger.d('📊 Updated Chart Filter: $tileName -> $selectedType');
+
+    if (tileName == 'PURCHASES') {
+      totalPurchaseAmount.value = calculateTotalPurchase(purchaseOrders, selectedType);
+    }
+    if (tileName == 'Purchase Orders to Receive') {
+   calculateOrdersToReceive(selectedType);
+    }
+    if (tileName == 'Purchase Orders to Bill') {
+      calculateOrdersToBill(selectedType);
+    }
   }
 
   void increment() => count.value++;

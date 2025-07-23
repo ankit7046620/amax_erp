@@ -2,7 +2,7 @@ import 'package:amax_hr/app/modules/leadDetails/views/lead_details_view.dart';
 import 'package:get/get.dart';
 import 'package:amax_hr/vo/crm_model.dart';
 
-class CrmController extends GetxController {
+class   CrmController extends GetxController {
   late CrmModel crmModel;
   late String selectedModule;
 

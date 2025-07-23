@@ -152,25 +152,25 @@ class BottamController extends GetxController {
         '/api/resource/Purchase Order?',
         params: {
           'fields':
-          '["name", "base_net_total", "transaction_date"]',
+          '["*"]',
           'limit_page_length': '1000',
         },
       );
       EasyLoading.dismiss();
       if (response != null && response.statusCode == 200) {
-         List<PurchaseOrder> purchaselist = (response.data['data'] as List)
-            .map((e) => PurchaseOrder.fromJson(e))
+         List<PurchaseOrderDataList> purchaselist = (response.data['data'] as List)
+            .map((e) => PurchaseOrderDataList.fromJson(e))
             .toList();
         logger.d("purchaselist===${purchaselist.length}");
         Get.to(()=>PurchaseOrdersDashboardView(), arguments: {'module': 'purchase', 'model': purchaselist});
 
       } else {
         EasyLoading.dismiss();
-        print('❌ Failed to fetch leads');
+        print('❌ Failed to fetch buys');
       }
     } catch (e) {
       EasyLoading.dismiss();
-      print("❌ Error fetching leads: $e");
+      print("❌ Error fetching buys: $e");
     } finally {
       EasyLoading.dismiss();
       isLoading.value = false;
