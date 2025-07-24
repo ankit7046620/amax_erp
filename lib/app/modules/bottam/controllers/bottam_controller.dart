@@ -38,7 +38,7 @@ class BottamController extends GetxController {
 
   Map<String, dynamic> getModuleConfig(String moduleName) {
     final configs = {
-      'Accounts': {'color': Colors.green, 'icon': FontAwesomeIcons.moneyBillTrendUp},
+      'Accounts': {'color': Colors.transparent, 'icon': FontAwesomeIcons.moneyBillTrendUp},
       'Assets': {'color': Colors.blue, 'icon': FontAwesomeIcons.building},
       'Automation': {'color': Colors.purple, 'icon': FontAwesomeIcons.robot},
       'BAPS': {'color': Colors.orange, 'icon': FontAwesomeIcons.chartColumn},
@@ -114,8 +114,23 @@ class BottamController extends GetxController {
 
       // Add remaining cases as needed
       default:
+        showSnackbar("Coming Soon", "$moduleName module is not ready yet.");
         print("Module ${module.value} is not yet handled.");
     }
+  }
+
+  void showSnackbar(String title, String message, {Color backgroundColor = Colors.indigo}) {
+    Get.snackbar(
+      title,
+      message,
+      snackPosition: SnackPosition.BOTTOM,
+      backgroundColor: backgroundColor,
+      colorText: Colors.white,
+      margin: const EdgeInsets.all(12),
+      borderRadius: 10,
+      duration: const Duration(seconds: 3),
+      icon: const Icon(Icons.info_outline, color: Colors.white),
+    );
   }
 
   Future<void> fetchAndStoreModules() async {
