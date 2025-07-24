@@ -55,7 +55,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
                       child: _buildDashboardCard(
                         title: 'TOTAL ACTIVE ITEMS',
                         value: controller.totalActiveItems.value.toString(),
-                        subtitle: '72% since last month',
+                        subtitle: '',
                         subtitleColor: Colors.green.shade600,
                         icon: Icons.inventory_2,
                         iconColor: Colors.teal.shade700,
@@ -66,7 +66,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
                       child: _buildDashboardCard(
                         title: 'TOTAL WAREHOUSES',
                         value: controller.totalWarehouses.value.toString(),
-                        subtitle: 'Active warehouses',
+                        subtitle: '',
                         subtitleColor: Colors.blue.shade600,
                         icon: Icons.warehouse,
                         iconColor: Colors.deepOrange.shade600,
