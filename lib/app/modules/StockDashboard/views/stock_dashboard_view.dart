@@ -8,13 +8,12 @@ class StockDashboardView extends GetView<StockDashboardController> {
 
   @override
   Widget build(BuildContext context) {
-
     Get.put(StockDashboardController());
     return Scaffold(
       appBar: AppBar(
         title: const Text('Stock Dashboard'),
         centerTitle: true,
-        backgroundColor: Colors.blue.shade600,
+        backgroundColor: Colors.indigo.shade600,
         foregroundColor: Colors.white,
         actions: [
           IconButton(
@@ -25,49 +24,11 @@ class StockDashboardView extends GetView<StockDashboardController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(
-            child: CircularProgressIndicator(),
-          );
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (controller.errorMessage.value.isNotEmpty) {
-          return Center(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  Icons.error_outline,
-                  size: 64,
-                  color: Colors.red.shade400,
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Error loading data',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.red.shade600,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Text(
-                    controller.errorMessage.value,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                ElevatedButton(
-                  onPressed: controller.refreshData,
-                  child: const Text('Retry'),
-                ),
-              ],
-            ),
-          );
+          return _buildErrorWidget(context);
         }
 
         return RefreshIndicator(
@@ -78,7 +39,6 @@ class StockDashboardView extends GetView<StockDashboardController> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Dashboard Title
                 const Text(
                   'Stock Dashboard',
                   style: TextStyle(
@@ -89,7 +49,6 @@ class StockDashboardView extends GetView<StockDashboardController> {
                 ),
                 const SizedBox(height: 20),
 
-                // Dashboard Cards
                 Row(
                   children: [
                     Expanded(
@@ -97,9 +56,9 @@ class StockDashboardView extends GetView<StockDashboardController> {
                         title: 'TOTAL ACTIVE ITEMS',
                         value: controller.totalActiveItems.value.toString(),
                         subtitle: '72% since last month',
-                        subtitleColor: Colors.green,
+                        subtitleColor: Colors.green.shade600,
                         icon: Icons.inventory_2,
-                        iconColor: Colors.blue,
+                        iconColor: Colors.teal.shade700,
                       ),
                     ),
                     const SizedBox(width: 12),
@@ -108,9 +67,9 @@ class StockDashboardView extends GetView<StockDashboardController> {
                         title: 'TOTAL WAREHOUSES',
                         value: controller.totalWarehouses.value.toString(),
                         subtitle: 'Active warehouses',
-                        subtitleColor: Colors.blue,
+                        subtitleColor: Colors.blue.shade600,
                         icon: Icons.warehouse,
-                        iconColor: Colors.orange,
+                        iconColor: Colors.deepOrange.shade600,
                       ),
                     ),
                   ],
@@ -120,135 +79,15 @@ class StockDashboardView extends GetView<StockDashboardController> {
                   title: 'TOTAL STOCK VALUE',
                   value: controller.totalStockValue.value,
                   subtitle: '0% since yesterday',
-                  subtitleColor: Colors.grey,
+                  subtitleColor: Colors.grey.shade700,
                   icon: Icons.monetization_on,
-                  iconColor: Colors.green,
+                  iconColor: Colors.green.shade700,
                   isFullWidth: true,
                 ),
-
                 const SizedBox(height: 24),
 
-                // Warehouse Details Section
-                Card(
-                  elevation: 2,
-                  child: Padding(
-                    padding: const EdgeInsets.all(16),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          children: [
-                            Icon(Icons.warehouse, color: Colors.blue.shade600),
-                            const SizedBox(width: 8),
-                            const Text(
-                              'Warehouse Details',
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 16),
-
-                        // Summary Row
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceAround,
-                          children: [
-                            _buildSummaryItem(
-                              'Total',
-                              controller.totalWarehouses.value.toString(),
-                              Colors.blue,
-                            ),
-                            _buildSummaryItem(
-                              'Active',
-                              controller.getActiveWarehouses().length.toString(),
-                              Colors.green,
-                            ),
-                            _buildSummaryItem(
-                              'Groups',
-                              controller.getWarehouseGroups().length.toString(),
-                              Colors.orange,
-                            ),
-                            _buildSummaryItem(
-                              'Individual',
-                              controller.getIndividualWarehouses().length.toString(),
-                              Colors.purple,
-                            ),
-                          ],
-                        ),
-
-                        const SizedBox(height: 16),
-                        const Divider(),
-                        const SizedBox(height: 8),
-
-                        // Recent Warehouses List
-                        const Text(
-                          'Recent Warehouses',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-
-                        // Show first 5 warehouses
-                        ...controller.warehouses.take(5).map((warehouse) =>
-                            Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: ListTile(
-                                leading: CircleAvatar(
-                                  backgroundColor: warehouse.isGroup == 1
-                                      ? Colors.orange.shade100
-                                      : Colors.blue.shade100,
-                                  child: Icon(
-                                    warehouse.isGroup == 1
-                                        ? Icons.folder
-                                        : Icons.warehouse,
-                                    color: warehouse.isGroup == 1
-                                        ? Colors.orange.shade600
-                                        : Colors.blue.shade600,
-                                    size: 20,
-                                  ),
-                                ),
-                                title: Text(
-                                  warehouse.warehouseName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                subtitle: Text(
-                                  warehouse.company,
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
-                                  ),
-                                ),
-                                trailing: warehouse.disabled == 1
-                                    ? Icon(Icons.block, color: Colors.red.shade400, size: 16)
-                                    : Icon(Icons.check_circle, color: Colors.green.shade400, size: 16),
-                              ),
-                            ),
-                        ).toList(),
-
-                        if (controller.warehouses.length > 5)
-                          Center(
-                            child: TextButton(
-                              onPressed: () {
-                                // Navigate to full warehouse list
-                                Get.snackbar(
-                                  'Info',
-                                  'Full warehouse list coming soon!',
-                                  snackPosition: SnackPosition.BOTTOM,
-                                );
-                              },
-                              child: Text('View All (${controller.warehouses.length})'),
-                            ),
-                          ),
-                      ],
-                    ),
-                  ),
-                ),
+                // Warehouses Section
+                _buildWarehouseDetails(),
               ],
             ),
           ),
@@ -267,7 +106,8 @@ class StockDashboardView extends GetView<StockDashboardController> {
     bool isFullWidth = false,
   }) {
     return Card(
-      elevation: 2,
+      elevation: 3,
+      color: Colors.white,
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -275,21 +115,21 @@ class StockDashboardView extends GetView<StockDashboardController> {
           children: [
             Row(
               children: [
-                Icon(icon, color: iconColor, size: 20),
+                Icon(icon, color: iconColor, size: 22),
                 const SizedBox(width: 8),
                 Flexible(
                   child: Text(
                     title,
                     style: TextStyle(
                       fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.grey.shade600,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade700,
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 10),
             Text(
               value,
               style: const TextStyle(
@@ -298,7 +138,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
                 color: Colors.black87,
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               subtitle,
               style: TextStyle(
@@ -319,7 +159,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
         Text(
           value,
           style: TextStyle(
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: FontWeight.bold,
             color: color,
           ),
@@ -332,6 +172,165 @@ class StockDashboardView extends GetView<StockDashboardController> {
           ),
         ),
       ],
+    );
+  }
+
+  Widget _buildWarehouseDetails() {
+    final controller = Get.find<StockDashboardController>();
+
+    return Card(
+      elevation: 2,
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(Icons.warehouse, color: Colors.blue.shade600),
+                const SizedBox(width: 8),
+                const Text(
+                  'Warehouse Details',
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: [
+                _buildSummaryItem(
+                  'Total',
+                  controller.totalWarehouses.value.toString(),
+                  Colors.blue.shade600,
+                ),
+                _buildSummaryItem(
+                  'Active',
+                  controller.getActiveWarehouses().length.toString(),
+                  Colors.green.shade700,
+                ),
+                _buildSummaryItem(
+                  'Groups',
+                  controller.getWarehouseGroups().length.toString(),
+                  Colors.orange.shade600,
+                ),
+                _buildSummaryItem(
+                  'Individual',
+                  controller.getIndividualWarehouses().length.toString(),
+                  Colors.purple.shade600,
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            const Divider(),
+            const SizedBox(height: 8),
+
+            const Text(
+              'Recent Warehouses',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            ...controller.warehouses.take(5).map((warehouse) => Padding(
+              padding: const EdgeInsets.only(bottom: 8),
+              child: ListTile(
+                leading: CircleAvatar(
+                  backgroundColor: warehouse.isGroup == 1
+                      ? Colors.orange.shade100
+                      : Colors.blue.shade100,
+                  child: Icon(
+                    warehouse.isGroup == 1
+                        ? Icons.folder
+                        : Icons.warehouse,
+                    color: warehouse.isGroup == 1
+                        ? Colors.orange.shade700
+                        : Colors.blue.shade700,
+                    size: 20,
+                  ),
+                ),
+                title: Text(
+                  warehouse.warehouseName,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                subtitle: Text(
+                  warehouse.company,
+                  style: TextStyle(
+                    color: Colors.grey.shade600,
+                    fontSize: 12,
+                  ),
+                ),
+                trailing: Icon(
+                  warehouse.disabled == 1
+                      ? Icons.block
+                      : Icons.check_circle,
+                  color: warehouse.disabled == 1
+                      ? Colors.red.shade400
+                      : Colors.green.shade400,
+                  size: 16,
+                ),
+              ),
+            )),
+            if (controller.warehouses.length > 5)
+              Center(
+                child: TextButton(
+                  onPressed: () {
+                    Get.snackbar(
+                      'Info',
+                      'Full warehouse list coming soon!',
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  },
+                  child: Text('View All (${controller.warehouses.length})'),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildErrorWidget(BuildContext context) {
+    final controller = Get.find<StockDashboardController>();
+
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
+          const SizedBox(height: 16),
+          Text(
+            'Error loading data',
+            style: TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Colors.red.shade600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 32),
+            child: Text(
+              controller.errorMessage.value,
+              textAlign: TextAlign.center,
+              style: TextStyle(color: Colors.grey.shade600),
+            ),
+          ),
+          const SizedBox(height: 24),
+          ElevatedButton(
+            onPressed: controller.refreshData,
+            child: const Text('Retry'),
+          ),
+        ],
+      ),
     );
   }
 }
