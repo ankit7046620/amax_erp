@@ -11,58 +11,84 @@ class SaleDashboardView extends StatelessWidget {
     return GetBuilder<SaleDashboardController>(
       init: SaleDashboardController(),
       builder: (controller) {
+        final items = [
+          {
+            "title": "ANNUAL SALES",
+            "icon": Icons.bar_chart,
+            "color": Colors.blue,
+            "count": controller.totalSales.value,
+            "currency": true,
+            "key": "ANNUAL SALES",
+            "onTap": () => Get.to(() => const SaleGraphView(), arguments: {
+              'module': 'sale',
+              'model': controller.saleData,
+            }),
+          },
+          {
+            "title": "SALES ORDERS TO DELIVER",
+            "icon": Icons.local_shipping_outlined,
+            "color": Colors.orange,
+            "count": controller.toOrdersToDeliver,
+            "currency": false,
+            "key": "SALES ORDERS TO DELIVER",
+          },
+          {
+            "title": "SALES ORDERS TO BILL",
+            "icon": Icons.receipt_long,
+            "color": Colors.purple,
+            "count": controller.todeliverandbill,
+            "currency": false,
+            "key": "SALES ORDERS TO BILL",
+          },
+          {
+            "title": "ACTIVE CUSTOMERS",
+            "icon": Icons.people,
+            "color": Colors.green,
+            "count": controller.customerCount.value,
+            "currency": false,
+            "key": "ACTIVE CUSTOMERS",
+          },
+        ];
+
         return Scaffold(
           appBar: AppBar(
             title: const Text('Selling Dashboard'),
             centerTitle: true,
+              backgroundColor: Colors.indigo.shade600,
+              foregroundColor: Colors.white
           ),
-          body: SingleChildScrollView(
+          body: Padding(
             padding: const EdgeInsets.all(12),
-            child: Column(
-              children: [
-                GestureDetector(
-                  onTap: () {
-                    Get.to(() => const SaleGraphView(),
-                        arguments: {'module': 'sale', 'model': controller.saleData});
-                  },
+            child: GridView.builder(
+              itemCount: items.length,
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 2,
+                mainAxisSpacing: 16,
+                crossAxisSpacing: 16,
+                childAspectRatio: 0.95,
+              ),
+              itemBuilder: (context, index) {
+                final item = items[index];
+                final String itemKey = item['key'] as String;
+                final bool isCurrency = item['currency'] == true;
+
+                return GestureDetector(
+                  onTap: item['onTap'] as void Function()? ?? () {},
                   child: _buildStatusCard(
                     context: context,
-                    title: 'ANNUAL SALES',
-                    count: controller.totalSales.value,
-                    color: Colors.blue,
-                    currency: true,
-                    selectedItem: controller.chartTypeMap['ANNUAL SALES']!,
-                    onChanged: (value) => controller.updateChartType('ANNUAL SALES', value),
+                    title: item['title'] as String,
+                    icon: item['icon'] as IconData,
+                    color: item['color'] as Color,
+                    count: item['count'],
+                    currency: isCurrency,
+                    selectedItem: controller.chartTypeMap[itemKey]!,
+                    onChanged: (val) {
+                      controller.chartTypeMap[itemKey]!.value = val!;
+                      controller.updateChartType(itemKey, val);
+                    },
                   ),
-                ),
-                const SizedBox(height: 12),
-                _buildStatusCard(
-                  context: context,
-                  title: 'SALES ORDERS TO DELIVER',
-                  count: controller.toOrdersToDeliver,
-                  color: Colors.orange,
-                  selectedItem: controller.chartTypeMap['SALES ORDERS TO DELIVER']!,
-                  onChanged: (value) => controller.updateChartType('SALES ORDERS TO DELIVER', value),
-                ),
-                const SizedBox(height: 12),
-                _buildStatusCard(
-                  context: context,
-                  title: 'SALES ORDERS TO BILL',
-                  count: controller.todeliverandbill,
-                  color: Colors.purple,
-                  selectedItem: controller.chartTypeMap['SALES ORDERS TO BILL']!,
-                  onChanged: (value) => controller.updateChartType('SALES ORDERS TO BILL', value),
-                ),
-                const SizedBox(height: 12),
-                _buildStatusCard(
-                  context: context,
-                  title: 'ACTIVE CUSTOMERS',
-                  count: controller.customerCount.value,
-                  color: Colors.green,
-                  selectedItem: controller.chartTypeMap['ACTIVE CUSTOMERS']!,
-                  onChanged: (value) => controller.updateChartType('ACTIVE CUSTOMERS', value),
-                ),
-              ],
+                );
+              },
             ),
           ),
         );
@@ -71,70 +97,99 @@ class SaleDashboardView extends StatelessWidget {
   }
 
   Widget _buildStatusCard({
-    required String title,
-    required dynamic count,
-    required Color color,
     required BuildContext context,
+    required String title,
+    required IconData icon,
+    required Color color,
+    required dynamic count,
+    required bool currency,
     required RxString selectedItem,
     required Function(String?) onChanged,
-    bool currency = false,
   }) {
-    final width = MediaQuery.of(context).size.width;
+    final size = MediaQuery.of(context).size;
 
-    return Card(
-      elevation: 3,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-          gradient: LinearGradient(
-            colors: [color.withOpacity(0.8), color],
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
+    String format(dynamic value) {
+      if (currency) {
+        final parsed = value is num ? value : double.tryParse(value.toString()) ?? 0.0;
+        return "₹ ${parsed.toStringAsFixed(2)}";
+      }
+      return value.toString();
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: LinearGradient(
+          colors: [color.withOpacity(0.85), color],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
-        padding: const EdgeInsets.all(16),
-        width: double.infinity,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Title + Dropdown
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: width * 0.04,
-                    color: Colors.white70,
-                  ),
-                ),
-                Obx(() => DropdownButton<String>(
-                  dropdownColor: color,
-                  value: selectedItem.value,
-                  style: const TextStyle(color: Colors.white),
-                  onChanged: onChanged,
-                  iconEnabledColor: Colors.white,
-                  items: SaleDashboardController.chartFilters.map((item) {
-                    return DropdownMenuItem<String>(
-                      value: item,
-                      child: Text(item),
-                    );
-                  }).toList(),
-                )),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              currency ? "₹ ${count.toStringAsFixed(2)}" : count.toString(),
-              style: TextStyle(
-                fontSize: width * 0.065,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+        boxShadow: [
+          BoxShadow(
+            color: color.withOpacity(0.3),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          )
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(20),
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Icon(icon, size: 28, color: Colors.white.withOpacity(0.9)),
+                      const SizedBox(height: 10),
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontSize: constraints.maxWidth * 0.09,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.white70,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        format(count),
+                        style: TextStyle(
+                          fontSize: constraints.maxWidth * 0.14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const Spacer(),
+                      Obx(() => Align(
+                        alignment: Alignment.bottomRight,
+                        child: DropdownButton<String>(
+                          value: selectedItem.value,
+                          iconEnabledColor: Colors.white,
+                          dropdownColor: color,
+                          style: const TextStyle(color: Colors.white),
+                          underline: const SizedBox(),
+                          onChanged: onChanged,
+                          items: SaleDashboardController.chartFilters
+                              .map((item) => DropdownMenuItem<String>(
+                            value: item,
+                            child: Text(item),
+                          ))
+                              .toList(),
+                        ),
+                      )),
+                    ],
+                  );
+                },
               ),
             ),
-          ],
+          ),
         ),
       ),
     );

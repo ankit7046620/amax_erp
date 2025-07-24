@@ -11,7 +11,9 @@ import 'package:amax_hr/vo/purchase_order_model.dart';
 import 'package:amax_hr/vo/sales_order.dart';
 import 'package:amax_hr/vo/sell_order_list.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:logger/logger.dart';
 
@@ -33,6 +35,64 @@ class BottamController extends GetxController {
   Module? moduleFromString(String value) {
     return Module.values.firstWhere((e) => e.value == value);
   }
+
+  Map<String, dynamic> getModuleConfig(String moduleName) {
+    final configs = {
+      'Accounts': {'color': Colors.green, 'icon': FontAwesomeIcons.moneyBillTrendUp},
+      'Assets': {'color': Colors.blue, 'icon': FontAwesomeIcons.building},
+      'Automation': {'color': Colors.purple, 'icon': FontAwesomeIcons.robot},
+      'BAPS': {'color': Colors.orange, 'icon': FontAwesomeIcons.chartColumn},
+      'Bulk Transacti': {'color': Colors.indigo, 'icon': FontAwesomeIcons.truckRampBox},
+      'Buying': {'color': Colors.teal, 'icon': FontAwesomeIcons.cartShopping},
+      'CIS': {'color': Colors.cyan, 'icon': FontAwesomeIcons.idCard},
+      'Communication': {'color': Colors.pink, 'icon': FontAwesomeIcons.comments},
+      'Contacts': {'color': Colors.amber, 'icon': FontAwesomeIcons.addressBook},
+      'Core': {'color': Colors.red, 'icon': FontAwesomeIcons.gear},
+      'CRM': {'color': Colors.deepPurple, 'icon': FontAwesomeIcons.userTie},
+      'Custom': {'color': Colors.brown, 'icon': FontAwesomeIcons.puzzlePiece},
+      'Desk': {'color': Colors.lightGreen, 'icon': FontAwesomeIcons.desktop},
+      'Email': {'color': Colors.blueGrey, 'icon': FontAwesomeIcons.envelope},
+      'ERPNext Integr': {'color': Colors.deepOrange, 'icon': FontAwesomeIcons.plug},
+      'File': {'color': Colors.grey, 'icon': FontAwesomeIcons.fileLines},
+      'Geo': {'color': Colors.lightBlue, 'icon': FontAwesomeIcons.mapLocationDot},
+      'HR': {'color': Colors.pinkAccent, 'icon': FontAwesomeIcons.usersGear},
+      'Integrations': {'color': Colors.yellowAccent, 'icon': FontAwesomeIcons.link},
+      'Maintenance': {'color': Colors.redAccent, 'icon': FontAwesomeIcons.screwdriverWrench},
+      'Manufactoring': {'color': Colors.brown, 'icon': FontAwesomeIcons.industry},
+      'Manufacturing': {'color': Colors.blueAccent, 'icon': FontAwesomeIcons.industry},
+      'Payment Gatewa': {'color': Colors.green, 'icon': FontAwesomeIcons.creditCard},
+      'Payments': {'color': Colors.greenAccent, 'icon': FontAwesomeIcons.wallet},
+      'Payroll': {'color': Colors.tealAccent, 'icon': FontAwesomeIcons.moneyCheckDollar},
+      'Portal': {'color': Colors.purpleAccent, 'icon': FontAwesomeIcons.globe},
+      'Printing': {'color': Colors.orangeAccent, 'icon': FontAwesomeIcons.print},
+      'Prods': {'color': Colors.lime, 'icon': FontAwesomeIcons.boxesStacked},
+      'Projects': {'color': Colors.indigo, 'icon': FontAwesomeIcons.diagramProject},
+      'Quality Manage': {'color': Colors.cyan, 'icon': FontAwesomeIcons.checkDouble},
+      'Regional': {'color': Colors.amber, 'icon': FontAwesomeIcons.earthAsia},
+      'Selling': {'color': Colors.pink, 'icon': FontAwesomeIcons.tags},
+      'Setup': {'color': Colors.grey, 'icon': FontAwesomeIcons.tools},
+      'Social': {'color': Colors.blue, 'icon': FontAwesomeIcons.shareNodes},
+      'Stock': {'color': Colors.orange, 'icon': FontAwesomeIcons.boxesPacking},
+      'Subcontracting': {'color': Colors.deepPurple, 'icon': FontAwesomeIcons.handshake},
+      'Support': {'color': Colors.green, 'icon': FontAwesomeIcons.headset},
+      'Telephony': {'color': Colors.red, 'icon': FontAwesomeIcons.phoneVolume},
+      'Utilities': {'color': Colors.brown, 'icon': FontAwesomeIcons.toolbox},
+      'Website': {'color': Colors.blue, 'icon': FontAwesomeIcons.windowMaximize},
+      'Workflow': {'color': Colors.purple, 'icon': FontAwesomeIcons.diagramSuccessor},
+      'X fieldss': {'color': Colors.grey, 'icon': FontAwesomeIcons.shapes},
+    };
+
+    return configs[moduleName] ?? {'color': Colors.grey, 'icon': FontAwesomeIcons.cubes};
+  }
+
+
+
+
+
+
+
+
+
 
   void handleModule(String moduleName) {
     final module = moduleFromString(moduleName);

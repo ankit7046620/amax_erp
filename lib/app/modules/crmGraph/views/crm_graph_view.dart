@@ -11,7 +11,10 @@ class CrmGraphView extends GetView<CrmGraphController> {
     final controller = Get.put(CrmGraphController());
 
     return Scaffold(
-      appBar: AppBar(title: const Text('📊 CRM Graph View'), centerTitle: true),
+      appBar: AppBar(
+          backgroundColor: Colors.indigo,
+          foregroundColor: Colors.white,
+          title: const Text('📊 CRM Graph View'), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(

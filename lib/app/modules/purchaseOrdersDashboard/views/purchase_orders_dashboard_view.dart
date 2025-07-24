@@ -1,5 +1,3 @@
-import 'package:amax_hr/app/modules/purchaseGraph/views/purchase_graph_view.dart';
-import 'package:amax_hr/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/purchase_orders_dashboard_controller.dart';
@@ -15,167 +13,180 @@ class PurchaseOrdersDashboardView extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Purchase Orders Dashboard'),
         centerTitle: true,
-        actions: [
-          IconButton(onPressed: () async {
-
-            logger.d("calll=======1");
-         await   Get.to(()=>PurchaseGraphView(), arguments: {'module': 'purchase', 'model': controller.purchaseOrders});
-          }, icon: Icon(Icons.arrow_circle_right))
-        ],
+        backgroundColor: Colors.indigo,
+        foregroundColor: Colors.white,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(12),
-        child: Column(
-          children: [
-            // ANNUAL PURCHASES Card (Reactive)
-            Obx(() => _buildStatusCard(
-              context: context,
-              title: 'ANNUAL PURCHASES',
-              count: controller.totalPurchaseAmount.value,
-              color: Colors.blue,
-              currency: true,
-              selectedItem: controller.filterTypeMap ['PURCHASES']!,
-              onChanged: (value) {
-                controller.filterTypeMap ['PURCHASES']!.value = value!;
-                controller.updateChartTypeFor("PURCHASES", value);
-                controller.update();
-              },
-            )),
+      body: Obx(() {
+        final items = [
+          {
+            "title": "ANNUAL PURCHASES",
+            "icon": Icons.attach_money,
+            "color": Colors.blue,
+            "count": controller.totalPurchaseAmount.value,
+            "currency": true,
+            "key": 'PURCHASES'
+          },
+          {
+            "title": "Purchase Orders to Receive",
+            "icon": Icons.inbox,
+            "color": Colors.orange,
+            "count": controller.pOrdersToReceive,
+            "currency": false,
+            "key": 'Purchase Orders to Receive'
+          },
+          {
+            "title": "Purchase Orders to Bill",
+            "icon": Icons.receipt_long,
+            "color": Colors.purple,
+            "count": controller.pOrdersToBill,
+            "currency": false,
+            "key": 'Purchase Orders to Bill'
+          },
+          {
+            "title": "Active Suppliers",
+            "icon": Icons.people,
+            "color": Colors.green,
+            "count": 1,
+            "currency": false,
+            "key": 'Active Suppliers'
+          },
+        ];
 
-            const SizedBox(height: 12),
+        return Padding(
+          padding: const EdgeInsets.all(12),
+          child: GridView.builder(
+            itemCount: items.length,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: 0.95, // Adjust this value for card height
+            ),
+            itemBuilder: (context, index) {
+              final item = items[index];
+              final key = item['key'] as String;
 
-            // Purchase Orders to Receive
-            Obx(() => _buildStatusCard(
-              context: context,
-              title: 'Purchase Orders to Receive',
-              count: controller.pOrdersToReceive,
-              color: Colors.orange,
-              selectedItem: controller.filterTypeMap ['Purchase Orders to Receive']!,
-              onChanged: (value) {
-                controller.filterTypeMap ['Purchase Orders to Receive']!.value = value!;
-             controller.updateChartTypeFor("Purchase Orders to Receive", value);
-             controller.update();
-              },
-            )),
-
-            const SizedBox(height: 12),
-
-            // Purchase Orders to Bill
-            Obx(() => _buildStatusCard(
-              context: context,
-              title: 'Purchase Orders to Bill',
-              count: controller.pOrdersToBill,
-              color: Colors.purple,
-              selectedItem: controller.filterTypeMap ['Purchase Orders to Bill']!,
-              onChanged: (value) {
-                controller.filterTypeMap ['Purchase Orders to Bill']!.value = value!;
-                controller.updateChartTypeFor("Purchase Orders to Bill", value);
-                controller.update();
-              },
-            )),
-
-            const SizedBox(height: 12),
-
-            // Active Suppliers (Static for now)
-            Obx(() => _buildStatusCard(
-              context: context,
-              title: 'Active Suppliers',
-              count: 1,
-              color: Colors.green,
-              selectedItem: controller.filterTypeMap ['Active Suppliers']!,
-              onChanged: (value) {
-                controller.filterTypeMap ['Active Suppliers']!.value = value!;
-              },
-            )),
-          ],
-        ),
-      ),
+              return _buildCard(
+                context: context,
+                title: item['title'] as String,
+                icon: item['icon'] as IconData,
+                color: item['color'] as Color,
+                count: item['count'],
+                currency: item['currency'] as bool,
+                selectedItem: controller.filterTypeMap[key]!,
+                onChanged: (val) {
+                  controller.filterTypeMap[key]!.value = val!;
+                  controller.updateChartTypeFor(key, val);
+                },
+              );
+            },
+          ),
+        );
+      }),
     );
   }
 }
 
-Widget _buildStatusCard({
-  required String title,
-  required dynamic count,
-  required Color color,
+Widget _buildCard({
   required BuildContext context,
+  required String title,
+  required IconData icon,
+  required Color color,
+  required dynamic count,
   bool currency = false,
   required RxString selectedItem,
   required Function(String?) onChanged,
 }) {
-  final width = MediaQuery.of(context).size.width;
+  final size = MediaQuery.of(context).size;
 
-  String formatCount(dynamic value, bool isCurrency) {
-    if (isCurrency) {
-      if (value is num) {
-        return "₹ ${value.toStringAsFixed(2)}";
-      } else if (value is String) {
-        final parsed = double.tryParse(value);
-        return parsed != null ? "₹ ${parsed.toStringAsFixed(2)}" : "₹ 0.00";
-      }
-      return "₹ 0.00";
-    } else {
-      return value.toString();
+  String format(dynamic value) {
+    if (currency) {
+      final parsed = value is num ? value : double.tryParse(value.toString()) ?? 0.0;
+      return "₹ ${parsed.toStringAsFixed(2)}";
     }
+    return value.toString();
   }
 
-  return Card(
-    elevation: 3,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-    child: Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.8), color],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+  return LayoutBuilder(
+    builder: (context, constraints) {
+      final iconSize = constraints.maxWidth * 0.15;
+      final titleSize = constraints.maxWidth * 0.07;
+      final valueSize = constraints.maxWidth * 0.1;
+
+      return Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(20),
+          gradient: LinearGradient(
+            colors: [color.withOpacity(0.85), color],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: color.withOpacity(0.35),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            )
+          ],
         ),
-      ),
-      padding: const EdgeInsets.all(16),
-      width: double.infinity,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Title + Dropdown
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Expanded(
-                child: Text(
-                  title,
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: width * 0.04,
-                    color: Colors.white70,
-                  ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              borderRadius: BorderRadius.circular(20),
+              onTap: () {},
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(icon, size: iconSize, color: Colors.white),
+                    const SizedBox(height: 10),
+                    Text(
+                      title,
+                      style: TextStyle(
+                        fontSize: titleSize,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white70,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      format(count),
+                      style: TextStyle(
+                        fontSize: valueSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const Spacer(),
+                    Obx(() => Align(
+                      alignment: Alignment.bottomRight,
+                      child: DropdownButton<String>(
+                        value: selectedItem.value,
+                        iconEnabledColor: Colors.white,
+                        dropdownColor: color,
+                        style: const TextStyle(color: Colors.white),
+                        underline: const SizedBox(),
+                        onChanged: onChanged,
+                        items: PurchaseOrdersDashboardController.chartFilters
+                            .map((item) => DropdownMenuItem<String>(
+                          value: item,
+                          child: Text(item),
+                        ))
+                            .toList(),
+                      ),
+                    )),
+                  ],
                 ),
               ),
-              Obx(() => DropdownButton<String>(
-                dropdownColor: color,
-                value: selectedItem.value,
-                style: const TextStyle(color: Colors.white),
-                onChanged: onChanged,
-                iconEnabledColor: Colors.white,
-                items: PurchaseOrdersDashboardController.chartFilters.map((item) {
-                  return DropdownMenuItem<String>(
-                    value: item,
-                    child: Text(item),
-                  );
-                }).toList(),
-              )),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            formatCount(count, currency),
-            style: TextStyle(
-              fontSize: width * 0.065,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
             ),
           ),
-        ],
-      ),
-    ),
+        ),
+      );
+    },
   );
 }
