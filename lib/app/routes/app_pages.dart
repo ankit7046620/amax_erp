@@ -2,6 +2,8 @@ import 'package:get/get.dart';
 
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
+import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
+import '../modules/StockDashboard/views/stock_dashboard_view.dart';
 import '../modules/bottam/bindings/bottam_binding.dart';
 import '../modules/bottam/views/bottam_view.dart';
 import '../modules/crm/bindings/crm_binding.dart';
@@ -80,6 +82,11 @@ class AppPages {
       name: _Paths.PURCHASE_GRAPH,
       page: () => const PurchaseGraphView(),
       binding: PurchaseGraphBinding(),
+    ),
+    GetPage(
+      name: _Paths.STOCK_DASHBOARD,
+      page: () => const StockDashboardView(),
+      binding: StockDashboardBinding(),
     ),
   ];
 }

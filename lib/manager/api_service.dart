@@ -1,5 +1,6 @@
 // lib/services/api_service.dart
 
+import 'package:amax_hr/vo/WarehouseModel.dart' show WarehouseModel;
 import 'package:dio/dio.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

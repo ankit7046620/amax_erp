@@ -1,3 +1,4 @@
+import 'package:amax_hr/app/modules/StockDashboard/views/stock_dashboard_view.dart';
 import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
 import 'package:amax_hr/app/modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
@@ -5,6 +6,7 @@ import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/utils/app_funcation.dart';
+import 'package:amax_hr/vo/WarehouseModel.dart';
 import 'package:amax_hr/vo/crm_model.dart';
 import 'package:amax_hr/vo/customer_list_model.dart';
 import 'package:amax_hr/vo/purchase_order_model.dart';
@@ -23,6 +25,10 @@ class BottamController extends GetxController {
   final count = 0.obs;
   List<String> moduleNames = [];
   final isLoading = true.obs;
+
+  final warehouses = <WarehouseModel>[].obs;
+  final totalWarehouses = 0.obs;
+  final errorMessage = ''.obs;
 
   @override
   void onInit() {
@@ -110,6 +116,10 @@ class BottamController extends GetxController {
         break;
       case Module.buying:
         fetchPurchaseData();
+        break;
+      case Module.stock:
+        Get.to(()=>StockDashboardView());
+
         break;
 
       // Add remaining cases as needed
@@ -251,4 +261,7 @@ class BottamController extends GetxController {
       isLoading.value = false;
     }
   }
+
+
+
 }
