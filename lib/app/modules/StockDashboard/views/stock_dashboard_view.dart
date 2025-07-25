@@ -1,7 +1,7 @@
-// views/stock_dashboard_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
+import 'package:syncfusion_flutter_charts/charts.dart';
 
 import '../controllers/stock_dashboard_controller.dart';
 
@@ -29,9 +29,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
           return _buildShimmerPlaceholder();
         }
 
-        if (controller.errorMessage.value.isNotEmpty) {
-          return _buildErrorWidget(context);
-        }
+        // Error widget removed
 
         return RefreshIndicator(
           onRefresh: controller.refreshData,
@@ -88,7 +86,30 @@ class StockDashboardView extends GetView<StockDashboardController> {
                 ),
                 const SizedBox(height: 24),
 
+                SizedBox(
+                  height: 300,
+                  child: SfCartesianChart(
 
+                    primaryXAxis: CategoryAxis(
+
+                        labelRotation: -45,
+                        majorGridLines: const MajorGridLines(width: 0),
+                        labelIntersectAction: AxisLabelIntersectAction.rotate45,
+                        edgeLabelPlacement: EdgeLabelPlacement.shift,
+                        maximumLabelWidth: 80,
+                    ),
+                    title: ChartTitle(text: 'Total Stock Value by Warehouse'),
+                    series: <CartesianSeries>[
+                      ColumnSeries<WarehouseStockChartData, String>(
+                        dataSource: controller.barChartData,
+                        xValueMapper: (data, _) => data.warehouse,
+                        yValueMapper: (data, _) => data.totalStockValue,
+                        name: 'Stock Value',
+                        dataLabelSettings: DataLabelSettings(isVisible: true),
+                      ),
+                    ],
+                  ),
+                ),
               ],
             ),
           ),
@@ -101,7 +122,6 @@ class StockDashboardView extends GetView<StockDashboardController> {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(16),
       child: Shimmer(
-
         child: Column(
           children: [
             Row(
@@ -185,187 +205,6 @@ class StockDashboardView extends GetView<StockDashboardController> {
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSummaryItem(String label, String value, Color color) {
-    return Column(
-      children: [
-        Text(
-          value,
-          style: TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: color,
-          ),
-        ),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey.shade600,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildWarehouseDetails() {
-    final controller = Get.find<StockDashboardController>();
-
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(Icons.warehouse, color: Colors.blue.shade600),
-                const SizedBox(width: 8),
-                const Text(
-                  'Warehouse Details',
-                  style: TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: [
-                _buildSummaryItem(
-                  'Total',
-                  controller.totalWarehouses.value.toString(),
-                  Colors.blue.shade600,
-                ),
-                _buildSummaryItem(
-                  'Active',
-                  controller.getActiveWarehouses().length.toString(),
-                  Colors.green.shade700,
-                ),
-                _buildSummaryItem(
-                  'Groups',
-                  controller.getWarehouseGroups().length.toString(),
-                  Colors.orange.shade600,
-                ),
-                _buildSummaryItem(
-                  'Individual',
-                  controller.getIndividualWarehouses().length.toString(),
-                  Colors.purple.shade600,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            const Divider(),
-            const SizedBox(height: 8),
-
-            const Text(
-              'Recent Warehouses',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            const SizedBox(height: 12),
-
-            ...controller.warehouses.take(5).map((warehouse) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: ListTile(
-                leading: CircleAvatar(
-                  backgroundColor: warehouse.isGroup == 1
-                      ? Colors.orange.shade100
-                      : Colors.blue.shade100,
-                  child: Icon(
-                    warehouse.isGroup == 1
-                        ? Icons.folder
-                        : Icons.warehouse,
-                    color: warehouse.isGroup == 1
-                        ? Colors.orange.shade700
-                        : Colors.blue.shade700,
-                    size: 20,
-                  ),
-                ),
-                title: Text(
-                  warehouse.warehouseName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                subtitle: Text(
-                  warehouse.company,
-                  style: TextStyle(
-                    color: Colors.grey.shade600,
-                    fontSize: 12,
-                  ),
-                ),
-                trailing: Icon(
-                  warehouse.disabled == 1
-                      ? Icons.block
-                      : Icons.check_circle,
-                  color: warehouse.disabled == 1
-                      ? Colors.red.shade400
-                      : Colors.green.shade400,
-                  size: 16,
-                ),
-              ),
-            )),
-            if (controller.warehouses.length > 5)
-              Center(
-                child: TextButton(
-                  onPressed: () {
-                    Get.snackbar(
-                      'Info',
-                      'Full warehouse list coming soon!',
-                      snackPosition: SnackPosition.BOTTOM,
-                    );
-                  },
-                  child: Text('View All (\${controller.warehouses.length})'),
-                ),
-              ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildErrorWidget(BuildContext context) {
-    final controller = Get.find<StockDashboardController>();
-
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: Colors.red.shade400),
-          const SizedBox(height: 16),
-          Text(
-            'Error loading data',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Colors.red.shade600,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 32),
-            child: Text(
-              controller.errorMessage.value,
-              textAlign: TextAlign.center,
-              style: TextStyle(color: Colors.grey.shade600),
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton(
-            onPressed: controller.refreshData,
-            child: const Text('Retry'),
-          ),
-        ],
       ),
     );
   }

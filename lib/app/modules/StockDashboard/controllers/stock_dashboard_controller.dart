@@ -1,4 +1,4 @@
-// controllers/stock_dashboard_controller.dart
+// lib/app/modules/StockDashboard/controllers/stock_dashboard_controller.dart
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart' show ApiService;
 import 'package:amax_hr/vo/WarehouseModel.dart' show WarehouseModel;
@@ -16,6 +16,8 @@ class StockDashboardController extends GetxController {
   final totalActiveItems = 0.obs;
   final totalStockValue = ''.obs;
 
+  RxList<WarehouseStockChartData> barChartData = <WarehouseStockChartData>[].obs;
+
   @override
   void onInit() {
     super.onInit();
@@ -25,7 +27,6 @@ class StockDashboardController extends GetxController {
   // Load all APIs in parallel with shared loading state
   void loadAllData() async {
     isLoading.value = true;
-
     try {
       await Future.wait([
         fetchWarehouses(),
@@ -97,7 +98,9 @@ class StockDashboardController extends GetxController {
             .map((e) => ItemStockModel.fromJson(e))
             .toList();
 
+        logger.d("fetchStockData===${itemsModel.length}");
         getStockValuation(itemsModel);
+        generateWarehouseStockChartData(itemsModel);
       } else {
         errorMessage.value = 'Failed to fetch stock data';
       }
@@ -108,11 +111,9 @@ class StockDashboardController extends GetxController {
 
   double getStockValuation(List<ItemStockModel> items) {
     double totalValuation = 0.0;
-
     for (var item in items) {
       totalValuation += item.stockValue ?? 0.0;
     }
-
     logger.d("getStockValuation >>> ₹${totalValuation.toStringAsFixed(2)}");
     formatToCrore(totalValuation);
     return totalValuation;
@@ -145,4 +146,27 @@ class StockDashboardController extends GetxController {
   List<WarehouseModel> getIndividualWarehouses() {
     return warehouses.where((warehouse) => warehouse.isGroup == 0).toList();
   }
+
+  List<WarehouseModel> getRejectedWarehouses() {
+    return warehouses.where((warehouse) => warehouse.isRejectedWarehouse == 1).toList();
+  }
+
+  void generateWarehouseStockChartData(List<ItemStockModel> itemsModel) {
+    final Map<String, double> stockMap = {};
+    for (var item in itemsModel) {
+      final warehouse = item.warehouse ?? 'Unknown';
+      final stockValue = item.stockValue ?? 0.0;
+      stockMap[warehouse] = (stockMap[warehouse] ?? 0) + stockValue;
+    }
+    barChartData.value = stockMap.entries
+        .map((entry) => WarehouseStockChartData(entry.key, entry.value))
+        .toList();
+  }
+}
+
+class WarehouseStockChartData {
+  final String warehouse;
+  final double totalStockValue;
+
+  WarehouseStockChartData(this.warehouse, this.totalStockValue);
 }
