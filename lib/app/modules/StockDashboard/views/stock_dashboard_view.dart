@@ -1,6 +1,8 @@
 // views/stock_dashboard_view.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
+
 import '../controllers/stock_dashboard_controller.dart';
 
 class StockDashboardView extends GetView<StockDashboardController> {
@@ -24,7 +26,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
       ),
       body: Obx(() {
         if (controller.isLoading.value) {
-          return const Center(child: CircularProgressIndicator());
+          return _buildShimmerPlaceholder();
         }
 
         if (controller.errorMessage.value.isNotEmpty) {
@@ -86,13 +88,47 @@ class StockDashboardView extends GetView<StockDashboardController> {
                 ),
                 const SizedBox(height: 24),
 
-                // Warehouses Section
-                _buildWarehouseDetails(),
+
               ],
             ),
           ),
         );
       }),
+    );
+  }
+
+  Widget _buildShimmerPlaceholder() {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16),
+      child: Shimmer(
+
+        child: Column(
+          children: [
+            Row(
+              children: [
+                Expanded(child: _shimmerCard()),
+                const SizedBox(width: 12),
+                Expanded(child: _shimmerCard()),
+              ],
+            ),
+            const SizedBox(height: 12),
+            _shimmerCard(height: 100),
+            const SizedBox(height: 24),
+            _shimmerCard(height: 220),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _shimmerCard({double height = 80}) {
+    return Container(
+      height: height,
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+      ),
     );
   }
 
@@ -289,7 +325,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
                       snackPosition: SnackPosition.BOTTOM,
                     );
                   },
-                  child: Text('View All (${controller.warehouses.length})'),
+                  child: Text('View All (\${controller.warehouses.length})'),
                 ),
               ),
           ],

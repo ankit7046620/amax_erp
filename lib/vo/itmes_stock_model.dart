@@ -5,8 +5,9 @@ class ItemStockModel {
   double? actualQty;
   double? valuationRate;
   double? reservedQty;
+  double? stockValue;
 
-  ItemStockModel({this.itemCode, this.warehouse, this.actualQty, this.reservedQty, this.valuationRate});
+  ItemStockModel({this.itemCode, this.warehouse, this.actualQty, this.reservedQty, this.valuationRate,this.stockValue});
 
   ItemStockModel.fromJson(Map<String, dynamic> json) {
     itemCode = json['item_code'];
@@ -14,6 +15,7 @@ class ItemStockModel {
     actualQty = json['actual_qty'];
     valuationRate = json['valuation_rate'];
     reservedQty = json['reserved_qty'];
+    stockValue = json['stock_value'];
   }
 
   Map<String, dynamic> toJson() {
@@ -23,6 +25,7 @@ class ItemStockModel {
     data['actual_qty'] = actualQty;
     data['valuation_rate'] = valuationRate;
     data['reserved_qty'] = reservedQty;
+    data['stock_value'] = stockValue;
     return data;
   }
 }
