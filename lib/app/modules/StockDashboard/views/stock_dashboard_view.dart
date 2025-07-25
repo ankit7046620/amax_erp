@@ -96,12 +96,51 @@ class StockDashboardView extends GetView<StockDashboardController> {
                         majorGridLines: const MajorGridLines(width: 0),
                         labelIntersectAction: AxisLabelIntersectAction.rotate45,
                         edgeLabelPlacement: EdgeLabelPlacement.shift,
+                        isVisible: true,
                         maximumLabelWidth: 80,
+                        labelPlacement: LabelPlacement.onTicks,
+                        axisLine: const AxisLine(width: 0),
+                        labelStyle: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.black87,
+                        )
                     ),
                     title: ChartTitle(text: 'Total Stock Value by Warehouse'),
                     series: <CartesianSeries>[
                       ColumnSeries<WarehouseStockChartData, String>(
                         dataSource: controller.barChartData,
+                        xValueMapper: (data, _) => data.warehouse,
+                        yValueMapper: (data, _) => data.totalStockValue,
+                        name: 'Stock Value',
+                        dataLabelSettings: DataLabelSettings(isVisible: true),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  height: 300,
+                  child: SfCartesianChart(
+ 
+
+                    primaryXAxis: CategoryAxis(
+                      // Set based on your max value
+                        labelRotation: -45,
+                        majorGridLines: const MajorGridLines(width: 0),
+                        labelIntersectAction: AxisLabelIntersectAction.rotate45,
+                        edgeLabelPlacement: EdgeLabelPlacement.shift,
+                        isVisible: true,
+                        maximumLabelWidth: 80,
+                        labelPlacement: LabelPlacement.onTicks,
+                        axisLine: const AxisLine(width: 0),
+                        labelStyle: const TextStyle(
+                          fontSize: 10,
+                          color: Colors.black87,
+                        )
+                    ),
+                    title: ChartTitle(text: 'Total Stock Value by Warehouse'),
+                    series: <CartesianSeries>[
+                      ColumnSeries<WarehouseStockChartData, String>(
+                        dataSource: controller.shortBarChartData,
                         xValueMapper: (data, _) => data.warehouse,
                         yValueMapper: (data, _) => data.totalStockValue,
                         name: 'Stock Value',
