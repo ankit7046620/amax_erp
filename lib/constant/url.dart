@@ -1,4 +1,6 @@
 class ApiUri {
-  static const base = "https://account.gotoliquorshop.com/api/";
-  static const String login = "user/login";
+  static const baseUrl = "https://plastic.techcloudamax.ai/";
+
+  static const String getAllModule = "/api/resource/Module Def";
+  static const String getLeadData =   "/api/resource/Lead";
 }

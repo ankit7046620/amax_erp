@@ -1,6 +1,8 @@
 import 'package:amax_hr/main.dart';
+import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/vo/purchase_order_model.dart';
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 
 class ChartFilterType {
@@ -12,15 +14,18 @@ class ChartFilterType {
 }
 
 class PurchaseOrdersDashboardController extends GetxController {
-  final RxInt count = 0.obs;
+  // Reactive states
+  final RxBool isLoading = true.obs;
   final RxDouble totalPurchaseAmount = 0.0.obs;
   final RxInt pOrdersToReceive = 0.obs;
   final RxInt pOrdersToBill = 0.obs;
   final RxInt activeSuppliers = 0.obs;
 
+  // Raw and mapped data
   List<PurchaseOrderDataList> purchaseOrders = [];
   List<Map<String, dynamic>> purchaseOrdersData = [];
 
+  // Filter config
   static const List<String> chartFilters = [
     ChartFilterType.yearly,
     ChartFilterType.quarterly,
@@ -36,17 +41,54 @@ class PurchaseOrdersDashboardController extends GetxController {
     'Active Suppliers': ChartFilterType.monthly.obs,
   }.obs;
 
+  // Year selection
   RxString selectedYear = '2025'.obs;
 
   static List<String> yearOptions = [
-    '2022',
-    '2023',
-    '2024',
-    '2025',
-    '2026',
-    '2027',
-    '2028',
+    '2022', '2023', '2024', '2025', '2026', '2027', '2028',
   ];
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchPurchaseData();
+  }
+
+  Future<void> fetchPurchaseData() async {
+ EasyLoading.show();
+    try {
+      final response = await ApiService.get(
+        '/api/resource/Purchase Order?',
+        params: {'fields': '["*"]', 'limit_page_length': '1000'},
+      );
+
+      if (response != null && response.statusCode == 200) {
+        final List<PurchaseOrderDataList> list = (response.data['data'] as List)
+            .map((e) => PurchaseOrderDataList.fromJson(e))
+            .toList();
+
+        EasyLoading.dismiss();
+
+        purchaseOrders = list;
+        purchaseOrdersData = list.map((e) => e.toJson()).toList();
+
+        updateAll();
+        logger.d("✅ Purchases loaded: ${list.length}");
+      } else {
+        EasyLoading.dismiss();
+
+        logger.e("❌ Failed to fetch purchases");
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+
+      logger.e("❌ Error fetching purchases: $e");
+    } finally {
+      isLoading.value = false;
+      EasyLoading.dismiss();
+
+    }
+  }
 
   void onYearChanged(String? year) {
     if (year != null) {
@@ -56,48 +98,50 @@ class PurchaseOrdersDashboardController extends GetxController {
   }
 
   void updateAll() {
-    final type = ChartFilterType.monthly;
-    logger.d("🔄 Updating All with Year: ${selectedYear.value}");
+    totalPurchaseAmount.value = calculateTotalPurchase(
+      purchaseOrders,
+      filterTypeMap['PURCHASES']!.value,
+    );
 
-    totalPurchaseAmount.value = calculateTotalPurchase(purchaseOrders, type);
     pOrdersToReceive.value = countOrdersToReceive(
       purchaseOrders,
-      ChartFilterType.monthly,
+      filterTypeMap['Purchase Orders to Receive']!.value,
       selectedYear,
     );
+
     pOrdersToBill.value = countOrdersToBill(
       purchaseOrders,
-      ChartFilterType.monthly,
+      filterTypeMap['Purchase Orders to Bill']!.value,
       selectedYear,
     );
 
-    update(); // for GetBuilder UI
+    activeSuppliers.value = getActiveSuppliers(
+      purchaseOrders,
+      filterTypeMap['Active Suppliers']!.value,
+      selectedYear,
+    );
+
+    isLoading.value = false;
+    update();
   }
 
-  @override
-  void onInit() {
-    super.onInit();
-    final args = Get.arguments;
-    if (args is Map && args.containsKey('model')) {
-      final List<PurchaseOrderDataList> receivedList =
-          List<PurchaseOrderDataList>.from(args['model']);
-
-      purchaseOrders = receivedList;
-      purchaseOrdersData = receivedList.map((e) => e.toJson()).toList();
-
-      updateAll();
-
-      logger.d('✅ Loaded ${purchaseOrders.length} purchase items.');
-    } else {
-      logger.e('❌ Invalid or missing purchase data');
+  void updateChartTypeFor(String tileName, String selectedType) {
+    if (!filterTypeMap.containsKey(tileName)) {
+      logger.e('⚠️ Unknown chart name: $tileName');
+      return;
     }
+
+    filterTypeMap[tileName]!.value = selectedType;
+    logger.d('📊 Updated Chart Filter: $tileName -> $selectedType');
+    updateAll();
   }
 
+  // 🕒 Filtering Date Logic
   DateTime getStartDate({
     required String selectedType,
     required RxString selectedYear,
   }) {
-    int year = int.tryParse(selectedYear.value) ?? 2025;
+    int year = int.tryParse(selectedYear.value) ?? DateTime.now().year;
     DateTime today = DateTime.now();
     DateTime baseDate = DateTime(year, today.month, today.day);
 
@@ -118,10 +162,8 @@ class PurchaseOrdersDashboardController extends GetxController {
     }
   }
 
-  double calculateTotalPurchase(
-    List<PurchaseOrderDataList> orders,
-    String filterType,
-  ) {
+  // 💰 Purchase Total Calculation
+  double calculateTotalPurchase(List<PurchaseOrderDataList> orders, String filterType) {
     double total = 0.0;
     DateTime startDate = getStartDate(
       selectedType: filterType,
@@ -132,204 +174,101 @@ class PurchaseOrdersDashboardController extends GetxController {
       final date = order.transactionDate;
       final baseNetTotal = order.baseNetTotal;
 
-      if (date == null || baseNetTotal == null || date.isBefore(startDate)) {
-        continue;
-      }
+      if (date == null || baseNetTotal == null || date.isBefore(startDate)) continue;
 
-      switch (filterType.toLowerCase()) {
-        case 'daily':
-          if (date.year == startDate.year &&
-              date.month == startDate.month &&
-              date.day == startDate.day) {
-            total += baseNetTotal;
-          }
-          break;
-        case 'weekly':
-          final endOfWeek = startDate.add(const Duration(days: 6));
-          if (!date.isBefore(startDate) && !date.isAfter(endOfWeek)) {
-            total += baseNetTotal;
-          }
-          break;
-        case 'monthly':
-          if (date.year == startDate.year && date.month == startDate.month) {
-            total += baseNetTotal;
-          }
-          break;
-        case 'quarterly':
-          int orderQuarter = ((date.month - 1) ~/ 3) + 1;
-          int startQuarter = ((startDate.month - 1) ~/ 3) + 1;
-          if (date.year == startDate.year && orderQuarter == startQuarter) {
-            total += baseNetTotal;
-          }
-          break;
-        case 'yearly':
-          if (date.year == startDate.year) {
-            total += baseNetTotal;
-          }
-          break;
-      }
+      bool withinRange = switch (filterType.toLowerCase()) {
+        'daily' => date.year == startDate.year && date.month == startDate.month && date.day == startDate.day,
+        'weekly' => !date.isBefore(startDate) && !date.isAfter(startDate.add(const Duration(days: 6))),
+        'monthly' => date.year == startDate.year && date.month == startDate.month,
+        'quarterly' => date.year == startDate.year &&
+            ((date.month - 1) ~/ 3) + 1 == ((startDate.month - 1) ~/ 3) + 1,
+        'yearly' => date.year == startDate.year,
+        _ => false,
+      };
+
+      if (withinRange) total += baseNetTotal;
     }
 
-    logger.d(
-      "💰 Total Purchase for [$filterType]: ₹${total.toStringAsFixed(2)}",
-    );
+    logger.d("💰 Total Purchase [$filterType]: ₹${total.toStringAsFixed(2)}");
     return total;
   }
 
+  // 📦 Orders to Receive
   int countOrdersToReceive(
-    List<PurchaseOrderDataList> orders,
-    String filterType,
-    RxString selectedYear,
-  ) {
-    int year = int.tryParse(selectedYear.value) ?? DateTime.now().year;
-    DateTime today = DateTime.now();
-    DateTime base = DateTime(year, today.month, today.day);
-
-    late DateTime start;
-    late DateTime end;
-
-    // Determine the date range based on filter type
-    switch (filterType.toLowerCase()) {
-      case 'daily':
-        start = DateTime(base.year, base.month, base.day);
-        end = start
-            .add(const Duration(days: 1))
-            .subtract(const Duration(seconds: 1));
-        break;
-
-      case 'weekly':
-        start = base.subtract(Duration(days: base.weekday - 1));
-        end = start.add(const Duration(days: 6));
-        break;
-
-      case 'monthly':
-        start = DateTime(base.year, base.month, 1);
-        end = DateTime(base.year, base.month + 1, 0);
-        break;
-
-      case 'quarterly':
-        int startMonth = ((base.month - 1) ~/ 3) * 3 + 1;
-        start = DateTime(base.year, startMonth, 1);
-        end = DateTime(base.year, startMonth + 3, 0);
-        break;
-
-      case 'yearly':
-        start = DateTime(base.year, 1, 1);
-        end = DateTime(base.year, 12, 31);
-        break;
-
-      default:
-        start = DateTime(2000, 1, 1);
-        end = DateTime(2099, 12, 31);
-    }
-
-    // Count orders that match date range and status
-    int count = orders.where((order) {
-      final date = order.creation;
-      final status = order.status?.toLowerCase().trim();
-
-      return date != null &&
-          !date.isBefore(start) &&
-          !date.isAfter(end) &&
-          (status == "to bill" || status == "to receive and bill");
-    }).length;
-
-    logger.d("📦 Orders to Receive [$filterType]: $count from $start to $end");
-    return count;
+      List<PurchaseOrderDataList> orders,
+      String filterType,
+      RxString selectedYear,
+      ) {
+    return _countOrdersByStatus(orders, filterType, selectedYear, ["to receive"]);
   }
 
+  // 🧾 Orders to Bill
   int countOrdersToBill(
-    List<PurchaseOrderDataList> orders,
-    String filterType,
-    RxString selectedYear,
-  ) {
-    int year = int.tryParse(selectedYear.value) ?? DateTime.now().year;
-    DateTime today = DateTime.now();
-    DateTime base = DateTime(year, today.month, today.day);
+      List<PurchaseOrderDataList> orders,
+      String filterType,
+      RxString selectedYear,
+      ) {
+    return _countOrdersByStatus(orders, filterType, selectedYear, ["to bill"]);
+  }
 
-    late DateTime start;
-    late DateTime end;
+  // 🧍‍♂️ Active Suppliers
+  int getActiveSuppliers(
+      List<PurchaseOrderDataList> orders,
+      String filterType,
+      RxString selectedYear,
+      ) {
+    final suppliers = <String>{};
+    DateTime start = getStartDate(selectedType: filterType, selectedYear: selectedYear);
+    DateTime end = _getEndDate(start, filterType);
 
-    // Determine the date range based on filter type
-    switch (filterType.toLowerCase()) {
-      case 'daily':
-        start = DateTime(base.year, base.month, base.day);
-        end = start
-            .add(const Duration(days: 1))
-            .subtract(const Duration(seconds: 1));
-        break;
-
-      case 'weekly':
-        start = base.subtract(Duration(days: base.weekday - 1));
-        end = start.add(const Duration(days: 6));
-        break;
-
-      case 'monthly':
-        start = DateTime(base.year, base.month, 1);
-        end = DateTime(base.year, base.month + 1, 0);
-        break;
-
-      case 'quarterly':
-        int startMonth = ((base.month - 1) ~/ 3) * 3 + 1;
-        start = DateTime(base.year, startMonth, 1);
-        end = DateTime(base.year, startMonth + 3, 0);
-        break;
-
-      case 'yearly':
-        start = DateTime(base.year, 1, 1);
-        end = DateTime(base.year, 12, 31);
-        break;
-
-      default:
-        start = DateTime(2000, 1, 1);
-        end = DateTime(2099, 12, 31);
+    for (var order in orders) {
+      final date = order.creation;
+      if (date != null && !date.isBefore(start) && !date.isAfter(end)) {
+        suppliers.add(order.supplier ?? '');
+      }
     }
 
-    // Count orders that match date range and status
-    int count = orders.where((order) {
+    return suppliers.length;
+  }
+
+  // 🔄 Helper - End date calculation
+  DateTime _getEndDate(DateTime start, String filterType) {
+    switch (filterType.toLowerCase()) {
+      case 'daily':
+        return start;
+      case 'weekly':
+        return start.add(const Duration(days: 6));
+      case 'monthly':
+        return DateTime(start.year, start.month + 1, 0);
+      case 'quarterly':
+        return DateTime(start.year, start.month + 3, 0);
+      case 'yearly':
+        return DateTime(start.year, 12, 31);
+      default:
+        return DateTime(2099, 12, 31);
+    }
+  }
+
+  // ✅ Shared Counter by Status
+  int _countOrdersByStatus(
+      List<PurchaseOrderDataList> orders,
+      String filterType,
+      RxString selectedYear,
+      List<String> statuses,
+      ) {
+    DateTime start = getStartDate(
+      selectedType: filterType,
+      selectedYear: selectedYear,
+    );
+    DateTime end = _getEndDate(start, filterType);
+
+    return orders.where((order) {
       final date = order.creation;
       final status = order.status?.toLowerCase().trim();
-
       return date != null &&
           !date.isBefore(start) &&
           !date.isAfter(end) &&
-          (status == "to bill");
+          statuses.contains(status);
     }).length;
-
-    logger.d("📦 Orders to Receive [$filterType]: $count from $start to $end");
-    return count;
-  }
-
-  void updateChartTypeFor(String tileName, String selectedType) {
-    if (!filterTypeMap.containsKey(tileName)) {
-      logger.e('⚠️ Unknown chart name: $tileName');
-      return;
-    }
-
-    filterTypeMap[tileName]!.value = selectedType;
-    logger.d('📊 Updated Chart Filter: $tileName -> $selectedType');
-
-    switch (tileName) {
-      case 'PURCHASES':
-        totalPurchaseAmount.value = calculateTotalPurchase(
-          purchaseOrders,
-          selectedType,
-        );
-        break;
-      case 'Purchase Orders to Receive':
-      pOrdersToReceive.value=  countOrdersToReceive(
-          purchaseOrders,
-        selectedType,
-          selectedYear,
-        );
-        break;
-      case 'Purchase Orders to Bill':
-    pOrdersToBill.value=    countOrdersToBill(
-          purchaseOrders,
-      selectedType,
-          selectedYear,
-        );
-        break;
-    }
   }
 }

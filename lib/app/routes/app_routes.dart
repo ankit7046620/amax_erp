@@ -19,6 +19,11 @@ abstract class Routes {
   static const PURCHASE_ORDERS_DASHBOARD = _Paths.PURCHASE_ORDERS_DASHBOARD;
   static const PURCHASE_GRAPH = _Paths.PURCHASE_GRAPH;
   static const STOCK_DASHBOARD = _Paths.STOCK_DASHBOARD;
+  static const NAV_BAR = _Paths.NAV_BAR;
+  static const HOME_TAB = _Paths.HOME_TAB;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
+  static const SETTINGS = _Paths.SETTINGS;
+  static const PROFILE = _Paths.PROFILE;
 }
 
 abstract class _Paths {
@@ -39,4 +44,9 @@ abstract class _Paths {
   static const PURCHASE_ORDERS_DASHBOARD = '/purchase-orders-dashboard';
   static const PURCHASE_GRAPH = '/purchase-graph';
   static const STOCK_DASHBOARD = '/stock-dashboard';
+  static const NAV_BAR = '/nav-bar';
+  static const HOME_TAB = '/home-tab';
+  static const NOTIFICATION = '/notification';
+  static const SETTINGS = '/settings';
+  static const PROFILE = '/profile';
 }

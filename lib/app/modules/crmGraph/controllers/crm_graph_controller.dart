@@ -5,7 +5,7 @@ import 'package:amax_hr/vo/crm_model.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
 class CrmGraphController extends GetxController {
-  List<Data> allLeads = [];
+  List<CrmModel> allLeads = [];
 
   RxMap<String, int> monthWiseLeadCounts = <String, int>{}.obs;
   RxList<ChartData> territoryChartData = <ChartData>[].obs;
@@ -18,7 +18,7 @@ class CrmGraphController extends GetxController {
   RxInt wonLeadCount = 0.obs;
 
   // List of only won leads
-  List<Data> wonLeads = [];
+  List<CrmModel> wonLeads = [];
 
   List<String> chartTypes = [
     ChartFilterType.yearly,
@@ -45,7 +45,7 @@ class CrmGraphController extends GetxController {
   void onInit() {
     super.onInit();
 
-    allLeads = Get.arguments as List<Data>;
+    allLeads = Get.arguments as List<CrmModel>;
 
     _categorizeLeads(); // 1. Separate won leads
     _generateMonthWiseLeadCounts(ChartFilterType.monthly); // 2. All leads month-wise (line chart)

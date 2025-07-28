@@ -109,7 +109,7 @@ class BottamController extends GetxController {
 
     switch (module) {
       case Module.crm:
-        fetchLeadData();
+       // fetchLeadData();
         break;
       case Module.selling:
         fetchSellData();
@@ -165,35 +165,35 @@ class BottamController extends GetxController {
       isLoading.value = false; // ✅ Stop loader in any case
     }
   }
-
-  Future<void> fetchLeadData() async {
-    try {
-      final response = await ApiService.get(
-        '/api/resource/Lead',
-        params: {
-          'fields':
-              '["name","lead_name","email_id","company_name","status","creation","modified","source","territory"]',
-          'limit_page_length': '1000',
-        },
-      );
-
-      if (response != null && response.statusCode == 200) {
-        final List modules = response.data['data'];
-
-        final CrmModel crmModel = CrmModel.fromJson({'data': modules});
-
-        logger.d('crmModel===>#${crmModel.data.length}');
-
-        Get.to(()=>CrmView(), arguments: {'module': 'crm', 'model': crmModel});
-      } else {
-        print('❌ Failed to fetch leads');
-      }
-    } catch (e) {
-      print("❌ Error fetching leads: $e");
-    } finally {
-      isLoading.value = false;
-    }
-  }
+  //
+  // Future<void> fetchLeadData() async {
+  //   try {
+  //     final response = await ApiService.get(
+  //       '/api/resource/Lead',
+  //       params: {
+  //         'fields':
+  //             '["name","lead_name","email_id","company_name","status","creation","modified","source","territory"]',
+  //         'limit_page_length': '1000',
+  //       },
+  //     );
+  //
+  //     if (response != null && response.statusCode == 200) {
+  //       final List modules = response.data['data'];
+  //
+  //       final CrmModel crmModel = CrmModel.fromJson({'data': modules});
+  //
+  //       logger.d('crmModel===>#${crmModel.data.length}');
+  //
+  //       Get.to(()=>CrmView(), arguments: {'module': 'crm', 'model': crmModel});
+  //     } else {
+  //       print('❌ Failed to fetch leads');
+  //     }
+  //   } catch (e) {
+  //     print("❌ Error fetching leads: $e");
+  //   } finally {
+  //     isLoading.value = false;
+  //   }
+  // }
   Future<void> fetchSellData() async {
     EasyLoading.show();
 

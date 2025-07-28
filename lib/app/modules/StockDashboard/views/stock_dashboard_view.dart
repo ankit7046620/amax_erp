@@ -120,7 +120,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
                 SizedBox(
                   height: 300,
                   child: SfCartesianChart(
- 
+
 
                     primaryXAxis: CategoryAxis(
                       // Set based on your max value
@@ -137,7 +137,7 @@ class StockDashboardView extends GetView<StockDashboardController> {
                           color: Colors.black87,
                         )
                     ),
-                    title: ChartTitle(text: 'Total Stock Value by Warehouse'),
+                    title: ChartTitle(text: 'Item Shortage Summary '),
                     series: <CartesianSeries>[
                       ColumnSeries<WarehouseStockChartData, String>(
                         dataSource: controller.shortBarChartData,

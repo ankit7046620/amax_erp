@@ -3,18 +3,18 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
-class LeadDetailsView extends StatelessWidget {
-  const LeadDetailsView({super.key});
+import 'package:shimmer_animation/shimmer_animation.dart';
+import '../controllers/lead_details_controller.dart';
+
+class LeadDetailsView extends GetView<LeadDetailsController> {
+  LeadDetailsView({super.key});
+  final LeadDetailsController leadDetailsController = Get.put(LeadDetailsController());
 
   @override
   Widget build(BuildContext context) {
-    final Map<String, dynamic> args = Get.arguments;
-    final String status = args['status'] ?? 'Unknown';
-    final List<Data> leads = List<Data>.from(args['leads'] ?? []);
-
     return Scaffold(
       appBar: AppBar(
-        title: Text("Leads - $status"),
+        title: Obx(() => Text("Leads - ${controller.status}")),
         centerTitle: true,
         backgroundColor: Colors.indigo.shade600,
         foregroundColor: Colors.white,
@@ -23,26 +23,53 @@ class LeadDetailsView extends StatelessWidget {
           onPressed: () => Get.back(),
         ),
       ),
-      body: leads.isEmpty
-          ? const Center(
-        child: Text(
-          "No leads found.",
-          style: TextStyle(fontSize: 16, color: Colors.grey),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return _buildShimmerList(); // 🔄 Show shimmer while loading
+        }
+
+        if (controller.leads.isEmpty) {
+          return const Center(
+            child: Text(
+              "No leads found.",
+              style: TextStyle(fontSize: 16, color: Colors.grey),
+            ),
+          );
+        }
+
+        return ListView.separated(
+          padding: const EdgeInsets.all(12),
+          itemCount: controller.leads.length,
+          separatorBuilder: (_, __) => const SizedBox(height: 12),
+          itemBuilder: (context, index) {
+            final lead = controller.leads[index];
+            return _buildLeadCard(context, lead);
+          },
+        );
+      }),
+    );
+  }
+
+  /// 🔄 Shimmer UI
+  Widget _buildShimmerList() {
+    return ListView.separated(
+      padding: const EdgeInsets.all(12),
+      itemCount: 5,
+      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      itemBuilder: (_, __) => Shimmer(
+
+        child: Container(
+          height: 110,
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+          ),
         ),
-      )
-          : ListView.separated(
-        padding: const EdgeInsets.all(12),
-        itemCount: leads.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 12),
-        itemBuilder: (context, index) {
-          final lead = leads[index];
-          return _buildLeadCard(context, lead);
-        },
       ),
     );
   }
 
-  Widget _buildLeadCard(BuildContext context, Data lead) {
+  Widget _buildLeadCard(BuildContext context, CrmModel lead) {
     final date = _formatDate(lead.creation);
     final backgroundColor = _statusBackground(lead.status);
     final chipColor = _chipColor(lead.status);
@@ -66,7 +93,6 @@ class LeadDetailsView extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Name & Status
             Row(
               children: [
                 Icon(Icons.person, color: Colors.grey.shade800),
@@ -91,8 +117,6 @@ class LeadDetailsView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-
-            // Company
             Row(
               children: [
                 const Icon(Icons.business, size: 20, color: Colors.grey),
@@ -109,8 +133,6 @@ class LeadDetailsView extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-
-            // Date
             Row(
               children: [
                 const Icon(Icons.calendar_today, size: 18, color: Colors.grey),
@@ -137,7 +159,6 @@ class LeadDetailsView extends StatelessWidget {
     }
   }
 
-  /// Soft background for the card (not chip)
   Color _statusBackground(String? status) {
     switch (status?.toLowerCase()) {
       case 'open':
@@ -151,7 +172,6 @@ class LeadDetailsView extends StatelessWidget {
     }
   }
 
-  /// Chip color
   Color _chipColor(String? status) {
     switch (status?.toLowerCase()) {
       case 'open':

@@ -105,7 +105,7 @@ class LoginController extends GetxController {
     print('✅ Dio cookie set!');
 
     if (cookieMap['sid']?.isNotEmpty ?? false) {
-      AppFunction.goToAndReplace(Routes.BOTTAM);
+      AppFunction.goToAndReplace(Routes.NAV_BAR);
     } else {
       print('❌ Session ID not found');
     }

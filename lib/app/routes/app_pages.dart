@@ -10,10 +10,18 @@ import '../modules/crm/bindings/crm_binding.dart';
 import '../modules/crm/views/crm_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/homeTab/bindings/home_tab_binding.dart';
+import '../modules/homeTab/views/home_tab_view.dart';
 import '../modules/leadDetails/bindings/lead_details_binding.dart';
 import '../modules/leadDetails/views/lead_details_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/navBar/bindings/nav_bar_binding.dart';
+import '../modules/navBar/views/nav_bar_view.dart';
+import '../modules/notification/bindings/notification_binding.dart';
+import '../modules/notification/views/notification_view.dart';
+import '../modules/profile/bindings/profile_binding.dart';
+import '../modules/profile/views/profile_view.dart';
 import '../modules/purchaseGraph/bindings/purchase_graph_binding.dart';
 import '../modules/purchaseGraph/views/purchase_graph_view.dart';
 import '../modules/purchaseOrdersDashboard/bindings/purchase_orders_dashboard_binding.dart';
@@ -22,6 +30,8 @@ import '../modules/saleGraph/bindings/sale_graph_binding.dart';
 import '../modules/saleGraph/views/sale_graph_view.dart';
 import '../modules/sales/bindings/sales_binding.dart';
 import '../modules/sales/views/sales_view.dart';
+import '../modules/settings/bindings/settings_binding.dart';
+import '../modules/settings/views/settings_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 
@@ -65,7 +75,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.LEAD_DETAILS,
-      page: () => const LeadDetailsView(),
+      page: () =>   LeadDetailsView(),
       binding: LeadDetailsBinding(),
     ),
     GetPage(
@@ -87,6 +97,31 @@ class AppPages {
       name: _Paths.STOCK_DASHBOARD,
       page: () => const StockDashboardView(),
       binding: StockDashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.NAV_BAR,
+      page: () => const NavBarView(),
+      binding: NavBarBinding(),
+    ),
+    GetPage(
+      name: _Paths.HOME_TAB,
+      page: () =>   HomeTabView(),
+      binding: HomeTabBinding(),
+    ),
+    GetPage(
+      name: _Paths.NOTIFICATION,
+      page: () => const NotificationView(),
+      binding: NotificationBinding(),
+    ),
+    GetPage(
+      name: _Paths.SETTINGS,
+      page: () => const SettingsView(),
+      binding: SettingsBinding(),
+    ),
+    GetPage(
+      name: _Paths.PROFILE,
+      page: () => const ProfileView(),
+      binding: ProfileBinding(),
     ),
   ];
 }
