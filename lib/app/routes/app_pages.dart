@@ -1,5 +1,9 @@
 import 'package:get/get.dart';
 
+import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
+import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
+import '../modules/HrDashboar/bindings/hr_dashboar_binding.dart';
+import '../modules/HrDashboar/views/hr_dashboar_view.dart';
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
@@ -87,6 +91,16 @@ class AppPages {
       name: _Paths.STOCK_DASHBOARD,
       page: () => const StockDashboardView(),
       binding: StockDashboardBinding(),
+    ),
+    GetPage(
+      name: _Paths.ASSET_DASHBOAR,
+      page: () => const AssetDashboardView(),
+      binding: AssetDashboarBinding(),
+    ),
+    GetPage(
+      name: _Paths.HR_DASHBOAR,
+      page: () => const HrDashboarView(),
+      binding: HrDashboarBinding(),
     ),
   ];
 }
