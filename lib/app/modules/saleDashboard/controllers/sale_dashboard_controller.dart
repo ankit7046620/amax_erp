@@ -3,6 +3,7 @@ import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/vo/customer_list_model.dart';
 import 'package:amax_hr/vo/sales_order.dart'; // Only use SalesOrder here
 import 'package:amax_hr/vo/sell_order_list.dart' hide SalesOrder; // Hide conflict
+import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import '../../../../manager/api_service.dart';
 
@@ -37,27 +38,50 @@ class SaleDashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    _loadPassedData();
+   // _loadPassedData();
     fetchCustomerData();
     fetchSellOrderData();
+    fetchSellData();
   }
 
-  void _loadPassedData() {
-    final args = Get.arguments;
-    logger.d('✅ Sale data args: $args');
 
-    if (args is Map && args.containsKey('model')) {
-      final String module = args['module'];
-      final List<SellOrderDataList> receivedList = List<SellOrderDataList>.from(args['model']);
 
-      // Convert SellOrderDataList to List<Map<String, dynamic>> for chart/total use
-      saleData = receivedList.map((e) => e.toJson()).toList();
+  Future<void> fetchSellData() async {
 
-      totalSales.value = calculateFilteredTotal(saleData, ChartFilterType.monthly);
 
-      logger.d('✅ Loaded ${saleData.length} sale items for module: $module');
-    } else {
-      logger.e('❌ Invalid or missing sale data in arguments');
+    try {
+      final response = await ApiService.get(
+        '/api/resource/Sales Order?',
+        params: {
+          'fields':
+          '["*"]',
+          'limit_page_length': '1000',
+        },
+      );
+
+      if (response != null && response.statusCode == 200) {
+
+
+        List<SellOrderDataList>sellOrderDataList = (response.data['data'] as List)
+            .map((e) => SellOrderDataList.fromJson(e))
+            .toList();
+        logger.d("sellOrderDataList::==>>${sellOrderDataList.length}");
+        saleData = sellOrderDataList.map((e) => e.toJson()).toList();
+        totalSales.value = calculateFilteredTotal(saleData, ChartFilterType.monthly);
+        update();
+
+      //  Get.to(()=>SaleDashboardView(), arguments: {'module': 'sale', 'model': sellOrderDataList});
+
+      } else {
+
+        print('❌ Failed to fetch leads');
+      }
+    } catch (e) {
+
+      print("❌ Error fetching leads: $e");
+    } finally {
+
+      isLoading.value = false;
     }
   }
 

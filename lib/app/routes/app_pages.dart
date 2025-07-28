@@ -14,10 +14,18 @@ import '../modules/crm/bindings/crm_binding.dart';
 import '../modules/crm/views/crm_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
+import '../modules/homeTab/bindings/home_tab_binding.dart';
+import '../modules/homeTab/views/home_tab_view.dart';
 import '../modules/leadDetails/bindings/lead_details_binding.dart';
 import '../modules/leadDetails/views/lead_details_view.dart';
 import '../modules/login/bindings/login_binding.dart';
 import '../modules/login/views/login_view.dart';
+import '../modules/navBar/bindings/nav_bar_binding.dart';
+import '../modules/navBar/views/nav_bar_view.dart';
+import '../modules/notification/bindings/notification_binding.dart';
+import '../modules/notification/views/notification_view.dart';
+import '../modules/profile/bindings/profile_binding.dart';
+import '../modules/profile/views/profile_view.dart';
 import '../modules/purchaseGraph/bindings/purchase_graph_binding.dart';
 import '../modules/purchaseGraph/views/purchase_graph_view.dart';
 import '../modules/purchaseOrdersDashboard/bindings/purchase_orders_dashboard_binding.dart';
@@ -91,16 +99,6 @@ class AppPages {
       name: _Paths.STOCK_DASHBOARD,
       page: () => const StockDashboardView(),
       binding: StockDashboardBinding(),
-    ),
-    GetPage(
-      name: _Paths.ASSET_DASHBOAR,
-      page: () => const AssetDashboardView(),
-      binding: AssetDashboarBinding(),
-    ),
-    GetPage(
-      name: _Paths.HR_DASHBOAR,
-      page: () => const HrDashboarView(),
-      binding: HrDashboarBinding(),
     ),
   ];
 }

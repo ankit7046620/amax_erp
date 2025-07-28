@@ -1,15 +1,16 @@
 import 'package:amax_hr/app/modules/leadDetails/views/lead_details_view.dart';
+import 'package:amax_hr/constant/url.dart';
+import 'package:amax_hr/main.dart';
+import 'package:amax_hr/manager/api_service.dart';
 import 'package:get/get.dart';
 import 'package:amax_hr/vo/crm_model.dart';
 
-class   CrmController extends GetxController {
-  late CrmModel crmModel;
-  late String selectedModule;
-
-  List<Data> allLeads = [];
+class CrmController extends GetxController {
+  String? selectedModule;
+  List<CrmModel> allLeads = [];
 
   /// Grouped leads by fixed status order
-  Map<String, List<Data>> leadsGroupedByStatus = {};
+  Map<String, List<CrmModel>> leadsGroupedByStatus = {};
 
   /// Counts per lead type (observable for UI if needed)
   RxMap<String, int> leadTypeCounts = <String, int>{}.obs;
@@ -18,7 +19,7 @@ class   CrmController extends GetxController {
   RxList<String> leadStatusList = <String>[].obs;
 
   /// Used in detail screen
-  RxList<Data> filteredLeads = <Data>[].obs;
+  RxList<CrmModel> filteredLeads = <CrmModel>[].obs;
 
   int totalLeads = 0;
 
@@ -39,34 +40,54 @@ class   CrmController extends GetxController {
   List<int> leadCountsArray = [];
 
   /// Indexed list of lead lists in fixedLeadTypes order
-  RxList<List<Data>> leadListArray = <List<Data>>[].obs;
+  RxList<List<CrmModel>> leadListArray = <List<CrmModel>>[].obs;
 
   @override
   void onInit() {
     super.onInit();
+    fetchLeadData();
+  }
 
-    final args = Get.arguments;
-    if (args is Map && args.containsKey('model')) {
-      crmModel = args['model'] as CrmModel;
-      selectedModule = args['module'] ?? 'Unknown';
-      processLeads();
-    } else {
-      print('❌ Invalid or missing arguments in CrmController');
+  final isLoading = true.obs;
+
+  Future<void> fetchLeadData() async {
+    try {
+      final response = await ApiService.get(
+        ApiUri.getLeadData,
+        params: {
+          'fields':
+              '["name","lead_name","email_id","company_name","status","creation","modified","source","territory"]',
+          'limit_page_length': '1000',
+        },
+      );
+
+      if (response != null && response.statusCode == 200) {
+        allLeads = (response.data['data'] as List)
+            .map((e) => CrmModel.fromJson(e))
+            .toList();
+
+        logger.d('crmModel===>#${allLeads.length}');
+        processLeads();
+        update();
+      } else {
+        print('❌ Failed to fetch leads');
+      }
+    } catch (e) {
+      print("❌ Error fetching leads: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 
   void processLeads() {
-    allLeads = crmModel.data;
     totalLeads = allLeads.length;
 
     // Prepare empty structure
-    final Map<String, List<Data>> grouped = {
+    final Map<String, List<CrmModel>> grouped = {
       for (var type in fixedLeadTypes) type: [],
     };
 
-    final Map<String, int> counts = {
-      for (var type in fixedLeadTypes) type: 0,
-    };
+    final Map<String, int> counts = {for (var type in fixedLeadTypes) type: 0};
 
     // Group leads by status
     for (final lead in allLeads) {
@@ -86,7 +107,9 @@ class   CrmController extends GetxController {
         .toList();
 
     leadCountsArray = fixedLeadTypes.map((type) => counts[type] ?? 0).toList();
-    leadListArray.value = fixedLeadTypes.map((type) => grouped[type] ?? []).toList();
+    leadListArray.value = fixedLeadTypes
+        .map((type) => grouped[type] ?? [])
+        .toList();
 
     print("📥 leadCountsArray: $leadCountsArray");
     print("📂 leadListArray: ${leadListArray.length} types");
@@ -98,10 +121,13 @@ class   CrmController extends GetxController {
 
     filteredLeads.value = leads;
 
-    Get.to(() => const LeadDetailsView(), arguments: {
-      'status': trimmedStatus,
-      'leads': leads, // not RxList, just raw List<Data>
-    });
+    Get.to(
+      () =>   LeadDetailsView(),
+      arguments: {
+        'status': trimmedStatus,
+        'leads': leads, // not RxList, just raw List<Data>
+      },
+    );
   }
 
   void clearFilter() {

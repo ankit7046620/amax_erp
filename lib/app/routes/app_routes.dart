@@ -21,6 +21,11 @@ abstract class Routes {
   static const STOCK_DASHBOARD = _Paths.STOCK_DASHBOARD;
   static const ASSET_DASHBOAR = _Paths.ASSET_DASHBOAR;
   static const HR_DASHBOAR = _Paths.HR_DASHBOAR;
+  static const NAV_BAR = _Paths.NAV_BAR;
+  static const HOME_TAB = _Paths.HOME_TAB;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
+  static const SETTINGS = _Paths.SETTINGS;
+  static const PROFILE = _Paths.PROFILE;
 }
 
 abstract class _Paths {
@@ -43,4 +48,9 @@ abstract class _Paths {
   static const STOCK_DASHBOARD = '/stock-dashboard';
   static const ASSET_DASHBOAR = '/asset-dashboar';
   static const HR_DASHBOAR = '/hr-dashboar';
+  static const NAV_BAR = '/nav-bar';
+  static const HOME_TAB = '/home-tab';
+  static const NOTIFICATION = '/notification';
+  static const SETTINGS = '/settings';
+  static const PROFILE = '/profile';
 }

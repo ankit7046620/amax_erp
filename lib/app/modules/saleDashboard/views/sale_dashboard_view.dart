@@ -1,7 +1,10 @@
-import 'package:amax_hr/app/modules/saleGraph/views/sale_graph_view.dart';
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shimmer_animation/shimmer_animation.dart';
 import '../controllers/sale_dashboard_controller.dart';
+import 'package:amax_hr/app/modules/saleGraph/views/sale_graph_view.dart';
 
 class SaleDashboardView extends StatelessWidget {
   const SaleDashboardView({super.key});
@@ -11,84 +14,65 @@ class SaleDashboardView extends StatelessWidget {
     return GetBuilder<SaleDashboardController>(
       init: SaleDashboardController(),
       builder: (controller) {
-        final items = [
-          {
-            "title": "ANNUAL SALES",
-            "icon": Icons.bar_chart,
-            "color": Colors.blue,
-            "count": controller.totalSales.value,
-            "currency": true,
-            "key": "ANNUAL SALES",
-            "onTap": () => Get.to(() => const SaleGraphView(), arguments: {
-              'module': 'sale',
-              'model': controller.saleData,
-            }),
-          },
-          {
-            "title": "SALES ORDERS TO DELIVER",
-            "icon": Icons.local_shipping_outlined,
-            "color": Colors.orange,
-            "count": controller.toOrdersToDeliver,
-            "currency": false,
-            "key": "SALES ORDERS TO DELIVER",
-          },
-          {
-            "title": "SALES ORDERS TO BILL",
-            "icon": Icons.receipt_long,
-            "color": Colors.purple,
-            "count": controller.todeliverandbill,
-            "currency": false,
-            "key": "SALES ORDERS TO BILL",
-          },
-          {
-            "title": "ACTIVE CUSTOMERS",
-            "icon": Icons.people,
-            "color": Colors.green,
-            "count": controller.customerCount.value,
-            "currency": false,
-            "key": "ACTIVE CUSTOMERS",
-          },
-        ];
-
         return Scaffold(
-          appBar: AppBar(
-            title: const Text('Selling Dashboard'),
-            centerTitle: true,
-              backgroundColor: Colors.indigo.shade600,
-              foregroundColor: Colors.white
-          ),
-          body: Padding(
+          appBar:CommonAppBar(imagePath: AssetsConstant.tech_logo,showBack: true,),
+          body: controller.isLoading.value
+              ? _buildShimmerGrid()
+              : Padding(
             padding: const EdgeInsets.all(12),
-            child: GridView.builder(
-              itemCount: items.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 2,
-                mainAxisSpacing: 16,
-                crossAxisSpacing: 16,
-                childAspectRatio: 0.95,
-              ),
-              itemBuilder: (context, index) {
-                final item = items[index];
-                final String itemKey = item['key'] as String;
-                final bool isCurrency = item['currency'] == true;
-
-                return GestureDetector(
-                  onTap: item['onTap'] as void Function()? ?? () {},
-                  child: _buildStatusCard(
-                    context: context,
-                    title: item['title'] as String,
-                    icon: item['icon'] as IconData,
-                    color: item['color'] as Color,
-                    count: item['count'],
-                    currency: isCurrency,
-                    selectedItem: controller.chartTypeMap[itemKey]!,
-                    onChanged: (val) {
-                      controller.chartTypeMap[itemKey]!.value = val!;
-                      controller.updateChartType(itemKey, val);
+            child: GridView.count(
+              crossAxisCount: 2,
+              crossAxisSpacing: 16,
+              mainAxisSpacing: 16,
+              childAspectRatio: 1.3,
+              children: [
+                {
+                  "title": "ANNUAL SALES",
+                  "subtitle": "0% since last month",
+                  "icon": Icons.bar_chart,
+                  "color": Colors.blue,
+                  "count": controller.totalSales.value,
+                  "onTap": () => Get.to(
+                        () => const SaleGraphView(),
+                    arguments: {
+                      'module': 'sale',
+                      'model': controller.saleData,
                     },
                   ),
+                },
+                {
+                  "title": "SALES ORDERS TO DELIVER",
+                  "subtitle": "0% since last month",
+                  "icon": Icons.local_shipping_outlined,
+                  "color": Colors.orange,
+                  "count": controller.toOrdersToDeliver,
+                },
+                {
+                  "title": "SALES ORDERS TO BILL",
+                  "subtitle": "0% since last month",
+                  "icon": Icons.receipt_long,
+                  "color": Colors.purple,
+                  "count": controller.todeliverandbill,
+                },
+                {
+                  "title": "ACTIVE CUSTOMERS",
+                  "subtitle": "0% since last month",
+                  "icon": Icons.people,
+                  "color": Colors.green,
+                  "count": controller.customerCount.value,
+                },
+              ].map((item) {
+                return GestureDetector(
+                  onTap: item['onTap'] as void Function()? ?? () {},
+                  child: _buildCard(
+                    title: item['title'] as String,
+                    subtitle: item['subtitle'] as String,
+                    count: item['count'],
+                    color: item['color'] as Color,
+                    icon: item['icon'] as IconData,
+                  ),
                 );
-              },
+              }).toList(),
             ),
           ),
         );
@@ -96,101 +80,134 @@ class SaleDashboardView extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusCard({
-    required BuildContext context,
+  Widget _buildCard({
     required String title,
-    required IconData icon,
-    required Color color,
+    required String subtitle,
     required dynamic count,
-    required bool currency,
-    required RxString selectedItem,
-    required Function(String?) onChanged,
+    required Color color,
+    required IconData icon,
   }) {
-    final size = MediaQuery.of(context).size;
-
-    String format(dynamic value) {
-      if (currency) {
-        final parsed = value is num ? value : double.tryParse(value.toString()) ?? 0.0;
-        return "₹ ${parsed.toStringAsFixed(2)}";
-      }
-      return value.toString();
-    }
-
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(20),
-        gradient: LinearGradient(
-          colors: [color.withOpacity(0.85), color],
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
+    return Material(
+      elevation: 4,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.grey.shade300),
         ),
-        boxShadow: [
-          BoxShadow(
-            color: color.withOpacity(0.3),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          )
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(20),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(20),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Icon(icon, size: 28, color: Colors.white.withOpacity(0.9)),
-                      const SizedBox(height: 10),
-                      Text(
-                        title,
-                        style: TextStyle(
-                          fontSize: constraints.maxWidth * 0.09,
-                          fontWeight: FontWeight.w600,
-                          color: Colors.white70,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        format(count),
-                        style: TextStyle(
-                          fontSize: constraints.maxWidth * 0.14,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                        ),
-                      ),
-                      const Spacer(),
-                      Obx(() => Align(
-                        alignment: Alignment.bottomRight,
-                        child: DropdownButton<String>(
-                          value: selectedItem.value,
-                          iconEnabledColor: Colors.white,
-                          dropdownColor: color,
-                          style: const TextStyle(color: Colors.white),
-                          underline: const SizedBox(),
-                          onChanged: onChanged,
-                          items: SaleDashboardController.chartFilters
-                              .map((item) => DropdownMenuItem<String>(
-                            value: item,
-                            child: Text(item),
-                          ))
-                              .toList(),
-                        ),
-                      )),
-                    ],
-                  );
-                },
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                CircleAvatar(
+                  backgroundColor: color.withOpacity(0.15),
+                  child: Icon(icon, color: color, size: 20),
+                  radius: 18,
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Text(
+              count.toString(),
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: color,
               ),
             ),
-          ),
+            const SizedBox(height: 6),
+            Text(
+              subtitle,
+              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+            ),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildShimmerGrid() {
+    return Padding(
+      padding: const EdgeInsets.all(12),
+      child: GridView.builder(
+        itemCount: 4,
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          crossAxisSpacing: 16,
+          mainAxisSpacing: 16,
+          childAspectRatio: 1.3,
+        ),
+        itemBuilder: (context, index) {
+          return Shimmer(
+            duration: const Duration(seconds: 2),
+            interval: const Duration(milliseconds: 100),
+            color: Colors.grey.shade300,
+            enabled: true,
+            direction: const ShimmerDirection.fromLTRB(),
+            child: Material(
+              elevation: 4,
+              borderRadius: BorderRadius.circular(12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade300,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Container(
+                            height: 12,
+                            color: Colors.grey.shade300,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Container(
+                      width: 60,
+                      height: 20,
+                      color: Colors.grey.shade300,
+                    ),
+                    const SizedBox(height: 6),
+                    Container(
+                      width: 100,
+                      height: 12,
+                      color: Colors.grey.shade300,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

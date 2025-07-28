@@ -1,5 +1,7 @@
 class AssetsConstant {
   static const String  logo = 'assets/images/logo.png';
+  static const String  tech_logo = 'assets/images/tech_cloud.png';
+  static const String  inudstry = 'assets/images/inudstry.png';
   static const String  Onbording1 = 'assets/images/image1.png';
   static const String  Onbording2 = 'assets/images/image2.png';
   static const String  Onbording3 = 'assets/images/image3.png';
