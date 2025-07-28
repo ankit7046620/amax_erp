@@ -17,6 +17,7 @@ class StockDashboardController extends GetxController {
   final totalStockValue = ''.obs;
 
   RxList<WarehouseStockChartData> barChartData = <WarehouseStockChartData>[].obs;
+  RxList<WarehouseStockChartData> shortBarChartData = <WarehouseStockChartData>[].obs;
 
   @override
   void onInit() {
@@ -101,6 +102,7 @@ class StockDashboardController extends GetxController {
         logger.d("fetchStockData===${itemsModel.length}");
         getStockValuation(itemsModel);
         generateWarehouseStockChartData(itemsModel);
+        generateshortQtyData(itemsModel);
       } else {
         errorMessage.value = 'Failed to fetch stock data';
       }
@@ -159,6 +161,17 @@ class StockDashboardController extends GetxController {
       stockMap[warehouse] = (stockMap[warehouse] ?? 0) + stockValue;
     }
     barChartData.value = stockMap.entries
+        .map((entry) => WarehouseStockChartData(entry.key, entry.value))
+        .toList();
+  }
+  void generateshortQtyData(List<ItemStockModel> itemsModel) {
+    final Map<String, double> stockMap = {};
+    for (var item in itemsModel) {
+      final warehouse = item.warehouse ?? 'Unknown';
+      final stockValue = item.projectedQty ?? 0.0;
+      stockMap[warehouse] = (stockMap[warehouse] ?? 0) + stockValue;
+    }
+    shortBarChartData.value = stockMap.entries
         .map((entry) => WarehouseStockChartData(entry.key, entry.value))
         .toList();
   }
