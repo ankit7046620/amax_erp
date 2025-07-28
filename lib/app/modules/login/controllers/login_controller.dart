@@ -1,3 +1,4 @@
+import 'package:amax_hr/app/modules/navBar/views/nav_bar_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/manager/shared_pref_service.dart';
@@ -51,11 +52,11 @@ class LoginController extends GetxController {
   var frappeClient;
   void onInit() {
     super.onInit();
-      frappeClient = FrappeV15(
-        // baseUrl: 'https://192.168.1.7:8003/',  //local
-        baseUrl: 'https://plastic.techcloudamax.ai/',
+    frappeClient = FrappeV15(
+      // baseUrl: 'https://192.168.1.7:8003/',  //local
+      baseUrl: 'https://plastic.techcloudamax.ai/',
     );
-      setData();
+    setData();
   }
 
 
@@ -99,16 +100,17 @@ class LoginController extends GetxController {
     print('✅ Stored Cookie: $cookieHeader');
 
     ApiService.dio.options.headers['cookie'] = cookieHeader;
+    Get.offAll(()=>NavBarView());
 
-
+    //
 
     print('✅ Dio cookie set!');
-
-    if (cookieMap['sid']?.isNotEmpty ?? false) {
-      AppFunction.goToAndReplace(Routes.NAV_BAR);
-    } else {
-      print('❌ Session ID not found');
-    }
+    //
+    // if (cookieMap['sid']?.isNotEmpty ?? false) {
+    //   AppFunction.goToAndReplace(Routes.NAV_BAR);
+    // } else {
+    //   print('❌ Session ID not found');
+    // }
   }
 
 

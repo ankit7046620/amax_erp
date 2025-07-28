@@ -77,7 +77,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.LEAD_DETAILS,
-      page: () => const LeadDetailsView(),
+      page: () =>   LeadDetailsView(),
       binding: LeadDetailsBinding(),
     ),
     GetPage(
