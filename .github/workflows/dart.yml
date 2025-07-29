@@ -8,6 +8,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      RECIPIENT_EMAILS: vpprajapati19@gmail.com ,sharmapratik151994@gmail.com
 
     steps:
       - name: Checkout code
@@ -66,11 +68,12 @@ jobs:
           username: ${{ secrets.EMAIL_USERNAME }}
           password: ${{ secrets.EMAIL_PASSWORD }}
           subject: "🚀 Demo App APK - ${{ env.APK_NAME }}"
-          to: user1@example.com, user2@example.com, user3@example.com
+          to: ${{ env.RECIPIENT_EMAILS }}
           from: "Flutter Bot <${{ secrets.EMAIL_USERNAME }}>"
           content_type: text/html
           body: |
             <p>Hello,</p>
-            <p>The Amax ERP system is ready for download. If you find any bugs, please ping me on WhatsApp at <strong>8460624920</strong>.</p>
-            <p>You can also reach me at: <a href="mailto:patelankit70466@gmail.com">patelankit70466@gmail.com</a></p>
+            <p>The Amax ERP system is ready for download.</p>
+            <p>If you find any bugs, please ping me on WhatsApp at <strong>8460624920</strong>.</p>
+            <p>Contact: <a href="mailto:patelankit70466@gmail.com">patelankit70466@gmail.com</a></p>
             <p><strong>Download APK here:</strong> <a href="${{ env.DOWNLOAD_LINK }}">Click to download</a></p>
