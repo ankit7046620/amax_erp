@@ -1,4 +1,6 @@
 import 'dart:math';
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -14,11 +16,7 @@ class CrmView extends GetView<CrmController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Lead Summary"),
-        backgroundColor: Colors.indigo,
-        foregroundColor: Colors.white,
-      ),
+      appBar:CommonAppBar(imagePath: AssetsConstant.tech_logo,showBack: true,),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: GetBuilder<CrmController>(

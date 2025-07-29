@@ -1,7 +1,8 @@
-
 import 'package:amax_hr/common/component/common_elevated_button.dart';
 import 'package:amax_hr/common/component/custom_image_widget.dart';
 import 'package:amax_hr/constant/assets_constant.dart';
+import 'package:amax_hr/manager/auth_manager.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/login_controller.dart';
@@ -10,7 +11,6 @@ class LoginView extends GetView<LoginController> {
   LoginView({super.key});
 
   final LoginController _loginController = Get.put(LoginController());
-  final RxBool _obscurePassword = true.obs;
 
   @override
   Widget build(BuildContext context) {
@@ -30,7 +30,9 @@ class LoginView extends GetView<LoginController> {
                     /// Login Card
                     Container(
                       padding: const EdgeInsets.symmetric(
-                          vertical: 32, horizontal: 16),
+                        vertical: 32,
+                        horizontal: 16,
+                      ),
                       decoration: BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(16),
@@ -39,7 +41,7 @@ class LoginView extends GetView<LoginController> {
                             color: Colors.black12,
                             blurRadius: 8,
                             offset: Offset(0, 4),
-                          )
+                          ),
                         ],
                       ),
                       child: Column(
@@ -68,28 +70,30 @@ class LoginView extends GetView<LoginController> {
                           const SizedBox(height: 16),
 
                           /// Password Field
-                          Obx(() => TextField(
-                            controller: controller.passwordController,
-                            obscureText: _obscurePassword.value,
-                            decoration: InputDecoration(
-                              prefixIcon: const Icon(Icons.lock),
-                              labelText: 'Password',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  _obscurePassword.value
-                                      ? Icons.visibility_off
-                                      : Icons.visibility,
+                          Obx(
+                            () => TextField(
+                              controller: controller.passwordController,
+                              obscureText: controller.obscurePassword.value,
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.lock),
+                                labelText: 'Password',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                onPressed: () {
-                                  _obscurePassword.value =
-                                  !_obscurePassword.value;
-                                },
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    controller.obscurePassword.value
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    controller.obscurePassword.value =
+                                        !controller.obscurePassword.value;
+                                  },
+                                ),
                               ),
                             ),
-                          )),
+                          ),
                           const SizedBox(height: 24),
 
                           /// Login Button
@@ -99,7 +103,8 @@ class LoginView extends GetView<LoginController> {
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: Colors.deepOrange,
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 14),
+                                  vertical: 14,
+                                ),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(10),
                                 ),
@@ -114,6 +119,22 @@ class LoginView extends GetView<LoginController> {
                               ),
                             ),
                           ),
+
+                          const SizedBox(height: 16),
+
+                          /// Biometric Auth
+
+                          IconButton(
+                            onPressed: () async {
+                              controller.biometricLogin();
+                            },
+                            icon: const FaIcon(
+                              FontAwesomeIcons.fingerprint,
+                              size: 40,
+                              color: Colors.deepOrange,
+                            ),
+                            tooltip: 'Login with Face/Fingerprint',
+                          ),
                         ],
                       ),
                     ),
@@ -122,6 +143,8 @@ class LoginView extends GetView<LoginController> {
                 ),
               ),
             ),
+
+            /// Industry image bottom
             if (!isKeyboardOpen)
               Positioned(
                 bottom: 0,

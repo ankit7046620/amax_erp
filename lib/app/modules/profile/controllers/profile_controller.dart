@@ -1,23 +1,31 @@
+import 'package:amax_hr/main.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../../utils/app.dart';
 
 class ProfileController extends GetxController {
-  //TODO: Implement ProfileController
+  String email = '';
+  String name = '';
 
-  final count = 0.obs;
   @override
   void onInit() {
     super.onInit();
+    loadUserInfo();
   }
 
-  @override
-  void onReady() {
-    super.onReady();
+  Future<void> loadUserInfo() async {
+    final prefs = await SharedPreferences.getInstance();
+    email = prefs.getString(LocalKeys.userId) ?? 'Not Available';
+    name = prefs.getString(LocalKeys.fullName ) ?? 'User';
+    update(); // Refresh UI
   }
 
-  @override
-  void onClose() {
-    super.onClose();
+  Future<void> logout() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.clear(); // Optional: clear all data
+    Get.snackbar("Logout", "You have been logged out.");
   }
 
-  void increment() => count.value++;
+
 }

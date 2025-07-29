@@ -1,3 +1,5 @@
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
@@ -11,10 +13,7 @@ class CrmGraphView extends GetView<CrmGraphController> {
     final controller = Get.put(CrmGraphController());
 
     return Scaffold(
-      appBar: AppBar(
-          backgroundColor: Colors.indigo,
-          foregroundColor: Colors.white,
-          title: const Text('📊 CRM Graph View'), centerTitle: true),
+      appBar:CommonAppBar(imagePath: AssetsConstant.tech_logo,showBack: true,),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
