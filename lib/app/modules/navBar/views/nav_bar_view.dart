@@ -10,6 +10,7 @@ class NavBarView extends GetView<NavBarController> {
   const NavBarView({super.key});
   @override
   Widget build(BuildContext context) {
+Get.put(NavBarController());
 
       return Obx(() => Scaffold(
         appBar:CommonAppBar(imagePath: AssetsConstant.tech_logo,),

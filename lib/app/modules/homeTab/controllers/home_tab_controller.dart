@@ -1,4 +1,5 @@
-
+import 'package:amax_hr/app/modules/AssetDashboar/views/asset_dashboar_view.dart';
+import 'package:amax_hr/app/modules/HrDashboar/views/hr_dashboar_view.dart';
 import 'package:amax_hr/app/modules/StockDashboard/views/stock_dashboard_view.dart';
 import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
 import 'package:amax_hr/app/modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
@@ -93,7 +94,7 @@ class HomeTabController extends GetxController {
       ModuleType? match;
       try {
         match = ModuleType.values.firstWhere(
-              (e) => e.name.toLowerCase() == name.toLowerCase(),
+          (e) => e.name.toLowerCase() == name.toLowerCase(),
         );
       } catch (_) {
         match = null;
@@ -125,27 +126,39 @@ class HomeTabController extends GetxController {
 
     switch (module) {
       case Module.crm:
-        Get.to(()=>CrmView());
+        Get.to(() => CrmView());
         break;
       case Module.selling:
-        Get.to(()=>SaleDashboardView());
+        Get.to(() => SaleDashboardView());
         break;
       case Module.buying:
-        Get.to(()=>PurchaseOrdersDashboardView());
+        Get.to(() => PurchaseOrdersDashboardView());
         break;
       case Module.stock:
-        Get.to(()=>StockDashboardView());
+        Get.to(() => StockDashboardView());
+        break;
+
+      case Module.hr:
+        Get.to(() => HrDashboarView());
+
+        break;
+      case Module.assets:
+        Get.to(() => AssetDashboardView());
 
         break;
 
-    // Add remaining cases as needed
+      // Add remaining cases as needed
       default:
         showSnackbar("Coming Soon", "$moduleName module is not ready yet.");
         print("Module ${module.value} is not yet handled.");
     }
   }
 
-  void showSnackbar(String title, String message, {Color backgroundColor = Colors.indigo}) {
+  void showSnackbar(
+    String title,
+    String message, {
+    Color backgroundColor = Colors.indigo,
+  }) {
     Get.snackbar(
       title,
       message,
@@ -158,9 +171,6 @@ class HomeTabController extends GetxController {
       icon: const Icon(Icons.info_outline, color: Colors.white),
     );
   }
-
-
-
 }
 
 class ModuleItem {

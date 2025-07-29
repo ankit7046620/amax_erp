@@ -3,6 +3,7 @@ part of 'app_pages.dart';
 
 abstract class Routes {
   Routes._();
+
   static const SPLASH = _Paths.SPLASH;
   static const ONBOARDING = _Paths.ONBOARDING;
   static const L_OGIN = _Paths.L_OGIN;
@@ -23,11 +24,14 @@ abstract class Routes {
   static const HOME_TAB = _Paths.HOME_TAB;
   static const NOTIFICATION = _Paths.NOTIFICATION;
   static const SETTINGS = _Paths.SETTINGS;
+
+  static const ASSET_DASHBOAR = _Paths.ASSET_DASHBOAR;
   static const PROFILE = _Paths.PROFILE;
 }
 
 abstract class _Paths {
   _Paths._();
+
   static const SPLASH = '/splash';
   static const ONBOARDING = '/onboarding';
   static const L_OGIN = '/l-ogin';
@@ -49,4 +53,5 @@ abstract class _Paths {
   static const NOTIFICATION = '/notification';
   static const SETTINGS = '/settings';
   static const PROFILE = '/profile';
+  static const ASSET_DASHBOAR = '/asset-dashboar';
 }

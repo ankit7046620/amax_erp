@@ -1,3 +1,4 @@
+import 'package:amax_hr/app/modules/navBar/views/nav_bar_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
@@ -74,23 +75,13 @@ class LoginController extends GetxController {
     return null;
   }
 
-<<<<<<< Updated upstream
-  var frappeClient;
-  void onInit() {
-    super.onInit();
-      frappeClient = FrappeV15(
-        // baseUrl: 'https://192.168.1.7:8003/',  //local
-        baseUrl: 'https://plastic.techcloudamax.ai/',
-    );
-      setData();
-=======
   void checkBiometricSupport() async {
     try {
       final isDeviceSupported = await _localAuth.isDeviceSupported();
       final canCheckBiometrics = await _localAuth.canCheckBiometrics;
       final biometrics = await _localAuth.getAvailableBiometrics();
       isBiometricAvailable.value =
-          isDeviceSupported ;
+          isDeviceSupported && canCheckBiometrics && biometrics.isNotEmpty;
       update();
     } catch (e) {
       isBiometricAvailable.value = false;
@@ -151,7 +142,6 @@ class LoginController extends GetxController {
         colorText: Colors.white,
       );
     }
->>>>>>> Stashed changes
   }
 
 
@@ -188,21 +178,8 @@ class LoginController extends GetxController {
     print('✅ Stored Cookie: $cookieHeader');
     extractAndStoreUserInfo(cookieHeader);
     ApiService.dio.options.headers['cookie'] = cookieHeader;
-<<<<<<< Updated upstream
-
-
-
-    print('✅ Dio cookie set!');
-
-    if (cookieMap['sid']?.isNotEmpty ?? false) {
-      AppFunction.goToAndReplace(Routes.NAV_BAR);
-    } else {
-      print('❌ Session ID not found');
-    }
-=======
     Get.offAll(() => NavBarView());
     print('✅ Dio cookie set!');
->>>>>>> Stashed changes
   }
 
   Future<void> extractAndStoreUserInfo(String cookieHeader) async {
@@ -244,9 +221,4 @@ class LoginController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
     );
   }
-<<<<<<< Updated upstream
-
-
-=======
->>>>>>> Stashed changes
 }

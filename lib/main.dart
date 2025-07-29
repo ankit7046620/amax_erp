@@ -15,7 +15,7 @@ void main() async {
   await ScreenUtil.ensureScreenSize();
   TGFlavor.init("assets/config/flavors.json");
 
-  configLoading(); // ✅ call this BEFORE runApp
+
 
   runApp(
     ScreenUtilInit(
@@ -31,23 +31,7 @@ void main() async {
   );
 }
 
-void configLoading() {
-  EasyLoading.instance
-    ..loadingStyle = EasyLoadingStyle.custom
-    ..indicatorWidget = Center(
-      child: Image.asset(
-        'assets/images/tech_cloud1.gif', // ✅ Make sure this path is correct
-        width: 150,
-        height: 150,
-        fit: BoxFit.contain,
-      ),
-    )
-    ..maskColor = Colors.black.withOpacity(0.3)
-    ..backgroundColor = Colors.transparent
-    ..indicatorSize = 150
-    ..userInteractions = false
-    ..dismissOnTap = false;
-}
+
 
 
 class MyApp extends StatelessWidget {

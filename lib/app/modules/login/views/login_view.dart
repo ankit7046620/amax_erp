@@ -126,7 +126,7 @@ class LoginView extends GetView<LoginController> {
 
                           IconButton(
                             onPressed: () async {
-                              controller.biometricLogin();
+                              controller.checkBiometricSupport();
                             },
                             icon: const FaIcon(
                               FontAwesomeIcons.fingerprint,

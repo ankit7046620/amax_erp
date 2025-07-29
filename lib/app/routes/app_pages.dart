@@ -1,3 +1,5 @@
+import 'package:amax_hr/app/modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
+import 'package:amax_hr/app/modules/AssetDashboar/views/asset_dashboar_view.dart';
 import 'package:get/get.dart';
 
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
@@ -47,6 +49,11 @@ class AppPages {
       name: _Paths.SPLASH,
       page: () => const SplashView(),
       binding: SplashBinding(),
+    ),
+    GetPage(
+      name: _Paths.ASSET_DASHBOAR,
+      page: () => const AssetDashboardView(),
+      binding: AssetDashboarBinding(),
     ),
     GetPage(
       name: _Paths.ONBOARDING,
