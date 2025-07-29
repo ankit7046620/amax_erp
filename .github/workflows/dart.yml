@@ -1,16 +1,16 @@
- name: Flutter CI
+name: Flutter CI
 
 on:
   push:
     branches:
-      - master
+      - main   # 🔁 Change to 'master' if your repo uses that
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     env:
-      # Do not put spaces in the email list
       RECIPIENT_EMAILS: vpprajapati19@gmail.com,sharmapratik151994@gmail.com
 
     steps:
@@ -57,7 +57,7 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
 
-      - name: ☁️ Upload APK to specific Google Drive folder
+      - name: ☁️ Upload APK to Google Drive folder
         run: |
           echo "Checking if gdrive is accessible..."
           if rclone lsf "gdrive:" > /dev/null 2>&1; then
