@@ -1,4 +1,4 @@
-name: Flutter CI
+ name: Flutter CI
 
 on:
   push:
@@ -8,8 +8,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
     env:
-      RECIPIENT_EMAILS: vpprajapati19@gmail.com ,sharmapratik151994@gmail.com
+      # Email list (NO spaces!)
+      RECIPIENT_EMAILS: vpprajapati19@gmail.com,sharmapratik151994@gmail.com
 
     steps:
       - name: Checkout code
@@ -57,8 +59,13 @@ jobs:
 
       - name: Upload APK to Google Drive folder
         run: |
-          rclone copy "$APK_PATH" "gdrive:1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk"
-          echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk" >> $GITHUB_ENV
+          if rclone ls "gdrive:" > /dev/null 2>&1; then
+            rclone copy "$APK_PATH" "gdrive:1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk"
+            echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk" >> $GITHUB_ENV
+          else
+            echo "❌ ERROR: gdrive remote not found in rclone config"
+            exit 1
+          fi
 
       - name: Send Email with APK Link
         uses: dawidd6/action-send-mail@v3
