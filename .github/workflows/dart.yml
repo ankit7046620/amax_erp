@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # No spaces in email list!
+      # Do not put spaces in the email list
       RECIPIENT_EMAILS: vpprajapati19@gmail.com,sharmapratik151994@gmail.com
 
     steps:
@@ -57,13 +57,15 @@ jobs:
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
 
-      - name: ☁️ Upload APK to Google Drive folder
+      - name: ☁️ Upload APK to specific Google Drive folder
         run: |
-          if rclone ls "gdrive:" > /dev/null 2>&1; then
-            rclone copy "$APK_PATH" "gdrive:1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk"
+          echo "Checking if gdrive is accessible..."
+          if rclone lsf "gdrive:" > /dev/null 2>&1; then
+            echo "Uploading APK..."
+            rclone copy "$APK_PATH" "gdrive:"
             echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk" >> $GITHUB_ENV
           else
-            echo "❌ ERROR: gdrive remote not found in rclone config"
+            echo "❌ ERROR: gdrive remote not accessible. Check your rclone.conf or credentials."
             exit 1
           fi
 
