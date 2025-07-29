@@ -10,14 +10,14 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      # Email list (NO spaces!)
+      # No spaces in email list!
       RECIPIENT_EMAILS: vpprajapati19@gmail.com,sharmapratik151994@gmail.com
 
     steps:
-      - name: Checkout code
+      - name: ✅ Checkout code
         uses: actions/checkout@v4
 
-      - name: Get Flutter version
+      - name: 🛠️ Get Flutter version
         run: |
           if [ -f ".flutter-version" ]; then
             FLUTTER_VERSION=$(cat .flutter-version)
@@ -26,21 +26,21 @@ jobs:
           fi
           echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> $GITHUB_ENV
 
-      - name: Setup Flutter
+      - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
           flutter-version: ${{ env.FLUTTER_VERSION }}
 
-      - name: Install dependencies
+      - name: 📦 Install dependencies
         run: flutter pub get
 
-      - name: Analyze code
+      - name: 🔍 Analyze code
         run: flutter analyze || true
 
-      - name: Build APK
+      - name: 🏗️ Build APK
         run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/debug_info
 
-      - name: Rename APK with current date
+      - name: 📝 Rename APK with current date
         run: |
           DATE=$(date +'%Y-%m-%d')
           ORIG_APK=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
@@ -49,15 +49,15 @@ jobs:
           echo "APK_NAME=demo-app-${DATE}.apk" >> $GITHUB_ENV
           echo "APK_PATH=$RENAMED_APK" >> $GITHUB_ENV
 
-      - name: Install rclone
+      - name: 📥 Install rclone
         run: curl https://rclone.org/install.sh | sudo bash
 
-      - name: Setup rclone config
+      - name: ⚙️ Setup rclone config
         run: |
           mkdir -p ~/.config/rclone
           echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
 
-      - name: Upload APK to Google Drive folder
+      - name: ☁️ Upload APK to Google Drive folder
         run: |
           if rclone ls "gdrive:" > /dev/null 2>&1; then
             rclone copy "$APK_PATH" "gdrive:1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk"
@@ -67,7 +67,7 @@ jobs:
             exit 1
           fi
 
-      - name: Send Email with APK Link
+      - name: 📧 Send Email with APK Link
         uses: dawidd6/action-send-mail@v3
         with:
           server_address: smtp.gmail.com
@@ -82,5 +82,5 @@ jobs:
             <p>Hello,</p>
             <p>The Amax ERP system is ready for download.</p>
             <p>If you find any bugs, please ping me on WhatsApp at <strong>8460624920</strong>.</p>
-            <p>Contact: <a href="mailto:patelankit70466@gmail.com">patelankit70466@gmail.com</a></p>
+            <p>Email: <a href="mailto:patelankit70466@gmail.com">patelankit70466@gmail.com</a></p>
             <p><strong>Download APK here:</strong> <a href="${{ env.DOWNLOAD_LINK }}">Click to download</a></p>
