@@ -12,7 +12,12 @@ class HrDashboarController extends GetxController {
   var employeesRelievingThisQuarter = 0.obs;
 
   // Chart data
-  var employeeAnalyticsData = <EmployeeAnalyticsData>[].obs;
+  var hiringAttritionData = <HiringAttritionData>[].obs;
+  var employeesByAgeData = <EmployeeAgeData>[].obs;
+  var genderData = <GenderData>[].obs;
+  var employeeTypeData = <EmployeeTypeData>[].obs;
+  var gradeData = <GradeData>[].obs;
+  var branchData = <BranchData>[].obs;
   var departmentChartData = <DepartmentChartData>[].obs;
   var designationChartData = <DesignationChartData>[].obs;
 
@@ -108,7 +113,7 @@ class HrDashboarController extends GetxController {
         try {
           final relievingDate = DateTime.parse(emp['relieving_date']);
           final relievingQuarter = ((relievingDate.month - 1) ~/ 3) + 1;
-          return relievingDate.year == currentYear && relievingQuarter == relievingQuarter;
+          return relievingDate.year == currentYear && relievingQuarter == currentQuarter;
         } catch (e) {
           return false;
         }
@@ -116,62 +121,144 @@ class HrDashboarController extends GetxController {
       return false;
     }).length;
 
-    // Process chart data
-    processEmployeeAnalyticsData(employees);
+    // Process all chart data
+    processHiringAttritionData(employees);
+    processEmployeesByAgeData(employees);
+    processGenderData(employees);
+    processEmployeeTypeData(employees);
+    processGradeData(employees);
+    processBranchData(employees);
     processDepartmentChartData(employees);
     processDesignationChartData(employees);
   }
 
-  void processEmployeeAnalyticsData(List<dynamic> employees) {
-    // Create monthly analytics data for current year
-    final currentYear = DateTime.now().year;
-    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  void processHiringAttritionData(List<dynamic> employees) {
+    final months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+    List<HiringAttritionData> data = [];
 
-    List<EmployeeAnalyticsData> analyticsData = [];
+    for (String month in months) {
+      // For demo purposes, using sample data
+      // You can replace this with actual calculations based on your data
+      final hiringCount = (employees.length * 0.1).round(); // Sample calculation
+      final attritionCount = (employees.length * 0.05).round(); // Sample calculation
 
-    for (int i = 0; i < 12; i++) {
-      final month = months[i];
-      final monthNumber = i + 1;
-
-      // Count new hires for this month
-      final newHires = employees.where((emp) {
-        if (emp['date_of_joining'] != null) {
-          try {
-            final joinDate = DateTime.parse(emp['date_of_joining']);
-            return joinDate.year == currentYear && joinDate.month == monthNumber;
-          } catch (e) {
-            return false;
-          }
-        }
-        return false;
-      }).length;
-
-      // Count exits for this month
-      final exits = employees.where((emp) {
-        if (emp['relieving_date'] != null) {
-          try {
-            final relievingDate = DateTime.parse(emp['relieving_date']);
-            return relievingDate.year == currentYear && relievingDate.month == monthNumber;
-          } catch (e) {
-            return false;
-          }
-        }
-        return false;
-      }).length;
-
-      analyticsData.add(EmployeeAnalyticsData(month, newHires, "New Hires"));
-      analyticsData.add(EmployeeAnalyticsData(month, exits, "Exits"));
+      data.add(HiringAttritionData(month, hiringCount, "Hiring Count"));
+      data.add(HiringAttritionData(month, attritionCount, "Attrition Count"));
     }
 
-    employeeAnalyticsData.value = analyticsData;
+    hiringAttritionData.value = data;
+  }
+
+  void processEmployeesByAgeData(List<dynamic> employees) {
+    Map<String, int> ageCounts = {
+      '18-19': 0,
+      '20-24': 0,
+      '25-29': 0,
+      '30-34': 0,
+      '35-39': 0,
+      '40-44': 0,
+      '45-49': 0,
+      '50-54': 0,
+      '55-59': 0,
+      '60-64': 0,
+      '65-69': 0,
+      '70-74': 0,
+      '75-79': 0,
+      '80+': 0,
+    };
+
+    for (var employee in employees) {
+      if (employee['date_of_birth'] != null) {
+        try {
+          final birthDate = DateTime.parse(employee['date_of_birth']);
+          final age = DateTime.now().year - birthDate.year;
+
+          if (age >= 18 && age <= 19) ageCounts['18-19'] = ageCounts['18-19']! + 1;
+          else if (age >= 20 && age <= 24) ageCounts['20-24'] = ageCounts['20-24']! + 1;
+          else if (age >= 25 && age <= 29) ageCounts['25-29'] = ageCounts['25-29']! + 1;
+          else if (age >= 30 && age <= 34) ageCounts['30-34'] = ageCounts['30-34']! + 1;
+          else if (age >= 35 && age <= 39) ageCounts['35-39'] = ageCounts['35-39']! + 1;
+          else if (age >= 40 && age <= 44) ageCounts['40-44'] = ageCounts['40-44']! + 1;
+          else if (age >= 45 && age <= 49) ageCounts['45-49'] = ageCounts['45-49']! + 1;
+          else if (age >= 50 && age <= 54) ageCounts['50-54'] = ageCounts['50-54']! + 1;
+          else if (age >= 55 && age <= 59) ageCounts['55-59'] = ageCounts['55-59']! + 1;
+          else if (age >= 60 && age <= 64) ageCounts['60-64'] = ageCounts['60-64']! + 1;
+          else if (age >= 65 && age <= 69) ageCounts['65-69'] = ageCounts['65-69']! + 1;
+          else if (age >= 70 && age <= 74) ageCounts['70-74'] = ageCounts['70-74']! + 1;
+          else if (age >= 75 && age <= 79) ageCounts['75-79'] = ageCounts['75-79']! + 1;
+          else if (age >= 80) ageCounts['80+'] = ageCounts['80+']! + 1;
+        } catch (e) {
+          // Handle invalid date format
+        }
+      }
+    }
+
+    employeesByAgeData.value = ageCounts.entries
+        .where((entry) => entry.value > 0) // Only include age groups with employees
+        .map((e) => EmployeeAgeData(e.key, e.value))
+        .toList();
+  }
+
+  void processGenderData(List<dynamic> employees) {
+    Map<String, int> genderCounts = {'Male': 0, 'Female': 0};
+
+    for (var employee in employees) {
+      final gender = employee['gender'] ?? 'Unknown';
+      if (gender == 'Male' || gender == 'Female') {
+        genderCounts[gender] = (genderCounts[gender] ?? 0) + 1;
+      }
+    }
+
+    genderData.value = genderCounts.entries
+        .where((entry) => entry.value > 0)
+        .map((e) => GenderData(e.key, e.value))
+        .toList();
+  }
+
+  void processEmployeeTypeData(List<dynamic> employees) {
+    Map<String, int> typeCounts = {};
+
+    for (var employee in employees) {
+      final employeeType = employee['employment_type'] ?? 'Full-time'; // Default to Full-time
+      typeCounts[employeeType] = (typeCounts[employeeType] ?? 0) + 1;
+    }
+
+    employeeTypeData.value = typeCounts.entries
+        .map((e) => EmployeeTypeData(e.key, e.value))
+        .toList();
+  }
+
+  void processGradeData(List<dynamic> employees) {
+    Map<String, int> gradeCounts = {};
+
+    for (var employee in employees) {
+      final grade = employee['grade'] ?? 'Ungraded';
+      gradeCounts[grade] = (gradeCounts[grade] ?? 0) + 1;
+    }
+
+    gradeData.value = gradeCounts.entries
+        .map((e) => GradeData(e.key, e.value))
+        .toList();
+  }
+
+  void processBranchData(List<dynamic> employees) {
+    Map<String, int> branchCounts = {};
+
+    for (var employee in employees) {
+      final branch = employee['branch'] ?? 'Main Office';
+      branchCounts[branch] = (branchCounts[branch] ?? 0) + 1;
+    }
+
+    branchData.value = branchCounts.entries
+        .map((e) => BranchData(e.key, e.value))
+        .toList();
   }
 
   void processDepartmentChartData(List<dynamic> employees) {
     Map<String, int> departmentCounts = {};
 
     for (var employee in employees) {
-      final department = employee['department'] ?? 'Unknown';
+      final department = employee['department'] ?? 'General';
       departmentCounts[department] = (departmentCounts[department] ?? 0) + 1;
     }
 
@@ -184,7 +271,7 @@ class HrDashboarController extends GetxController {
     Map<String, int> designationCounts = {};
 
     for (var employee in employees) {
-      final designation = employee['designation'] ?? 'Unknown';
+      final designation = employee['designation'] ?? 'Employee';
       designationCounts[designation] = (designationCounts[designation] ?? 0) + 1;
     }
 
@@ -209,12 +296,47 @@ class HrDashboarController extends GetxController {
 }
 
 // Data models for charts
-class EmployeeAnalyticsData {
+class HiringAttritionData {
   final String month;
   final int value;
   final String type;
 
-  EmployeeAnalyticsData(this.month, this.value, this.type);
+  HiringAttritionData(this.month, this.value, this.type);
+}
+
+class EmployeeAgeData {
+  final String ageGroup;
+  final int count;
+
+  EmployeeAgeData(this.ageGroup, this.count);
+}
+
+class GenderData {
+  final String gender;
+  final int count;
+
+  GenderData(this.gender, this.count);
+}
+
+class EmployeeTypeData {
+  final String type;
+  final int count;
+
+  EmployeeTypeData(this.type, this.count);
+}
+
+class GradeData {
+  final String grade;
+  final int count;
+
+  GradeData(this.grade, this.count);
+}
+
+class BranchData {
+  final String branch;
+  final int count;
+
+  BranchData(this.branch, this.count);
 }
 
 class DepartmentChartData {

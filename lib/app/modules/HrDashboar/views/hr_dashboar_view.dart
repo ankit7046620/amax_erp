@@ -10,9 +10,13 @@ class HrDashboarView extends GetView<HrDashboarController> {
   @override
   Widget build(BuildContext context) {
     Get.put(HrDashboarController());
+
+    // Reactive variables for managing expanded states
+    final RxInt expandedDashboard = 0.obs; // HR Dashboard expanded by default
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Human Resource Dashboard'),
+        title: const Text('HR Dashboard'),
         centerTitle: true,
         backgroundColor: Colors.indigo.shade600,
         foregroundColor: Colors.white,
@@ -23,259 +27,549 @@ class HrDashboarView extends GetView<HrDashboarController> {
           ),
         ],
       ),
-      body: Obx(() {
-        if (controller.isLoading.value) {
-          return _buildShimmerPlaceholder();
-        }
+      body: SingleChildScrollView(
+        child: Column(
+          children: [
+            // HR Dashboard Section
+            _buildDashboardSection(
+              index: 0,
+              title: 'HR Dashboard',
+              icon: Icons.people,
+              color: Colors.indigo,
+              expandedDashboard: expandedDashboard,
+              content: _buildHRDashboardContent(),
+            ),
 
-        return RefreshIndicator(
-          onRefresh: controller.refreshData,
-          child: SingleChildScrollView(
-            physics: const AlwaysScrollableScrollPhysics(),
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Human Resource Dashboard',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+            // Recruitment Dashboard Section
+            _buildDashboardSection(
+              index: 1,
+              title: 'Recruitment Dashboard',
+              icon: Icons.person_add,
+              color: Colors.green,
+              expandedDashboard: expandedDashboard,
+              content: _buildRecruitmentDashboardContent(),
+            ),
+
+            // Employee Lifecycle Dashboard Section
+            _buildDashboardSection(
+              index: 2,
+              title: 'Employee Lifecycle Dashboard',
+              icon: Icons.timeline,
+              color: Colors.blue,
+              expandedDashboard: expandedDashboard,
+              content: _buildEmployeeLifecycleDashboardContent(),
+            ),
+
+            // Attendance Dashboard Section
+            _buildDashboardSection(
+              index: 3,
+              title: 'Attendance Dashboard',
+              icon: Icons.access_time,
+              color: Colors.orange,
+              expandedDashboard: expandedDashboard,
+              content: _buildAttendanceDashboardContent(),
+            ),
+
+            // Expense Claims Dashboard Section
+            _buildDashboardSection(
+              index: 4,
+              title: 'Expense Claims Dashboard',
+              icon: Icons.receipt,
+              color: Colors.purple,
+              expandedDashboard: expandedDashboard,
+              content: _buildExpenseClaimsDashboardContent(),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Build individual dashboard section with accordion behavior
+  Widget _buildDashboardSection({
+    required int index,
+    required String title,
+    required IconData icon,
+    required MaterialColor color,
+    required RxInt expandedDashboard,
+    required Widget content,
+  }) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          // Dashboard Header Button
+          Material(
+            elevation: 2,
+            borderRadius: BorderRadius.circular(12),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                if (expandedDashboard.value == index) {
+                  expandedDashboard.value = -1; // Collapse if already expanded
+                } else {
+                  expandedDashboard.value = index; // Expand this dashboard
+                }
+              },
+              child: Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  gradient: LinearGradient(
+                    colors: [
+                      color.shade600,
+                      color.shade400,
+                    ],
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
                   ),
                 ),
-                const SizedBox(height: 20),
-
-                // First Row - Total Employees, New Hires, Exits
-                Row(
+                child: Row(
                   children: [
-                    Expanded(
-                      child: _buildDashboardCard(
-                        title: 'TOTAL EMPLOYEES',
-                        value: controller.totalEmployees.value.toString(),
-                        subtitle: '0 % since last month',
-                        subtitleColor: Colors.grey.shade600,
-                        icon: Icons.people,
-                        iconColor: Colors.teal.shade700,
-                      ),
+                    Icon(
+                      icon,
+                      color: Colors.white,
+                      size: 24,
                     ),
                     const SizedBox(width: 12),
                     Expanded(
-                      child: _buildDashboardCard(
-                        title: 'NEW HIRES (THIS YEAR)',
-                        value: controller.newHiresThisYear.value.toString(),
-                        subtitle: '0 % since last month',
-                        subtitleColor: Colors.blue.shade600,
-                        icon: Icons.person_add,
-                        iconColor: Colors.green.shade600,
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
-                  ],
-                ),
-                const SizedBox(height: 12),
 
-                // Second Row - Employee Exits
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDashboardCard(
-                        title: 'EMPLOYEE EXITS (THIS YEAR)',
-                        value: controller.employeeExitsThisYear.value.toString(),
-                        subtitle: '0 % since last month',
-                        subtitleColor: Colors.red.shade600,
-                        icon: Icons.person_remove,
-                        iconColor: Colors.red.shade600,
-                      ),
-                    ),
                     const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildDashboardCard(
-                        title: 'EMPLOYEES JOINING (THIS QUARTER)',
-                        value: controller.employeesJoiningThisQuarter.value.toString(),
-                        subtitle: '0 % since last quarter',
-                        subtitleColor: Colors.grey.shade700,
-                        icon: Icons.trending_up,
-                        iconColor: Colors.blue.shade700,
+                    Obx(() => AnimatedRotation(
+                      turns: expandedDashboard.value == index ? 0.5 : 0,
+                      duration: const Duration(milliseconds: 300),
+                      child: const Icon(
+                        Icons.expand_more,
+                        color: Colors.white,
+                        size: 24,
+                      ),
+                    )),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // Expandable Content
+          Obx(() => AnimatedContainer(
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+            height: expandedDashboard.value == index ? null : 0,
+            child: expandedDashboard.value == index
+                ? Container(
+              width: double.infinity,
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: const BorderRadius.only(
+                  bottomLeft: Radius.circular(12),
+                  bottomRight: Radius.circular(12),
+                ),
+                border: Border.all(
+                  color: color.shade200,
+                  width: 2,
+                ),
+              ),
+              child: content,
+            )
+                : const SizedBox.shrink(),
+          )),
+        ],
+      ),
+    );
+  }
+
+  // HR Dashboard Content
+  Widget _buildHRDashboardContent() {
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return _buildShimmerPlaceholder();
+      }
+
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              'Human Resource Dashboard',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 20),
+
+            // First Row - Total Employees, New Hires, Exits
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDashboardCard(
+                    title: 'TOTAL EMPLOYEES',
+                    value: controller.totalEmployees.value.toString(),
+                    subtitle: '0 % since last month',
+                    subtitleColor: Colors.grey.shade600,
+                    icon: Icons.people,
+                    iconColor: Colors.teal.shade700,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDashboardCard(
+                    title: 'NEW HIRES (THIS YEAR)',
+                    value: controller.newHiresThisYear.value.toString(),
+                    subtitle: '0 % since last month',
+                    subtitleColor: Colors.blue.shade600,
+                    icon: Icons.person_add,
+                    iconColor: Colors.green.shade600,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Second Row - Employee Exits
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDashboardCard(
+                    title: 'EMPLOYEE EXITS (THIS YEAR)',
+                    value: controller.employeeExitsThisYear.value.toString(),
+                    subtitle: '0 % since last month',
+                    subtitleColor: Colors.red.shade600,
+                    icon: Icons.person_remove,
+                    iconColor: Colors.red.shade600,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Container(), // Empty space to maintain layout
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Third Row - Quarterly Stats
+            Row(
+              children: [
+                Expanded(
+                  child: _buildDashboardCard(
+                    title: 'EMPLOYEES JOINING (THIS QUARTER)',
+                    value: controller.employeesJoiningThisQuarter.value.toString(),
+                    subtitle: '0 % since last quarter',
+                    subtitleColor: Colors.grey.shade700,
+                    icon: Icons.trending_up,
+                    iconColor: Colors.blue.shade700,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _buildDashboardCard(
+                    title: 'EMPLOYEES RELIEVING (THIS QUARTER)',
+                    value: controller.employeesRelievingThisQuarter.value.toString(),
+                    subtitle: '0 % since last quarter',
+                    subtitleColor: Colors.grey.shade700,
+                    icon: Icons.trending_down,
+                    iconColor: Colors.orange.shade700,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // Hiring vs Attrition Count (Line Chart)
+            _buildChartCard(
+              title: 'Hiring vs Attrition Count',
+              subtitle: 'Last synced 6 hours ago',
+              child: SizedBox(
+                height: 250,
+                child: SfCartesianChart(
+                  onSelectionChanged: (SelectionArgs args) {
+                    if (args.seriesIndex != null && args.pointIndex != null) {
+                      final seriesData = args.seriesIndex == 0
+                          ? controller.hiringAttritionData.where((data) => data.type == "Hiring Count").toList()
+                          : controller.hiringAttritionData.where((data) => data.type == "Attrition Count").toList();
+
+                      if (args.pointIndex! < seriesData.length) {
+                        final selectedData = seriesData[args.pointIndex!];
+                        _showValueTooltip(Get.context!, selectedData.type, selectedData.value.toDouble());
+                      }
+                    }
+                  },
+                  enableAxisAnimation: true,
+                  primaryXAxis: CategoryAxis(
+                    majorGridLines: const MajorGridLines(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    labelFormat: '{value}',
+                    majorGridLines: const MajorGridLines(width: 0.5),
+                    minimum: 0,
+                    maximum: 5,
+                    interval: 1,
+                  ),
+                  legend: Legend(
+                    isVisible: true,
+                    position: LegendPosition.bottom,
+                    alignment: ChartAlignment.center,
+                  ),
+                  series: <CartesianSeries>[
+                    LineSeries<HiringAttritionData, String>(
+                      dataSource: controller.hiringAttritionData.where((data) => data.type == "Hiring Count").toList(),
+                      xValueMapper: (data, _) => data.month,
+                      yValueMapper: (data, _) => data.value,
+                      name: "Hiring Count",
+                      color: const Color(0xFF2196F3),
+                      markerSettings: const MarkerSettings(
+                        isVisible: true,
+                        shape: DataMarkerType.circle,
+                      ),
+                    ),
+                    LineSeries<HiringAttritionData, String>(
+                      dataSource: controller.hiringAttritionData.where((data) => data.type == "Attrition Count").toList(),
+                      xValueMapper: (data, _) => data.month,
+                      yValueMapper: (data, _) => data.value,
+                      name: "Attrition Count",
+                      color: const Color(0xFF9C27B0),
+                      markerSettings: const MarkerSettings(
+                        isVisible: true,
+                        shape: DataMarkerType.circle,
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 12),
+              ),
+            ),
 
-                // Third Row - Quarterly Stats
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildDashboardCard(
-                        title: 'EMPLOYEES RELIEVING (THIS QUARTER)',
-                        value: controller.employeesRelievingThisQuarter.value.toString(),
-                        subtitle: '0 % since last quarter',
-                        subtitleColor: Colors.grey.shade700,
-                        icon: Icons.trending_down,
-                        iconColor: Colors.orange.shade700,
+            const SizedBox(height: 20),
+
+            // Employees by Age (Bar Chart)
+            _buildChartCard(
+              title: 'Employees by Age',
+              subtitle: 'Last synced 6 hours ago',
+              child: SizedBox(
+                height: 250,
+                child: SfCartesianChart(
+                  onSelectionChanged: (SelectionArgs args) {
+                    if (args.pointIndex != null && args.pointIndex! < controller.employeesByAgeData.length) {
+                      final selectedData = controller.employeesByAgeData[args.pointIndex!];
+                      _showValueTooltip(Get.context!, selectedData.ageGroup, selectedData.count.toDouble());
+                    }
+                  },
+                  enableAxisAnimation: true,
+                  primaryXAxis: CategoryAxis(
+                    majorGridLines: const MajorGridLines(width: 0),
+                  ),
+                  primaryYAxis: NumericAxis(
+                    labelFormat: '{value}',
+                    majorGridLines: const MajorGridLines(width: 0.5),
+                    minimum: 0,
+                    maximum: 6,
+                    interval: 1,
+                  ),
+                  series: <CartesianSeries>[
+                    ColumnSeries<EmployeeAgeData, String>(
+                      dataSource: controller.employeesByAgeData,
+                      xValueMapper: (data, _) => data.ageGroup,
+                      yValueMapper: (data, _) => data.count,
+                      color: const Color(0xFF2196F3),
+                      selectionBehavior: SelectionBehavior(
+                        enable: true,
+                        selectedColor: const Color(0xFF2196F3).withOpacity(0.7),
                       ),
                     ),
                   ],
                 ),
-                const SizedBox(height: 24),
+              ),
+            ),
 
-                // Employee Analytics Chart
+            const SizedBox(height: 20),
+
+            // Column layout for Gender Diversity and Employee Type
+            Column(
+              children: [
                 _buildChartCard(
-                  title: 'Employee Analytics',
-                  subtitle: 'Current Year',
+                  title: 'Gender Diversity Ratio',
+                  subtitle: 'Last synced 6 hours ago',
                   child: SizedBox(
                     height: 250,
-                    child: SfCartesianChart(
-                      onSelectionChanged: (SelectionArgs args) {
-                        if (args.seriesIndex != null && args.pointIndex != null) {
-                          final seriesData = args.seriesIndex == 0
-                              ? controller.employeeAnalyticsData.where((data) => data.type == "New Hires").toList()
-                              : controller.employeeAnalyticsData.where((data) => data.type == "Exits").toList();
-
-                          if (args.pointIndex! < seriesData.length) {
-                            final selectedData = seriesData[args.pointIndex!];
-                            _showValueTooltip(context, selectedData.type, selectedData.value.toDouble());
-                          }
-                        }
-                      },
-                      enableAxisAnimation: true,
-                      primaryXAxis: CategoryAxis(
-                        majorGridLines: const MajorGridLines(width: 0),
-                      ),
-                      primaryYAxis: NumericAxis(
-                        labelFormat: '{value}',
-                        majorGridLines: const MajorGridLines(width: 0.5),
-                      ),
-                      legend: Legend(
-                        isVisible: true,
-                        position: LegendPosition.top,
-                        alignment: ChartAlignment.center,
-                      ),
-                      series: <CartesianSeries>[
-                        ColumnSeries<EmployeeAnalyticsData, String>(
-                          dataSource: controller.employeeAnalyticsData.where((data) => data.type == "New Hires").toList(),
-                          xValueMapper: (data, _) => data.month,
-                          yValueMapper: (data, _) => data.value,
-                          name: "New Hires",
-                          color: const Color(0xFF4CAF50),
-                          selectionBehavior: SelectionBehavior(
-                            enable: true,
-                            selectedColor: const Color(0xFF4CAF50).withOpacity(0.7),
-                          ),
-                        ),
-                        ColumnSeries<EmployeeAnalyticsData, String>(
-                          dataSource: controller.employeeAnalyticsData.where((data) => data.type == "Exits").toList(),
-                          xValueMapper: (data, _) => data.month,
-                          yValueMapper: (data, _) => data.value,
-                          name: "Exits",
-                          color: const Color(0xFFE91E63),
-                          selectionBehavior: SelectionBehavior(
-                            enable: true,
-                            selectedColor: const Color(0xFFE91E63).withOpacity(0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 20),
-
-                // Department-wise Employee Distribution (Pie Chart)
-                _buildChartCard(
-                  title: 'Department-wise Employee Distribution',
-                  child: SizedBox(
-                    height: 300,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.departmentChartData.length) {
-                          final selectedData = controller.departmentChartData[args.pointIndex!];
-                          _showValueTooltip(context, selectedData.department, selectedData.count.toDouble());
+                        if (args.pointIndex != null && args.pointIndex! < controller.genderData.length) {
+                          final selectedData = controller.genderData[args.pointIndex!];
+                          _showValueTooltip(Get.context!, selectedData.gender, selectedData.count.toDouble());
                         }
                       },
                       legend: Legend(
                         isVisible: true,
                         position: LegendPosition.bottom,
-                        overflowMode: LegendItemOverflowMode.wrap,
-                        textStyle: const TextStyle(fontSize: 10),
+                        textStyle: const TextStyle(fontSize: 12),
                       ),
                       series: <CircularSeries>[
-                        DoughnutSeries<DepartmentChartData, String>(
-                          dataSource: controller.departmentChartData,
-                          xValueMapper: (data, _) => data.department,
+                        PieSeries<GenderData, String>(
+                          dataSource: controller.genderData,
+                          xValueMapper: (data, _) => data.gender,
                           yValueMapper: (data, _) => data.count,
                           dataLabelMapper: (data, _) => '${data.count}',
                           dataLabelSettings: const DataLabelSettings(
                             isVisible: true,
                             labelPosition: ChartDataLabelPosition.outside,
-                            textStyle: TextStyle(fontSize: 10),
                           ),
-                          innerRadius: '60%',
                           selectionBehavior: SelectionBehavior(
                             enable: true,
                             unselectedOpacity: 0.5,
                           ),
                           pointColorMapper: (data, index) {
-                            final colors = [
-                              const Color(0xFFE91E63),
-                              const Color(0xFF2196F3),
-                              const Color(0xFF4CAF50),
-                              const Color(0xFF9E9E9E),
-                              const Color(0xFFFF9800),
-                              const Color(0xFF9C27B0),
-                            ];
-                            return colors[index! % colors.length];
+                            return data.gender == 'Male'
+                                ? const Color(0xFF2196F3)
+                                : const Color(0xFFE91E63);
                           },
                         ),
                       ],
                     ),
                   ),
                 ),
-
-                const SizedBox(height: 20),
-
-                // Designation-wise Employee Distribution (Pie Chart)
+                const SizedBox(height: 12),
                 _buildChartCard(
-                  title: 'Designation-wise Employee Distribution',
+                  title: 'Employees by Type',
+                  subtitle: 'Last synced 6 hours ago',
                   child: SizedBox(
-                    height: 300,
+                    height: 250,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.designationChartData.length) {
-                          final selectedData = controller.designationChartData[args.pointIndex!];
-                          _showValueTooltip(context, selectedData.designation, selectedData.count.toDouble());
+                        if (args.pointIndex != null && args.pointIndex! < controller.employeeTypeData.length) {
+                          final selectedData = controller.employeeTypeData[args.pointIndex!];
+                          _showValueTooltip(Get.context!, selectedData.type, selectedData.count.toDouble());
                         }
                       },
                       legend: Legend(
                         isVisible: true,
                         position: LegendPosition.bottom,
-                        overflowMode: LegendItemOverflowMode.wrap,
-                        textStyle: const TextStyle(fontSize: 10),
+                        textStyle: const TextStyle(fontSize: 12),
                       ),
                       series: <CircularSeries>[
-                        DoughnutSeries<DesignationChartData, String>(
-                          dataSource: controller.designationChartData,
-                          xValueMapper: (data, _) => data.designation,
+                        PieSeries<EmployeeTypeData, String>(
+                          dataSource: controller.employeeTypeData,
+                          xValueMapper: (data, _) => data.type,
                           yValueMapper: (data, _) => data.count,
                           dataLabelMapper: (data, _) => '${data.count}',
                           dataLabelSettings: const DataLabelSettings(
                             isVisible: true,
                             labelPosition: ChartDataLabelPosition.outside,
-                            textStyle: TextStyle(fontSize: 10),
                           ),
-                          innerRadius: '60%',
+                          selectionBehavior: SelectionBehavior(
+                            enable: true,
+                            unselectedOpacity: 0.5,
+                          ),
+                          pointColorMapper: (data, index) {
+                            return const Color(0xFF2196F3);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Column layout for Grade and Branch
+            Column(
+              children: [
+                _buildChartCard(
+                  title: 'Employees by Grade',
+                  subtitle: 'Last synced 6 hours ago',
+                  child: SizedBox(
+                    height: 250,
+                    child: SfCircularChart(
+                      onSelectionChanged: (SelectionArgs args) {
+                        if (args.pointIndex != null && args.pointIndex! < controller.gradeData.length) {
+                          final selectedData = controller.gradeData[args.pointIndex!];
+                          _showValueTooltip(Get.context!, selectedData.grade, selectedData.count.toDouble());
+                        }
+                      },
+                      legend: Legend(
+                        isVisible: true,
+                        position: LegendPosition.bottom,
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                      series: <CircularSeries>[
+                        PieSeries<GradeData, String>(
+                          dataSource: controller.gradeData,
+                          xValueMapper: (data, _) => data.grade,
+                          yValueMapper: (data, _) => data.count,
+                          dataLabelMapper: (data, _) => '${data.count}',
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                            labelPosition: ChartDataLabelPosition.outside,
+                          ),
+                          selectionBehavior: SelectionBehavior(
+                            enable: true,
+                            unselectedOpacity: 0.5,
+                          ),
+                          pointColorMapper: (data, index) {
+                            return const Color(0xFF2196F3);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildChartCard(
+                  title: 'Employees by Branch',
+                  subtitle: 'Last synced 6 hours ago',
+                  child: SizedBox(
+                    height: 250,
+                    child: SfCircularChart(
+                      onSelectionChanged: (SelectionArgs args) {
+                        if (args.pointIndex != null && args.pointIndex! < controller.branchData.length) {
+                          final selectedData = controller.branchData[args.pointIndex!];
+                          _showValueTooltip(Get.context!, selectedData.branch, selectedData.count.toDouble());
+                        }
+                      },
+                      legend: Legend(
+                        isVisible: true,
+                        position: LegendPosition.bottom,
+                        textStyle: const TextStyle(fontSize: 12),
+                      ),
+                      series: <CircularSeries>[
+                        PieSeries<BranchData, String>(
+                          dataSource: controller.branchData,
+                          xValueMapper: (data, _) => data.branch,
+                          yValueMapper: (data, _) => data.count,
+                          dataLabelMapper: (data, _) => '${data.count}',
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: true,
+                            labelPosition: ChartDataLabelPosition.outside,
+                          ),
                           selectionBehavior: SelectionBehavior(
                             enable: true,
                             unselectedOpacity: 0.5,
                           ),
                           pointColorMapper: (data, index) {
                             final colors = [
-                              const Color(0xFFE91E63),
                               const Color(0xFF2196F3),
-                              const Color(0xFF4CAF50),
-                              const Color(0xFF9E9E9E),
-                              const Color(0xFFFF9800),
-                              const Color(0xFF9C27B0),
+                              const Color(0xFFE91E63),
                             ];
                             return colors[index! % colors.length];
                           },
@@ -286,9 +580,265 @@ class HrDashboarView extends GetView<HrDashboarController> {
                 ),
               ],
             ),
+
+            const SizedBox(height: 20),
+
+            // Column layout for Designation and Department
+            Column(
+              children: [
+                _buildChartCard(
+                  title: 'Designation Wise Employee Count',
+                  subtitle: 'Last synced 6 hours ago',
+                  child: SizedBox(
+                    height: 250,
+                    child: SfCircularChart(
+                      onSelectionChanged: (SelectionArgs args) {
+                        if (args.pointIndex != null && args.pointIndex! < controller.designationChartData.length) {
+                          final selectedData = controller.designationChartData[args.pointIndex!];
+                          _showValueTooltip(Get.context!, selectedData.designation, selectedData.count.toDouble());
+                        }
+                      },
+                      legend: Legend(
+                        isVisible: true,
+                        position: LegendPosition.bottom,
+                        textStyle: const TextStyle(fontSize: 10),
+                      ),
+                      series: <CircularSeries>[
+                        PieSeries<DesignationChartData, String>(
+                          dataSource: controller.designationChartData,
+                          xValueMapper: (data, _) => data.designation,
+                          yValueMapper: (data, _) => data.count,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: false,
+                          ),
+                          selectionBehavior: SelectionBehavior(
+                            enable: true,
+                            unselectedOpacity: 0.5,
+                          ),
+                          pointColorMapper: (data, index) {
+                            final colors = [
+                              const Color(0xFF2196F3),
+                              const Color(0xFFE91E63),
+                              const Color(0xFF4CAF50),
+                            ];
+                            return colors[index! % colors.length];
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                _buildChartCard(
+                  title: 'Department Wise Employee Count',
+                  subtitle: 'Last synced 6 hours ago',
+                  child: SizedBox(
+                    height: 250,
+                    child: SfCircularChart(
+                      onSelectionChanged: (SelectionArgs args) {
+                        if (args.pointIndex != null && args.pointIndex! < controller.departmentChartData.length) {
+                          final selectedData = controller.departmentChartData[args.pointIndex!];
+                          _showValueTooltip(Get.context!, selectedData.department, selectedData.count.toDouble());
+                        }
+                      },
+                      legend: Legend(
+                        isVisible: true,
+                        position: LegendPosition.bottom,
+                        textStyle: const TextStyle(fontSize: 10),
+                      ),
+                      series: <CircularSeries>[
+                        PieSeries<DepartmentChartData, String>(
+                          dataSource: controller.departmentChartData,
+                          xValueMapper: (data, _) => data.department,
+                          yValueMapper: (data, _) => data.count,
+                          dataLabelSettings: const DataLabelSettings(
+                            isVisible: false,
+                          ),
+                          selectionBehavior: SelectionBehavior(
+                            enable: true,
+                            unselectedOpacity: 0.5,
+                          ),
+                          pointColorMapper: (data, index) {
+                            return const Color(0xFF2196F3);
+                          },
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    });
+  }
+
+  // Recruitment Dashboard Content (Placeholder)
+  Widget _buildRecruitmentDashboardContent() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Icon(
+            Icons.person_add,
+            size: 80,
+            color: Colors.green.shade300,
           ),
-        );
-      }),
+          const SizedBox(height: 16),
+          Text(
+            'Recruitment Dashboard',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.green.shade700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coming Soon!',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'This dashboard will show recruitment metrics, job postings, candidate pipeline, interview schedules, and hiring analytics.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Employee Lifecycle Dashboard Content (Placeholder)
+  Widget _buildEmployeeLifecycleDashboardContent() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Icon(
+            Icons.timeline,
+            size: 80,
+            color: Colors.blue.shade300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Employee Lifecycle Dashboard',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.blue.shade700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coming Soon!',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'This dashboard will track employee journey from onboarding to exit, performance reviews, career progression, and retention analytics.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Attendance Dashboard Content (Placeholder)
+  Widget _buildAttendanceDashboardContent() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Icon(
+            Icons.access_time,
+            size: 80,
+            color: Colors.orange.shade300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Attendance Dashboard',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.orange.shade700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coming Soon!',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'This dashboard will display attendance patterns, leave management, work hours tracking, and punctuality reports.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  // Expense Claims Dashboard Content (Placeholder)
+  Widget _buildExpenseClaimsDashboardContent() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      child: Column(
+        children: [
+          Icon(
+            Icons.receipt,
+            size: 80,
+            color: Colors.purple.shade300,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'Expense Claims Dashboard',
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple.shade700,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Coming Soon!',
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey.shade600,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'This dashboard will manage expense submissions, approval workflows, reimbursement tracking, and expense analytics.',
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey.shade500,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -390,9 +940,31 @@ class HrDashboarView extends GetView<HrDashboarController> {
             const SizedBox(height: 24),
             _shimmerCard(height: 250),
             const SizedBox(height: 20),
-            _shimmerCard(height: 300),
+            _shimmerCard(height: 250),
             const SizedBox(height: 20),
-            _shimmerCard(height: 300),
+            Row(
+              children: [
+                Expanded(child: _shimmerCard(height: 250)),
+                const SizedBox(width: 12),
+                Expanded(child: _shimmerCard(height: 250)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(child: _shimmerCard(height: 250)),
+                const SizedBox(width: 12),
+                Expanded(child: _shimmerCard(height: 250)),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(child: _shimmerCard(height: 250)),
+                const SizedBox(width: 12),
+                Expanded(child: _shimmerCard(height: 250)),
+              ],
+            ),
           ],
         ),
       ),
@@ -426,19 +998,21 @@ class HrDashboarView extends GetView<HrDashboarController> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  title,
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
                 if (subtitle != null)
                   Text(
                     subtitle,
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 10,
                       color: Colors.grey.shade600,
                     ),
                   ),
