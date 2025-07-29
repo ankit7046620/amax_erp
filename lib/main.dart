@@ -6,22 +6,22 @@ import 'package:logger/logger.dart';
 import 'package:techgrains/com/techgrains/util/tg_flavor.dart';
 
 import 'app/routes/app_pages.dart';
-var logger = Logger(
-  printer: PrettyPrinter(),
-);
 
-var loggerNoStack = Logger(
-  printer: PrettyPrinter(methodCount: 0),
-);
+var logger = Logger(printer: PrettyPrinter());
+var loggerNoStack = Logger(printer: PrettyPrinter(methodCount: 0));
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await ScreenUtil.ensureScreenSize();
   TGFlavor.init("assets/config/flavors.json");
 
+
+
   runApp(
     ScreenUtilInit(
-      designSize: MediaQueryData.fromView(WidgetsBinding.instance.platformDispatcher.views.first).size,
+      designSize: MediaQueryData.fromView(
+        WidgetsBinding.instance.platformDispatcher.views.first,
+      ).size,
       minTextAdapt: true,
       splitScreenMode: true,
       builder: (BuildContext context, Widget? child) {
@@ -30,6 +30,9 @@ void main() async {
     ),
   );
 }
+
+
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

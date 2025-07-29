@@ -1,13 +1,18 @@
+import 'package:amax_hr/app/modules/navBar/views/nav_bar_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
+import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
+import 'package:amax_hr/manager/auth_manager.dart';
 import 'package:amax_hr/manager/shared_pref_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/utils/app_funcation.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart';
 import 'package:frappe_dart/frappe_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:local_auth/local_auth.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
@@ -16,6 +21,22 @@ class LoginController extends GetxController {
 
   var isLoading = false.obs;
   var isPasswordVisible = false.obs;
+  final RxBool obscurePassword = true.obs;
+
+  final LocalAuthentication _localAuth = LocalAuthentication();
+  final RxBool isBiometricAvailable = false.obs;
+
+  var frappeClient;
+
+  @override
+  void onInit() {
+    setData();
+    checkBiometricSupport();
+    super.onInit();
+    frappeClient = FrappeV15(
+      baseUrl: 'https://plastic.techcloudamax.ai/',
+    );
+  }
 
   @override
   void onClose() {
@@ -23,6 +44,12 @@ class LoginController extends GetxController {
     passwordController.dispose();
     super.onClose();
   }
+
+  setData(){
+    emailController.text="vignesh@amaxconsultancyservices.com";
+    passwordController.text="Welcome@@123#";
+  }
+
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -48,38 +75,84 @@ class LoginController extends GetxController {
     return null;
   }
 
-  var frappeClient;
-  void onInit() {
-    super.onInit();
-      frappeClient = FrappeV15(
-        // baseUrl: 'https://192.168.1.7:8003/',
-        baseUrl: 'https://plastic.techcloudamax.ai/',
-    );
+  void checkBiometricSupport() async {
+    try {
+      final isDeviceSupported = await _localAuth.isDeviceSupported();
+      final canCheckBiometrics = await _localAuth.canCheckBiometrics;
+      final biometrics = await _localAuth.getAvailableBiometrics();
+      isBiometricAvailable.value =
+          isDeviceSupported && canCheckBiometrics && biometrics.isNotEmpty;
+      update();
+    } catch (e) {
+      isBiometricAvailable.value = false;
+    }
+  }
+
+  void biometricLogin() async {
+    final prefs = await SharedPreferences.getInstance();
+    final cookieHeader = prefs.getString(LocalKeys.cookieHeader) ?? '';
+
+    // 🔒 Step 1: Check if cookie is stored
+    if (cookieHeader.isEmpty) {
+      Get.snackbar(
+        "Login Required",
+        "Please login using email and password first.",
+        backgroundColor: Colors.orange,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    // ✅ Step 2: Proceed with biometric auth
+    if (!isBiometricAvailable.value) {
+      Get.snackbar(
+        "Unavailable",
+        "Biometric authentication not available on this device.",
+        backgroundColor: Colors.grey,
+        colorText: Colors.white,
+      );
+      return;
+    }
+
+    try {
+      final isAuthenticated = await _localAuth.authenticate(
+        localizedReason: 'Please authenticate to login',
+        options: const AuthenticationOptions(
+          biometricOnly: false,
+          stickyAuth: true,
+        ),
+      );
+
+      if (isAuthenticated) {
+        ApiService.dio.options.headers['cookie'] = cookieHeader;
+        Get.offAll(() => NavBarView());
+      } else {
+        Get.snackbar(
+          "Authentication Failed",
+          "Biometric not recognized",
+          backgroundColor: Colors.redAccent,
+          colorText: Colors.white,
+        );
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Biometric authentication error: ${e.toString()}",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    }
   }
 
 
-  // Future<void> login() async {
-  //   //if (!formKey.currentState!.validate()) return;
-  //   Map<String, dynamic> data={
-  //     'usr': "rock@yopmail.com",
-  //     'pwd':"rock@123",
-  //   };
-  //
-  //
-  //   final response =  ApiService.post("https://ankit.frappehr.com/app", data);
-  //
-  //   print("object=====>>$response");
-  //   AppFunction.goToAndReplace(Routes.BOTTAM);
-  //
-  //   }
 
   login() async {
     EasyLoading.show();
 
     final authResponse = await frappeClient.login(
       LoginRequest(
-        usr: 'vignesh@amaxconsultancyservices.com',
-        pwd: 'Welcome@@123#',
+        usr: emailController.text.trim(),
+        pwd: passwordController.text.trim(),
       ),
     );
 
@@ -87,7 +160,8 @@ class LoginController extends GetxController {
 
     final cookieString = authResponse.toJson().toString();
 
-    final cookieRegex = RegExp(r'(full_name|sid|system_user|user_id|user_image)=([^;]+)');
+    final cookieRegex =
+    RegExp(r'(full_name|sid|system_user|user_id|user_image)=([^;]+)');
     final matches = cookieRegex.allMatches(cookieString);
 
     Map<String, String> cookieMap = {};
@@ -95,30 +169,42 @@ class LoginController extends GetxController {
       cookieMap[match.group(1)!] = match.group(2)!;
     }
 
-    // Build cookie header
-    final cookieHeader = cookieMap.entries.map((e) => '${e.key}=${e.value}').join('; ');
+    final cookieHeader =
+    cookieMap.entries.map((e) => '${e.key}=${e.value}').join('; ');
 
-    // Save to SharedPreferences
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(LocalKeys.cookieHeader, cookieHeader);
 
     print('✅ Stored Cookie: $cookieHeader');
-
+    extractAndStoreUserInfo(cookieHeader);
     ApiService.dio.options.headers['cookie'] = cookieHeader;
-
-
-
+    Get.offAll(() => NavBarView());
     print('✅ Dio cookie set!');
-
-    if (cookieMap['sid']?.isNotEmpty ?? false) {
-      AppFunction.goToAndReplace(Routes.BOTTAM);
-    } else {
-      print('❌ Session ID not found');
-    }
   }
 
+  Future<void> extractAndStoreUserInfo(String cookieHeader) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(LocalKeys.cookieHeader, cookieHeader);
 
+    final parts = cookieHeader.split(';');
+    String? sid, fullName, email;
 
+    for (var part in parts) {
+      final trimmed = part.trim();
+      if (trimmed.startsWith("sid=")) {
+        sid = trimmed.substring(4);
+      } else if (trimmed.startsWith("full_name=")) {
+        fullName = trimmed.substring(10);
+      } else if (trimmed.startsWith("user_id=")) {
+        email = Uri.decodeComponent(trimmed.substring(8));
+      }
+    }
+    logger.d("get email>>>>${email}");
+
+    if (sid != null) await prefs.setString(LocalKeys.sid, sid);
+    if (fullName != null) await prefs.setString(LocalKeys.fullName, fullName);
+    if (email != null) await prefs.setString(LocalKeys.userId, email);
+  }
 
   void forgotPassword() {
     Get.snackbar(
@@ -135,6 +221,4 @@ class LoginController extends GetxController {
       snackPosition: SnackPosition.BOTTOM,
     );
   }
-
-
 }

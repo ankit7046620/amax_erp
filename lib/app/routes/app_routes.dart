@@ -3,6 +3,7 @@ part of 'app_pages.dart';
 
 abstract class Routes {
   Routes._();
+
   static const SPLASH = _Paths.SPLASH;
   static const ONBOARDING = _Paths.ONBOARDING;
   static const L_OGIN = _Paths.L_OGIN;
@@ -11,10 +12,26 @@ abstract class Routes {
   static const CRM = _Paths.CRM;
   static const SALES = _Paths.SALES;
   static const LEAD_DETAILS = _Paths.LEAD_DETAILS;
+  static const HOME = _Paths.HOME;
+  static const SALE_DASHBOARD = _Paths.SALE_DASHBOARD;
+  static const CRM_GRAPH = _Paths.CRM_GRAPH;
+  static const SALE_GRAPH = _Paths.SALE_GRAPH;
+  static const PURCHASEORDERS = _Paths.PURCHASEORDERS;
+  static const PURCHASE_ORDERS_DASHBOARD = _Paths.PURCHASE_ORDERS_DASHBOARD;
+  static const PURCHASE_GRAPH = _Paths.PURCHASE_GRAPH;
+  static const STOCK_DASHBOARD = _Paths.STOCK_DASHBOARD;
+  static const NAV_BAR = _Paths.NAV_BAR;
+  static const HOME_TAB = _Paths.HOME_TAB;
+  static const NOTIFICATION = _Paths.NOTIFICATION;
+  static const SETTINGS = _Paths.SETTINGS;
+
+  static const ASSET_DASHBOAR = _Paths.ASSET_DASHBOAR;
+  static const PROFILE = _Paths.PROFILE;
 }
 
 abstract class _Paths {
   _Paths._();
+
   static const SPLASH = '/splash';
   static const ONBOARDING = '/onboarding';
   static const L_OGIN = '/l-ogin';
@@ -23,4 +40,18 @@ abstract class _Paths {
   static const CRM = '/crm';
   static const SALES = '/sales';
   static const LEAD_DETAILS = '/lead-details';
+  static const HOME = '/home';
+  static const SALE_DASHBOARD = '/sale-dashboard';
+  static const CRM_GRAPH = '/crm-graph';
+  static const SALE_GRAPH = '/sale-graph';
+  static const PURCHASEORDERS = '/purchaseOrdersDashboard';
+  static const PURCHASE_ORDERS_DASHBOARD = '/purchase-orders-dashboard';
+  static const PURCHASE_GRAPH = '/purchase-graph';
+  static const STOCK_DASHBOARD = '/stock-dashboard';
+  static const NAV_BAR = '/nav-bar';
+  static const HOME_TAB = '/home-tab';
+  static const NOTIFICATION = '/notification';
+  static const SETTINGS = '/settings';
+  static const PROFILE = '/profile';
+  static const ASSET_DASHBOAR = '/asset-dashboar';
 }

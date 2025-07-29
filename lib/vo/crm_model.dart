@@ -1,30 +1,5 @@
+
 class CrmModel {
-  List<Data> data;
-
-  CrmModel({required this.data});
-
-  factory CrmModel.fromJson(Map<String, dynamic> json) {
-    final rawData = json['data'];
-    List<Data> parsedData = [];
-
-    if (rawData != null && rawData is List) {
-      parsedData = rawData
-          .where((item) => item != null)
-          .map<Data>((item) => Data.fromJson(item as Map<String, dynamic>))
-          .toList();
-    }
-
-    return CrmModel(data: parsedData);
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'data': data.map((v) => v.toJson()).toList(),
-    };
-  }
-}
-
-class Data {
   String name;
   String leadName;
   String emailId;
@@ -33,8 +8,9 @@ class Data {
   String creation;
   String modified;
   String source;
+  String territory;
 
-  Data({
+  CrmModel({
     required this.name,
     required this.leadName,
     required this.emailId,
@@ -43,10 +19,11 @@ class Data {
     required this.creation,
     required this.modified,
     required this.source,
+    required this.territory,
   });
 
-  factory Data.fromJson(Map<String, dynamic> json) {
-    return Data(
+  factory CrmModel.fromJson(Map<String, dynamic> json) {
+    return CrmModel(
       name: json['name'] ?? '',
       leadName: json['lead_name'] ?? '',
       emailId: json['email_id'] ?? '',
@@ -55,6 +32,7 @@ class Data {
       creation: json['creation'] ?? '',
       modified: json['modified'] ?? '',
       source: json['source'] ?? '',
+      territory: json['territory'] ?? '',
     );
   }
 
@@ -68,6 +46,7 @@ class Data {
       'creation': creation,
       'modified': modified,
       'source': source,
+      'territory': territory,
     };
   }
 }

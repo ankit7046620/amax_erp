@@ -9,6 +9,25 @@ class HeadersKey {
 }
 
 
+class CrmLeadStatus{
+  static const String converted ='converted';
+}
+
+class CardStatus{
+  static const String toReceiveAndBill= "To Receive and Bill";
+}
+
+class ChartFilterType{
+  static const String yearly ='Yearly';
+  static const String quarterly ='Quarterly';
+  static const String monthly ='Monthly';
+  static const String weekly ='Weekly';
+  static const String daily ='Daily';
+
+
+
+}
+
 class LocalKeys {
   static const String sid = 'sid';
   static const String fullName = 'fullName';

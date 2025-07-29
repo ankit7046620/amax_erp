@@ -1,159 +1,164 @@
 import 'package:amax_hr/common/component/common_elevated_button.dart';
 import 'package:amax_hr/common/component/custom_image_widget.dart';
-import 'package:amax_hr/common/component/custom_text_field.dart';
 import 'package:amax_hr/constant/assets_constant.dart';
-import 'package:amax_hr/constant/localel.dart';
-import 'package:amax_hr/core/app_color.dart';
-import 'package:amax_hr/utils/app.dart';
+import 'package:amax_hr/manager/auth_manager.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-
 import 'package:get/get.dart';
-import 'package:google_fonts/google_fonts.dart';
-
 import '../controllers/login_controller.dart';
 
 class LoginView extends GetView<LoginController> {
-       LoginView({super.key});
+  LoginView({super.key});
 
-
-LoginController _loginController=Get.put(LoginController());
-
+  final LoginController _loginController = Get.put(LoginController());
 
   @override
   Widget build(BuildContext context) {
-    Get.put(LoginController());
+    final isKeyboardOpen = MediaQuery.of(context).viewInsets.bottom > 0;
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFFFF5F3),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24.0),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              minHeight:
-              MediaQuery.of(context).size.height -
-                  MediaQuery.of(context).padding.top -
-                  MediaQuery.of(context).padding.bottom -
-                  48, // Subtract padding
-            ),
-            child: IntrinsicHeight(
-              child: Form(
-                key: controller.formKey,
+        child: Stack(
+          children: [
+            Center(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(horizontal: 24),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children:
-[
-                    SizedBox(height: SizeType.xxxs),
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    /// Login Card
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 32,
+                        horizontal: 16,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: const [
+                          BoxShadow(
+                            color: Colors.black12,
+                            blurRadius: 8,
+                            offset: Offset(0, 4),
+                          ),
+                        ],
+                      ),
+                      child: Column(
+                        children: [
+                          /// Logo
+                          CustomImageWidget(
+                            imagePath: AssetsConstant.tech_logo,
+                            fit: BoxFit.contain,
+                            height: 80,
+                            width: 160,
+                            alignment: Alignment.center,
+                          ),
+                          const SizedBox(height: 24),
 
-                    _buildHeader(),
-                    SizedBox(height: SizeType.xxxs),
-                    _buildEmailField(),
-                    SizedBox(height: SizeType.xxxs),
-                    _buildPasswordField(),
-                    SizedBox(height: SizeType.xxxxxs),
-                    _buildLoginButton(),
+                          /// Email Field
+                          TextField(
+                            controller: controller.emailController,
+                            decoration: InputDecoration(
+                              prefixIcon: const Icon(Icons.email),
+                              labelText: 'Email or Username',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
 
-                    SizedBox(height: SizeType.xxxxxxs),
-                    _buildForgotPassword(),
+                          /// Password Field
+                          Obx(
+                            () => TextField(
+                              controller: controller.passwordController,
+                              obscureText: controller.obscurePassword.value,
+                              decoration: InputDecoration(
+                                prefixIcon: const Icon(Icons.lock),
+                                labelText: 'Password',
+                                border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    controller.obscurePassword.value
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    controller.obscurePassword.value =
+                                        !controller.obscurePassword.value;
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 24),
 
-                    // Add bottom spacing to push content up
-                    SizedBox(height: SizeType.xxxxxs),
+                          /// Login Button
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.deepOrange,
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(10),
+                                ),
+                              ),
+                              onPressed: () {
+                                FocusScope.of(context).unfocus();
+                                controller.login();
+                              },
+                              child: const Text(
+                                'Login',
+                                style: TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
+
+                          /// Biometric Auth
+
+                          IconButton(
+                            onPressed: () async {
+                              controller.checkBiometricSupport();
+                            },
+                            icon: const FaIcon(
+                              FontAwesomeIcons.fingerprint,
+                              size: 40,
+                              color: Colors.deepOrange,
+                            ),
+                            tooltip: 'Login with Face/Fingerprint',
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 120),
                   ],
                 ),
               ),
             ),
-          ),
-        ),
-      ),
-    );
-  }
 
-  Widget _buildHeader() {
-    return Column(
-      children: [
-        CustomImageWidget(
-          fit: BoxFit.contain,
-          imagePath: AssetsConstant.logo,
-          height: 120,
-          // Increased logo size for full screen
-          width: double.infinity,
-          alignment: Alignment.center,
-        ),
-        SizedBox(height: SizeType.xxxxxxs),
-        Text(
-          LabelConstants.welcome,
-          style: GoogleFonts.poppins(
-            fontSize: 32.sp,
-            fontWeight: FontWeight.bold,
-            color: AppColor.primary,
-          ),
-        ),
-        SizedBox(height: SizeType.xxxxxxxxxxxs),
-        Text(
-            LabelConstants.signIn,
-            style:  GoogleFonts.poppins(
-              fontSize: 18.sp,
-
-              color: AppColor.secondary,
-            )
-        ),
-      ],
-    );
-  }
-
-  Widget _buildEmailField() {
-    return CustomTextField(
-      controller: controller.emailController,
-      labelText: 'Email',
-      hintText: 'Enter your email',
-      prefixIcon: Icons.email_outlined,
-      keyboardType: TextInputType.emailAddress,
-      validator: controller.validateEmail,
-    );
-  }
-
-  Widget _buildPasswordField() {
-    return Obx(
-          () => CustomTextField(
-        controller: controller.passwordController,
-        labelText: 'Password',
-        hintText: 'Enter your password',
-        prefixIcon: Icons.lock_outline,
-        obscureText: !controller.isPasswordVisible.value,
-        suffixIcon: IconButton(
-          icon: Icon(
-            controller.isPasswordVisible.value
-                ? Icons.visibility_off
-                : Icons.visibility,
-          ),
-          onPressed: controller.togglePasswordVisibility,
-        ),
-        validator: controller.validatePassword,
-      ),
-    );
-  }
-
-  Widget _buildLoginButton() {
-    return Obx(
-          () => CommonElevatedButton(
-        text: 'Login',
-        width: double.infinity,
-        isLoading: controller.isLoading.value,
-        onPressed:  controller.login,
-        child: SizedBox(),
-      ),
-    );
-  }
-
-  Widget _buildForgotPassword() {
-    return TextButton(
-      onPressed: controller.forgotPassword,
-
-      child: Text(
-        'Forgot Password?',
-        style: TextStyle(
-          color: Color(0xFF163049), // Changed to white70 for better contrast
-          fontSize: 16,
+            /// Industry image bottom
+            if (!isKeyboardOpen)
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: CustomImageWidget(
+                  imagePath: AssetsConstant.inudstry,
+                  fit: BoxFit.cover,
+                  height: 100,
+                  width: double.infinity,
+                  alignment: Alignment.bottomCenter,
+                ),
+              ),
+          ],
         ),
       ),
     );
