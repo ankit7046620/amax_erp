@@ -1,4 +1,5 @@
 import 'package:amax_hr/app/modules/HrDashboar/controllers/hr_dashboar_controller.dart';
+import 'package:amax_hr/app/modules/HrDashboar/controllers/recruitment_dashboard_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -13,7 +14,6 @@ class HrDashboarView extends GetView<HrDashboarController> {
 
     // Reactive variables for managing expanded states
     final RxInt expandedDashboard = 0.obs; // HR Dashboard expanded by default
-
     return Scaffold(
       appBar: AppBar(
         title: const Text('HR Dashboard'),
@@ -675,45 +675,394 @@ class HrDashboarView extends GetView<HrDashboarController> {
   }
 
   // Recruitment Dashboard Content (Placeholder)
+
+  // Recruitment Dashboard Content
   Widget _buildRecruitmentDashboardContent() {
-    return Container(
-      padding: const EdgeInsets.all(24),
-      child: Column(
-        children: [
-          Icon(
-            Icons.person_add,
-            size: 80,
-            color: Colors.green.shade300,
+    final RecruitmentDashboardController controller = Get.put(RecruitmentDashboardController());
+
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return _buildShimmerPlaceholder();
+      }
+
+      return Padding(
+        padding: const EdgeInsets.all(16),
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Recruitment Dashboard',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // First Row - Job Openings, Total Applicants, Accepted, Rejected
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'JOB OPENINGS',
+                      value: controller.totalJobOpenings.value.toString(),
+                      subtitle: 'Active positions',
+                      subtitleColor: Colors.grey.shade600,
+                      icon: Icons.work,
+                      iconColor: Colors.blue.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'TOTAL APPLICANTS THIS MONTH',
+                      value: controller.totalApplicantsThisMonth.value.toString(),
+                      subtitle: 'New applications',
+                      subtitleColor: Colors.blue.shade600,
+                      icon: Icons.people,
+                      iconColor: Colors.green.shade600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Second Row - Accepted and Rejected
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'ACCEPTED JOB APPLICANTS',
+                      value: controller.acceptedJobApplicants.value.toString(),
+                      subtitle: 'Successful candidates',
+                      subtitleColor: Colors.green.shade600,
+                      icon: Icons.check_circle,
+                      iconColor: Colors.green.shade600,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'REJECTED JOB APPLICANTS',
+                      value: controller.rejectedJobApplicants.value.toString(),
+                      subtitle: 'Not selected',
+                      subtitleColor: Colors.red.shade600,
+                      icon: Icons.cancel,
+                      iconColor: Colors.red.shade600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Third Row - Job Offers and New Candidates
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'JOB OFFER THIS MONTH',
+                      value: controller.jobOfferThisMonth.value.toString(),
+                      subtitle: 'Offers extended',
+                      subtitleColor: Colors.grey.shade700,
+                      icon: Icons.local_offer,
+                      iconColor: Colors.orange.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'NEW CANDIDATE ADDED THIS MONTH',
+                      value: controller.newCandidateAddedThisMonth.value.toString(),
+                      subtitle: 'Fresh candidates',
+                      subtitleColor: Colors.grey.shade700,
+                      icon: Icons.person_add,
+                      iconColor: Colors.purple.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+
+              // Fourth Row - Job Offer Acceptance Rate and Time to Fill
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'JOB OFFER ACCEPTANCE RATE',
+                      value: '${controller.jobOfferAcceptanceRate.value}%',
+                      subtitle: 'Acceptance ratio',
+                      subtitleColor: Colors.grey.shade700,
+                      icon: Icons.trending_up,
+                      iconColor: Colors.blue.shade700,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildDashboardCard(
+                      title: 'TIME TO FILL',
+                      value: '${controller.timeToFill.value}d',
+                      subtitle: 'Average days',
+                      subtitleColor: Colors.grey.shade700,
+                      icon: Icons.access_time,
+                      iconColor: Colors.teal.shade700,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+
+              // Job Applicant Pipeline Chart
+              _buildChartCard(
+                title: 'Job Applicant Pipeline',
+                subtitle: 'Last synced 6 hours ago',
+                child: SizedBox(
+                  height: 250,
+                  child: SfCartesianChart(
+                    enableAxisAnimation: true,
+                    primaryXAxis: CategoryAxis(
+                      majorGridLines: const MajorGridLines(width: 0),
+                    ),
+                    primaryYAxis: NumericAxis(
+                      labelFormat: '{value}',
+                      majorGridLines: const MajorGridLines(width: 0.5),
+                      minimum: 0,
+                    ),
+                    series: <CartesianSeries>[
+                      ColumnSeries<JobApplicantPipelineData, String>(
+                        dataSource: controller.jobApplicantPipelineData,
+                        xValueMapper: (data, _) => data.jobTitle,
+                        yValueMapper: (data, _) => data.count,
+                        color: const Color(0xFF2196F3),
+                        dataLabelSettings: const DataLabelSettings(isVisible: true),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Job Applicant Source Chart
+              _buildChartCard(
+                title: 'Job Applicant Source',
+                subtitle: 'Last synced 6 hours ago',
+                child: SizedBox(
+                  height: 250,
+                  child: SfCartesianChart(
+                    enableAxisAnimation: true,
+                    primaryXAxis: CategoryAxis(
+                      majorGridLines: const MajorGridLines(width: 0),
+                    ),
+                    primaryYAxis: NumericAxis(
+                      labelFormat: '{value}',
+                      majorGridLines: const MajorGridLines(width: 0.5),
+                      minimum: 0,
+                    ),
+                    series: <CartesianSeries>[
+                      ColumnSeries<JobApplicantSourceData, String>(
+                        dataSource: controller.jobApplicantSourceData,
+                        xValueMapper: (data, _) => data.source,
+                        yValueMapper: (data, _) => data.count,
+                        color: const Color(0xFF4CAF50),
+                        dataLabelSettings: const DataLabelSettings(isVisible: true),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // Row for Country and Application Status Charts
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildChartCard(
+                      title: 'Job Applicants by Country',
+                      subtitle: 'Last synced 6 hours ago',
+                      child: SizedBox(
+                        height: 250,
+                        child: SfCircularChart(
+                          legend: Legend(
+                            isVisible: true,
+                            position: LegendPosition.bottom,
+                            textStyle: const TextStyle(fontSize: 12),
+                          ),
+                          series: <CircularSeries>[
+                            PieSeries<JobApplicantsByCountryData, String>(
+                              dataSource: controller.jobApplicantsByCountryData,
+                              xValueMapper: (data, _) => data.country,
+                              yValueMapper: (data, _) => data.count,
+                              dataLabelMapper: (data, _) => '${data.count}',
+                              dataLabelSettings: const DataLabelSettings(
+                                isVisible: true,
+                                labelPosition: ChartDataLabelPosition.outside,
+                              ),
+                              pointColorMapper: (data, index) {
+                                return const Color(0xFF2196F3);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildChartCard(
+                      title: 'Job Application Status',
+                      subtitle: 'Last synced 6 hours ago',
+                      child: SizedBox(
+                        height: 250,
+                        child: SfCircularChart(
+                          legend: Legend(
+                            isVisible: true,
+                            position: LegendPosition.bottom,
+                            textStyle: const TextStyle(fontSize: 12),
+                          ),
+                          series: <CircularSeries>[
+                            PieSeries<JobApplicationStatusData, String>(
+                              dataSource: controller.jobApplicationStatusData,
+                              xValueMapper: (data, _) => data.status,
+                              yValueMapper: (data, _) => data.count,
+                              dataLabelMapper: (data, _) => '${data.count}',
+                              dataLabelSettings: const DataLabelSettings(
+                                isVisible: true,
+                                labelPosition: ChartDataLabelPosition.outside,
+                              ),
+                              pointColorMapper: (data, index) {
+                                final colors = [
+                                  const Color(0xFF4CAF50), // Green for Accepted
+                                  const Color(0xFFE91E63), // Pink for Rejected
+                                  const Color(0xFF2196F3), // Blue for Open
+                                ];
+                                return colors[index! % colors.length];
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Row for Job Offer Status and Interview Status
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildChartCard(
+                      title: 'Job Offer Status',
+                      subtitle: 'Last synced 6 hours ago',
+                      child: SizedBox(
+                        height: 250,
+                        child: SfCircularChart(
+                          legend: Legend(
+                            isVisible: true,
+                            position: LegendPosition.bottom,
+                            textStyle: const TextStyle(fontSize: 12),
+                          ),
+                          series: <CircularSeries>[
+                            PieSeries<JobOfferStatusData, String>(
+                              dataSource: controller.jobOfferStatusData,
+                              xValueMapper: (data, _) => data.status,
+                              yValueMapper: (data, _) => data.count,
+                              dataLabelMapper: (data, _) => '${data.count}',
+                              dataLabelSettings: const DataLabelSettings(
+                                isVisible: true,
+                                labelPosition: ChartDataLabelPosition.outside,
+                              ),
+                              pointColorMapper: (data, index) {
+                                return data.status == 'Accepted'
+                                    ? const Color(0xFF4CAF50)
+                                    : const Color(0xFFE91E63);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: _buildChartCard(
+                      title: 'Interview Status',
+                      subtitle: 'Last synced 6 hours ago',
+                      child: SizedBox(
+                        height: 250,
+                        child: SfCircularChart(
+                          legend: Legend(
+                            isVisible: true,
+                            position: LegendPosition.bottom,
+                            textStyle: const TextStyle(fontSize: 12),
+                          ),
+                          series: <CircularSeries>[
+                            PieSeries<InterviewStatusData, String>(
+                              dataSource: controller.interviewStatusData,
+                              xValueMapper: (data, _) => data.status,
+                              yValueMapper: (data, _) => data.count,
+                              dataLabelMapper: (data, _) => '${data.count}',
+                              dataLabelSettings: const DataLabelSettings(
+                                isVisible: true,
+                                labelPosition: ChartDataLabelPosition.outside,
+                              ),
+                              pointColorMapper: (data, index) {
+                                return const Color(0xFF2196F3);
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // Job Application Frequency Line Chart
+              _buildChartCard(
+                title: 'Job Application Frequency',
+                subtitle: 'Last synced 6 hours ago',
+                child: SizedBox(
+                  height: 250,
+                  child: SfCartesianChart(
+                    enableAxisAnimation: true,
+                    primaryXAxis: CategoryAxis(
+                      majorGridLines: const MajorGridLines(width: 0),
+                    ),
+                    primaryYAxis: NumericAxis(
+                      labelFormat: '{value}',
+                      majorGridLines: const MajorGridLines(width: 0.5),
+                      minimum: 0,
+                    ),
+                    series: <CartesianSeries>[
+                      LineSeries<JobApplicationFrequencyData, String>(
+                        dataSource: controller.jobApplicationFrequencyData,
+                        xValueMapper: (data, _) => data.month,
+                        yValueMapper: (data, _) => data.count,
+                        color: const Color(0xFF2196F3),
+                        markerSettings: const MarkerSettings(
+                          isVisible: true,
+                          shape: DataMarkerType.circle,
+                        ),
+                        dataLabelSettings: const DataLabelSettings(isVisible: true),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+            ],
           ),
-          const SizedBox(height: 16),
-          Text(
-            'Recruitment Dashboard',
-            style: TextStyle(
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
-              color: Colors.green.shade700,
-            ),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Coming Soon!',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'This dashboard will show recruitment metrics, job postings, candidate pipeline, interview schedules, and hiring analytics.',
-            textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
-          ),
-        ],
-      ),
-    );
+        ),
+      );
+    });
   }
 
   // Employee Lifecycle Dashboard Content (Placeholder)
@@ -1083,3 +1432,4 @@ class HrDashboarView extends GetView<HrDashboarController> {
     );
   }
 }
+
