@@ -1,5 +1,7 @@
 import 'package:amax_hr/app/modules/HrDashboar/controllers/hr_dashboar_controller.dart';
 import 'package:amax_hr/app/modules/HrDashboar/controllers/recruitment_dashboard_controller.dart';
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -13,20 +15,11 @@ class HrDashboarView extends GetView<HrDashboarController> {
     Get.put(HrDashboarController());
 
     // Reactive variables for managing expanded states
-    final RxInt expandedDashboard = 0.obs; // HR Dashboard expanded by default
+    final RxInt expandedDashboard =
+        (-1).obs; // HR Dashboard expanded by default
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('HR Dashboard'),
-        centerTitle: true,
-        backgroundColor: Colors.indigo.shade600,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: controller.refreshData,
-          ),
-        ],
-      ),
+      appBar: CommonAppBar(imagePath: AssetsConstant.tech_logo,showBack: true,),
+
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -115,32 +108,23 @@ class HrDashboarView extends GetView<HrDashboarController> {
             child: InkWell(
               borderRadius: BorderRadius.circular(12),
               onTap: () {
-                if (expandedDashboard.value == index) {
-                  expandedDashboard.value = -1; // Collapse if already expanded
-                } else {
-                  expandedDashboard.value = index; // Expand this dashboard
-                }
+                expandedDashboard.value = expandedDashboard.value == index
+                    ? -1
+                    : index;
               },
               child: Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(12),
                   gradient: LinearGradient(
-                    colors: [
-                      color.shade600,
-                      color.shade400,
-                    ],
+                    colors: [color.shade600, color.shade400],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      icon,
-                      color: Colors.white,
-                      size: 24,
-                    ),
+                    Icon(icon, color: Colors.white, size: 24),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -152,17 +136,18 @@ class HrDashboarView extends GetView<HrDashboarController> {
                         ),
                       ),
                     ),
-
                     const SizedBox(width: 12),
-                    Obx(() => AnimatedRotation(
-                      turns: expandedDashboard.value == index ? 0.5 : 0,
-                      duration: const Duration(milliseconds: 300),
-                      child: const Icon(
-                        Icons.expand_more,
-                        color: Colors.white,
-                        size: 24,
+                    Obx(
+                      () => AnimatedRotation(
+                        turns: expandedDashboard.value == index ? 0.5 : 0,
+                        duration: const Duration(milliseconds: 300),
+                        child: const Icon(
+                          Icons.expand_more,
+                          color: Colors.white,
+                          size: 24,
+                        ),
                       ),
-                    )),
+                    ),
                   ],
                 ),
               ),
@@ -170,28 +155,27 @@ class HrDashboarView extends GetView<HrDashboarController> {
           ),
 
           // Expandable Content
-          Obx(() => AnimatedContainer(
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-            height: expandedDashboard.value == index ? null : 0,
-            child: expandedDashboard.value == index
-                ? Container(
-              width: double.infinity,
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(12),
-                  bottomRight: Radius.circular(12),
-                ),
-                border: Border.all(
-                  color: color.shade200,
-                  width: 2,
-                ),
-              ),
-              child: content,
-            )
-                : const SizedBox.shrink(),
-          )),
+          Obx(
+            () => AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              height: expandedDashboard.value == index ? null : 0,
+              child: expandedDashboard.value == index
+                  ? Container(
+                      width: double.infinity,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: const BorderRadius.only(
+                          bottomLeft: Radius.circular(12),
+                          bottomRight: Radius.circular(12),
+                        ),
+                        border: Border.all(color: color.shade200, width: 2),
+                      ),
+                      child: content,
+                    )
+                  : const SizedBox.shrink(),
+            ),
+          ),
         ],
       ),
     );
@@ -274,7 +258,8 @@ class HrDashboarView extends GetView<HrDashboarController> {
                 Expanded(
                   child: _buildDashboardCard(
                     title: 'EMPLOYEES JOINING (THIS QUARTER)',
-                    value: controller.employeesJoiningThisQuarter.value.toString(),
+                    value: controller.employeesJoiningThisQuarter.value
+                        .toString(),
                     subtitle: '0 % since last quarter',
                     subtitleColor: Colors.grey.shade700,
                     icon: Icons.trending_up,
@@ -285,7 +270,8 @@ class HrDashboarView extends GetView<HrDashboarController> {
                 Expanded(
                   child: _buildDashboardCard(
                     title: 'EMPLOYEES RELIEVING (THIS QUARTER)',
-                    value: controller.employeesRelievingThisQuarter.value.toString(),
+                    value: controller.employeesRelievingThisQuarter.value
+                        .toString(),
                     subtitle: '0 % since last quarter',
                     subtitleColor: Colors.grey.shade700,
                     icon: Icons.trending_down,
@@ -306,12 +292,20 @@ class HrDashboarView extends GetView<HrDashboarController> {
                   onSelectionChanged: (SelectionArgs args) {
                     if (args.seriesIndex != null && args.pointIndex != null) {
                       final seriesData = args.seriesIndex == 0
-                          ? controller.hiringAttritionData.where((data) => data.type == "Hiring Count").toList()
-                          : controller.hiringAttritionData.where((data) => data.type == "Attrition Count").toList();
+                          ? controller.hiringAttritionData
+                                .where((data) => data.type == "Hiring Count")
+                                .toList()
+                          : controller.hiringAttritionData
+                                .where((data) => data.type == "Attrition Count")
+                                .toList();
 
                       if (args.pointIndex! < seriesData.length) {
                         final selectedData = seriesData[args.pointIndex!];
-                        _showValueTooltip(Get.context!, selectedData.type, selectedData.value.toDouble());
+                        _showValueTooltip(
+                          Get.context!,
+                          selectedData.type,
+                          selectedData.value.toDouble(),
+                        );
                       }
                     }
                   },
@@ -333,7 +327,9 @@ class HrDashboarView extends GetView<HrDashboarController> {
                   ),
                   series: <CartesianSeries>[
                     LineSeries<HiringAttritionData, String>(
-                      dataSource: controller.hiringAttritionData.where((data) => data.type == "Hiring Count").toList(),
+                      dataSource: controller.hiringAttritionData
+                          .where((data) => data.type == "Hiring Count")
+                          .toList(),
                       xValueMapper: (data, _) => data.month,
                       yValueMapper: (data, _) => data.value,
                       name: "Hiring Count",
@@ -344,7 +340,9 @@ class HrDashboarView extends GetView<HrDashboarController> {
                       ),
                     ),
                     LineSeries<HiringAttritionData, String>(
-                      dataSource: controller.hiringAttritionData.where((data) => data.type == "Attrition Count").toList(),
+                      dataSource: controller.hiringAttritionData
+                          .where((data) => data.type == "Attrition Count")
+                          .toList(),
                       xValueMapper: (data, _) => data.month,
                       yValueMapper: (data, _) => data.value,
                       name: "Attrition Count",
@@ -369,9 +367,16 @@ class HrDashboarView extends GetView<HrDashboarController> {
                 height: 250,
                 child: SfCartesianChart(
                   onSelectionChanged: (SelectionArgs args) {
-                    if (args.pointIndex != null && args.pointIndex! < controller.employeesByAgeData.length) {
-                      final selectedData = controller.employeesByAgeData[args.pointIndex!];
-                      _showValueTooltip(Get.context!, selectedData.ageGroup, selectedData.count.toDouble());
+                    if (args.pointIndex != null &&
+                        args.pointIndex! <
+                            controller.employeesByAgeData.length) {
+                      final selectedData =
+                          controller.employeesByAgeData[args.pointIndex!];
+                      _showValueTooltip(
+                        Get.context!,
+                        selectedData.ageGroup,
+                        selectedData.count.toDouble(),
+                      );
                     }
                   },
                   enableAxisAnimation: true,
@@ -413,9 +418,15 @@ class HrDashboarView extends GetView<HrDashboarController> {
                     height: 250,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.genderData.length) {
-                          final selectedData = controller.genderData[args.pointIndex!];
-                          _showValueTooltip(Get.context!, selectedData.gender, selectedData.count.toDouble());
+                        if (args.pointIndex != null &&
+                            args.pointIndex! < controller.genderData.length) {
+                          final selectedData =
+                              controller.genderData[args.pointIndex!];
+                          _showValueTooltip(
+                            Get.context!,
+                            selectedData.gender,
+                            selectedData.count.toDouble(),
+                          );
                         }
                       },
                       legend: Legend(
@@ -455,9 +466,16 @@ class HrDashboarView extends GetView<HrDashboarController> {
                     height: 250,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.employeeTypeData.length) {
-                          final selectedData = controller.employeeTypeData[args.pointIndex!];
-                          _showValueTooltip(Get.context!, selectedData.type, selectedData.count.toDouble());
+                        if (args.pointIndex != null &&
+                            args.pointIndex! <
+                                controller.employeeTypeData.length) {
+                          final selectedData =
+                              controller.employeeTypeData[args.pointIndex!];
+                          _showValueTooltip(
+                            Get.context!,
+                            selectedData.type,
+                            selectedData.count.toDouble(),
+                          );
                         }
                       },
                       legend: Legend(
@@ -502,9 +520,15 @@ class HrDashboarView extends GetView<HrDashboarController> {
                     height: 250,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.gradeData.length) {
-                          final selectedData = controller.gradeData[args.pointIndex!];
-                          _showValueTooltip(Get.context!, selectedData.grade, selectedData.count.toDouble());
+                        if (args.pointIndex != null &&
+                            args.pointIndex! < controller.gradeData.length) {
+                          final selectedData =
+                              controller.gradeData[args.pointIndex!];
+                          _showValueTooltip(
+                            Get.context!,
+                            selectedData.grade,
+                            selectedData.count.toDouble(),
+                          );
                         }
                       },
                       legend: Legend(
@@ -542,9 +566,15 @@ class HrDashboarView extends GetView<HrDashboarController> {
                     height: 250,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.branchData.length) {
-                          final selectedData = controller.branchData[args.pointIndex!];
-                          _showValueTooltip(Get.context!, selectedData.branch, selectedData.count.toDouble());
+                        if (args.pointIndex != null &&
+                            args.pointIndex! < controller.branchData.length) {
+                          final selectedData =
+                              controller.branchData[args.pointIndex!];
+                          _showValueTooltip(
+                            Get.context!,
+                            selectedData.branch,
+                            selectedData.count.toDouble(),
+                          );
                         }
                       },
                       legend: Legend(
@@ -593,9 +623,16 @@ class HrDashboarView extends GetView<HrDashboarController> {
                     height: 250,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.designationChartData.length) {
-                          final selectedData = controller.designationChartData[args.pointIndex!];
-                          _showValueTooltip(Get.context!, selectedData.designation, selectedData.count.toDouble());
+                        if (args.pointIndex != null &&
+                            args.pointIndex! <
+                                controller.designationChartData.length) {
+                          final selectedData =
+                              controller.designationChartData[args.pointIndex!];
+                          _showValueTooltip(
+                            Get.context!,
+                            selectedData.designation,
+                            selectedData.count.toDouble(),
+                          );
                         }
                       },
                       legend: Legend(
@@ -636,9 +673,16 @@ class HrDashboarView extends GetView<HrDashboarController> {
                     height: 250,
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
-                        if (args.pointIndex != null && args.pointIndex! < controller.departmentChartData.length) {
-                          final selectedData = controller.departmentChartData[args.pointIndex!];
-                          _showValueTooltip(Get.context!, selectedData.department, selectedData.count.toDouble());
+                        if (args.pointIndex != null &&
+                            args.pointIndex! <
+                                controller.departmentChartData.length) {
+                          final selectedData =
+                              controller.departmentChartData[args.pointIndex!];
+                          _showValueTooltip(
+                            Get.context!,
+                            selectedData.department,
+                            selectedData.count.toDouble(),
+                          );
                         }
                       },
                       legend: Legend(
@@ -678,7 +722,9 @@ class HrDashboarView extends GetView<HrDashboarController> {
 
   // Recruitment Dashboard Content
   Widget _buildRecruitmentDashboardContent() {
-    final RecruitmentDashboardController controller = Get.put(RecruitmentDashboardController());
+    final RecruitmentDashboardController controller = Get.put(
+      RecruitmentDashboardController(),
+    );
 
     return Obx(() {
       if (controller.isLoading.value) {
@@ -718,7 +764,8 @@ class HrDashboarView extends GetView<HrDashboarController> {
                   Expanded(
                     child: _buildDashboardCard(
                       title: 'TOTAL APPLICANTS THIS MONTH',
-                      value: controller.totalApplicantsThisMonth.value.toString(),
+                      value: controller.totalApplicantsThisMonth.value
+                          .toString(),
                       subtitle: 'New applications',
                       subtitleColor: Colors.blue.shade600,
                       icon: Icons.people,
@@ -774,7 +821,8 @@ class HrDashboarView extends GetView<HrDashboarController> {
                   Expanded(
                     child: _buildDashboardCard(
                       title: 'NEW CANDIDATE ADDED THIS MONTH',
-                      value: controller.newCandidateAddedThisMonth.value.toString(),
+                      value: controller.newCandidateAddedThisMonth.value
+                          .toString(),
                       subtitle: 'Fresh candidates',
                       subtitleColor: Colors.grey.shade700,
                       icon: Icons.person_add,
@@ -835,7 +883,9 @@ class HrDashboarView extends GetView<HrDashboarController> {
                         xValueMapper: (data, _) => data.jobTitle,
                         yValueMapper: (data, _) => data.count,
                         color: const Color(0xFF2196F3),
-                        dataLabelSettings: const DataLabelSettings(isVisible: true),
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                        ),
                       ),
                     ],
                   ),
@@ -866,7 +916,9 @@ class HrDashboarView extends GetView<HrDashboarController> {
                         xValueMapper: (data, _) => data.source,
                         yValueMapper: (data, _) => data.count,
                         color: const Color(0xFF4CAF50),
-                        dataLabelSettings: const DataLabelSettings(isVisible: true),
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                        ),
                       ),
                     ],
                   ),
@@ -1050,7 +1102,9 @@ class HrDashboarView extends GetView<HrDashboarController> {
                           isVisible: true,
                           shape: DataMarkerType.circle,
                         ),
-                        dataLabelSettings: const DataLabelSettings(isVisible: true),
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                        ),
                       ),
                     ],
                   ),
@@ -1071,11 +1125,7 @@ class HrDashboarView extends GetView<HrDashboarController> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Icon(
-            Icons.timeline,
-            size: 80,
-            color: Colors.blue.shade300,
-          ),
+          Icon(Icons.timeline, size: 80, color: Colors.blue.shade300),
           const SizedBox(height: 16),
           Text(
             'Employee Lifecycle Dashboard',
@@ -1088,19 +1138,13 @@ class HrDashboarView extends GetView<HrDashboarController> {
           const SizedBox(height: 8),
           Text(
             'Coming Soon!',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 16),
           Text(
             'This dashboard will track employee journey from onboarding to exit, performance reviews, career progression, and retention analytics.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
       ),
@@ -1113,11 +1157,7 @@ class HrDashboarView extends GetView<HrDashboarController> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Icon(
-            Icons.access_time,
-            size: 80,
-            color: Colors.orange.shade300,
-          ),
+          Icon(Icons.access_time, size: 80, color: Colors.orange.shade300),
           const SizedBox(height: 16),
           Text(
             'Attendance Dashboard',
@@ -1130,19 +1170,13 @@ class HrDashboarView extends GetView<HrDashboarController> {
           const SizedBox(height: 8),
           Text(
             'Coming Soon!',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 16),
           Text(
             'This dashboard will display attendance patterns, leave management, work hours tracking, and punctuality reports.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
       ),
@@ -1155,11 +1189,7 @@ class HrDashboarView extends GetView<HrDashboarController> {
       padding: const EdgeInsets.all(24),
       child: Column(
         children: [
-          Icon(
-            Icons.receipt,
-            size: 80,
-            color: Colors.purple.shade300,
-          ),
+          Icon(Icons.receipt, size: 80, color: Colors.purple.shade300),
           const SizedBox(height: 16),
           Text(
             'Expense Claims Dashboard',
@@ -1172,19 +1202,13 @@ class HrDashboarView extends GetView<HrDashboarController> {
           const SizedBox(height: 8),
           Text(
             'Coming Soon!',
-            style: TextStyle(
-              fontSize: 16,
-              color: Colors.grey.shade600,
-            ),
+            style: TextStyle(fontSize: 16, color: Colors.grey.shade600),
           ),
           const SizedBox(height: 16),
           Text(
             'This dashboard will manage expense submissions, approval workflows, reimbursement tracking, and expense analytics.',
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey.shade500,
-            ),
+            style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
           ),
         ],
       ),
@@ -1360,10 +1384,7 @@ class HrDashboarView extends GetView<HrDashboarController> {
                 if (subtitle != null)
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 10,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
                   ),
               ],
             ),
@@ -1432,4 +1453,3 @@ class HrDashboarView extends GetView<HrDashboarController> {
     );
   }
 }
-

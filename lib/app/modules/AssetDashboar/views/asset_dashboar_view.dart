@@ -1,4 +1,6 @@
 import 'package:amax_hr/app/modules/AssetDashboar/controllers/asset_dashboar_controller.dart';
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -11,18 +13,12 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
   Widget build(BuildContext context) {
     Get.put(AssetDashboardController());
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Asset Dashboard'),
-        centerTitle: true,
-        backgroundColor: Colors.indigo.shade600,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: controller.refreshData,
-          ),
-        ],
+      appBar: CommonAppBar(
+        imagePath: AssetsConstant.tech_logo,
+        showBack: true,
+        actions: [_acationButton()],
       ),
+
       body: Obx(() {
         if (controller.isLoading.value) {
           return _buildShimmerPlaceholder();
@@ -92,14 +88,26 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
                     child: SfCartesianChart(
                       onSelectionChanged: (SelectionArgs args) {
                         // Handle column click event
-                        if (args.seriesIndex != null && args.pointIndex != null) {
+                        if (args.seriesIndex != null &&
+                            args.pointIndex != null) {
                           final seriesData = args.seriesIndex == 0
-                              ? controller.assetValueAnalyticsData.where((data) => data.type == "Asset Value").toList()
-                              : controller.assetValueAnalyticsData.where((data) => data.type == "Depreciated Amount").toList();
+                              ? controller.assetValueAnalyticsData
+                                    .where((data) => data.type == "Asset Value")
+                                    .toList()
+                              : controller.assetValueAnalyticsData
+                                    .where(
+                                      (data) =>
+                                          data.type == "Depreciated Amount",
+                                    )
+                                    .toList();
 
                           if (args.pointIndex! < seriesData.length) {
                             final selectedData = seriesData[args.pointIndex!];
-                            _showValueTooltip(context, selectedData.type, selectedData.value);
+                            _showValueTooltip(
+                              context,
+                              selectedData.type,
+                              selectedData.value,
+                            );
                           }
                         }
                       },
@@ -118,25 +126,35 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
                       ),
                       series: <CartesianSeries>[
                         StackedColumnSeries<AssetValueAnalyticsData, String>(
-                          dataSource: controller.assetValueAnalyticsData.where((data) => data.type == "Asset Value").toList(),
+                          dataSource: controller.assetValueAnalyticsData
+                              .where((data) => data.type == "Asset Value")
+                              .toList(),
                           xValueMapper: (data, _) => "Nov 2023",
                           yValueMapper: (data, _) => data.value / 100000,
                           name: "Asset Value",
                           color: const Color(0xFFE91E63),
                           selectionBehavior: SelectionBehavior(
                             enable: true,
-                            selectedColor: const Color(0xFFE91E63).withOpacity(0.7),
+                            selectedColor: const Color(
+                              0xFFE91E63,
+                            ).withOpacity(0.7),
                           ),
                         ),
                         StackedColumnSeries<AssetValueAnalyticsData, String>(
-                          dataSource: controller.assetValueAnalyticsData.where((data) => data.type == "Depreciated Amount").toList(),
+                          dataSource: controller.assetValueAnalyticsData
+                              .where(
+                                (data) => data.type == "Depreciated Amount",
+                              )
+                              .toList(),
                           xValueMapper: (data, _) => "Nov 2023",
                           yValueMapper: (data, _) => data.value / 100000,
                           name: "Depreciated Amount",
                           color: const Color(0xFF2196F3),
                           selectionBehavior: SelectionBehavior(
                             enable: true,
-                            selectedColor: const Color(0xFF2196F3).withOpacity(0.7),
+                            selectedColor: const Color(
+                              0xFF2196F3,
+                            ).withOpacity(0.7),
                           ),
                         ),
                       ],
@@ -155,9 +173,16 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
                         // Handle pie chart click event
-                        if (args.pointIndex != null && args.pointIndex! < controller.categoryChartData.length) {
-                          final selectedData = controller.categoryChartData[args.pointIndex!];
-                          _showValueTooltip(context, selectedData.category, selectedData.value);
+                        if (args.pointIndex != null &&
+                            args.pointIndex! <
+                                controller.categoryChartData.length) {
+                          final selectedData =
+                              controller.categoryChartData[args.pointIndex!];
+                          _showValueTooltip(
+                            context,
+                            selectedData.category,
+                            selectedData.value,
+                          );
                         }
                       },
                       legend: Legend(
@@ -171,7 +196,8 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
                           dataSource: controller.categoryChartData,
                           xValueMapper: (data, _) => data.category,
                           yValueMapper: (data, _) => data.value,
-                          dataLabelMapper: (data, _) => '${(data.value / 1000).toStringAsFixed(0)}K',
+                          dataLabelMapper: (data, _) =>
+                              '${(data.value / 1000).toStringAsFixed(0)}K',
                           dataLabelSettings: const DataLabelSettings(
                             isVisible: true,
                             labelPosition: ChartDataLabelPosition.outside,
@@ -209,9 +235,16 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
                     child: SfCircularChart(
                       onSelectionChanged: (SelectionArgs args) {
                         // Handle pie chart click event
-                        if (args.pointIndex != null && args.pointIndex! < controller.locationChartData.length) {
-                          final selectedData = controller.locationChartData[args.pointIndex!];
-                          _showValueTooltip(context, selectedData.location, selectedData.totalAssetValue);
+                        if (args.pointIndex != null &&
+                            args.pointIndex! <
+                                controller.locationChartData.length) {
+                          final selectedData =
+                              controller.locationChartData[args.pointIndex!];
+                          _showValueTooltip(
+                            context,
+                            selectedData.location,
+                            selectedData.totalAssetValue,
+                          );
                         }
                       },
                       legend: Legend(
@@ -225,7 +258,8 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
                           dataSource: controller.locationChartData,
                           xValueMapper: (data, _) => data.location,
                           yValueMapper: (data, _) => data.totalAssetValue,
-                          dataLabelMapper: (data, _) => '${(data.totalAssetValue / 1000).toStringAsFixed(0)}K',
+                          dataLabelMapper: (data, _) =>
+                              '${(data.totalAssetValue / 1000).toStringAsFixed(0)}K',
                           dataLabelSettings: const DataLabelSettings(
                             isVisible: true,
                             labelPosition: ChartDataLabelPosition.outside,
@@ -257,6 +291,13 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
           ),
         );
       }),
+    );
+  }
+
+  Widget _acationButton() {
+    return IconButton(
+      icon: const Icon(Icons.refresh, color: Colors.black),
+      onPressed: controller.refreshData,
     );
   }
 
@@ -392,10 +433,7 @@ class AssetDashboardView extends GetView<AssetDashboardController> {
                 if (subtitle != null)
                   Text(
                     subtitle,
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: Colors.grey.shade600,
-                    ),
+                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
                   ),
               ],
             ),
