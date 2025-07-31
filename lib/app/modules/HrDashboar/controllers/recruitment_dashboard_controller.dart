@@ -64,8 +64,8 @@ class RecruitmentDashboardController extends GetxController {
     final currentYear = DateTime.now().year;
 
     // Calculate basic stats
-    totalJobOpenings.value = jobApplicants.map((app) => app['job_title']).where((title) => title != null && title.toString().isNotEmpty).toSet().length;
-
+  //  totalJobOpenings.value = jobApplicants.map((app) => app['job_title']).where((title) => title != null && title.toString().isNotEmpty).toSet().length;
+    totalJobOpenings.value = jobApplicants.where((app) => app['status'] == 'Open').length;
     // Total applicants this month
     totalApplicantsThisMonth.value = jobApplicants.where((app) {
       if (app['creation'] != null) {

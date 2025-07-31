@@ -15,8 +15,6 @@ void main() async {
   await ScreenUtil.ensureScreenSize();
   TGFlavor.init("assets/config/flavors.json");
 
-
-
   runApp(
     ScreenUtilInit(
       designSize: MediaQueryData.fromView(
