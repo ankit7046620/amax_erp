@@ -3,7 +3,7 @@
 on:
   push:
     branches:
-      - master  # Change if your main branch has a different name
+      - master
   workflow_dispatch:
 
 jobs:
@@ -17,21 +17,30 @@ jobs:
       - name: ✅ Checkout code
         uses: actions/checkout@v4
 
+      - name: 🛠️ Get Flutter version
+        run: |
+          if [ -f ".flutter-version" ]; then
+            FLUTTER_VERSION=$(cat .flutter-version)
+          else
+            FLUTTER_VERSION=$(grep 'flutter:' pubspec.yaml | awk '{print $2}' | tr -d '"')
+          fi
+          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> $GITHUB_ENV
+
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.19.6'  # Optional: specify your Flutter version
+          flutter-version: ${{ env.FLUTTER_VERSION }}
 
       - name: 📦 Install dependencies
         run: flutter pub get
 
-      - name: 🧪 Analyze code
+      - name: 🔍 Analyze code
         run: flutter analyze || true
 
       - name: 🏗️ Build APK
         run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/debug_info
 
-      - name: 📝 Rename APK with date
+      - name: 📝 Rename APK with current date
         run: |
           DATE=$(date +'%Y-%m-%d')
           ORIG_APK=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
