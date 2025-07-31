@@ -3,7 +3,7 @@
 on:
   push:
     branches:
-      - main  # Change if your main branch has a different name
+      - master  # Change if your main branch has a different name
   workflow_dispatch:
 
 jobs:
