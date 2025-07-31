@@ -876,73 +876,70 @@ class HrDashboarView extends GetView<HrDashboarController> {
               const SizedBox(height: 20),
 
               // Row for Country and Application Status Charts
-              Row(
+              // Column for Country and Application Status Charts
+              Column(
                 children: [
-                  Expanded(
-                    child: _buildChartCard(
-                      title: 'Job Applicants by Country',
-                      subtitle: 'Last synced 6 hours ago',
-                      child: SizedBox(
-                        height: 250,
-                        child: SfCircularChart(
-                          legend: Legend(
-                            isVisible: true,
-                            position: LegendPosition.bottom,
-                            textStyle: const TextStyle(fontSize: 12),
-                          ),
-                          series: <CircularSeries>[
-                            PieSeries<JobApplicantsByCountryData, String>(
-                              dataSource: controller.jobApplicantsByCountryData,
-                              xValueMapper: (data, _) => data.country,
-                              yValueMapper: (data, _) => data.count,
-                              dataLabelMapper: (data, _) => '${data.count}',
-                              dataLabelSettings: const DataLabelSettings(
-                                isVisible: true,
-                                labelPosition: ChartDataLabelPosition.outside,
-                              ),
-                              pointColorMapper: (data, index) {
-                                return const Color(0xFF2196F3);
-                              },
-                            ),
-                          ],
+                  _buildChartCard(
+                    title: 'Job Applicants by Country',
+                    subtitle: 'Last synced 6 hours ago',
+                    child: SizedBox(
+                      height: 250,
+                      child: SfCircularChart(
+                        legend: Legend(
+                          isVisible: true,
+                          position: LegendPosition.bottom,
+                          textStyle: const TextStyle(fontSize: 12),
                         ),
+                        series: <CircularSeries>[
+                          PieSeries<JobApplicantsByCountryData, String>(
+                            dataSource: controller.jobApplicantsByCountryData,
+                            xValueMapper: (data, _) => data.country,
+                            yValueMapper: (data, _) => data.count,
+                            dataLabelMapper: (data, _) => '${data.count}',
+                            dataLabelSettings: const DataLabelSettings(
+                              isVisible: true,
+                              labelPosition: ChartDataLabelPosition.outside,
+                            ),
+                            pointColorMapper: (data, index) {
+                              return const Color(0xFF2196F3);
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildChartCard(
-                      title: 'Job Application Status',
-                      subtitle: 'Last synced 6 hours ago',
-                      child: SizedBox(
-                        height: 250,
-                        child: SfCircularChart(
-                          legend: Legend(
-                            isVisible: true,
-                            position: LegendPosition.bottom,
-                            textStyle: const TextStyle(fontSize: 12),
-                          ),
-                          series: <CircularSeries>[
-                            PieSeries<JobApplicationStatusData, String>(
-                              dataSource: controller.jobApplicationStatusData,
-                              xValueMapper: (data, _) => data.status,
-                              yValueMapper: (data, _) => data.count,
-                              dataLabelMapper: (data, _) => '${data.count}',
-                              dataLabelSettings: const DataLabelSettings(
-                                isVisible: true,
-                                labelPosition: ChartDataLabelPosition.outside,
-                              ),
-                              pointColorMapper: (data, index) {
-                                final colors = [
-                                  const Color(0xFF4CAF50), // Green for Accepted
-                                  const Color(0xFFE91E63), // Pink for Rejected
-                                  const Color(0xFF2196F3), // Blue for Open
-                                ];
-                                return colors[index! % colors.length];
-                              },
-                            ),
-                          ],
+                  const SizedBox(height: 16),
+                  _buildChartCard(
+                    title: 'Job Application Status',
+                    subtitle: 'Last synced 6 hours ago',
+                    child: SizedBox(
+                      height: 250,
+                      child: SfCircularChart(
+                        legend: Legend(
+                          isVisible: true,
+                          position: LegendPosition.bottom,
+                          textStyle: const TextStyle(fontSize: 12),
                         ),
+                        series: <CircularSeries>[
+                          PieSeries<JobApplicationStatusData, String>(
+                            dataSource: controller.jobApplicationStatusData,
+                            xValueMapper: (data, _) => data.status,
+                            yValueMapper: (data, _) => data.count,
+                            dataLabelMapper: (data, _) => '${data.count}',
+                            dataLabelSettings: const DataLabelSettings(
+                              isVisible: true,
+                              labelPosition: ChartDataLabelPosition.outside,
+                            ),
+                            pointColorMapper: (data, index) {
+                              final colors = [
+                                const Color(0xFF4CAF50), // Accepted - Green
+                                const Color(0xFFE91E63), // Rejected - Pink
+                                const Color(0xFF2196F3), // Open - Blue
+                              ];
+                              return colors[index! % colors.length];
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
@@ -951,76 +948,73 @@ class HrDashboarView extends GetView<HrDashboarController> {
 
               const SizedBox(height: 20),
 
-              // Row for Job Offer Status and Interview Status
-              Row(
+              // Column for Job Offer Status and Interview Status
+              Column(
                 children: [
-                  Expanded(
-                    child: _buildChartCard(
-                      title: 'Job Offer Status',
-                      subtitle: 'Last synced 6 hours ago',
-                      child: SizedBox(
-                        height: 250,
-                        child: SfCircularChart(
-                          legend: Legend(
-                            isVisible: true,
-                            position: LegendPosition.bottom,
-                            textStyle: const TextStyle(fontSize: 12),
-                          ),
-                          series: <CircularSeries>[
-                            PieSeries<JobOfferStatusData, String>(
-                              dataSource: controller.jobOfferStatusData,
-                              xValueMapper: (data, _) => data.status,
-                              yValueMapper: (data, _) => data.count,
-                              dataLabelMapper: (data, _) => '${data.count}',
-                              dataLabelSettings: const DataLabelSettings(
-                                isVisible: true,
-                                labelPosition: ChartDataLabelPosition.outside,
-                              ),
-                              pointColorMapper: (data, index) {
-                                return data.status == 'Accepted'
-                                    ? const Color(0xFF4CAF50)
-                                    : const Color(0xFFE91E63);
-                              },
-                            ),
-                          ],
+                  _buildChartCard(
+                    title: 'Job Offer Status',
+                    subtitle: 'Last synced 6 hours ago',
+                    child: SizedBox(
+                      height: 250,
+                      child: SfCircularChart(
+                        legend: Legend(
+                          isVisible: true,
+                          position: LegendPosition.bottom,
+                          textStyle: const TextStyle(fontSize: 12),
                         ),
+                        series: <CircularSeries>[
+                          PieSeries<JobOfferStatusData, String>(
+                            dataSource: controller.jobOfferStatusData,
+                            xValueMapper: (data, _) => data.status,
+                            yValueMapper: (data, _) => data.count,
+                            dataLabelMapper: (data, _) => '${data.count}',
+                            dataLabelSettings: const DataLabelSettings(
+                              isVisible: true,
+                              labelPosition: ChartDataLabelPosition.outside,
+                            ),
+                            pointColorMapper: (data, index) {
+                              return data.status == 'Accepted'
+                                  ? const Color(0xFF4CAF50)
+                                  : const Color(0xFFE91E63);
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: _buildChartCard(
-                      title: 'Interview Status',
-                      subtitle: 'Last synced 6 hours ago',
-                      child: SizedBox(
-                        height: 250,
-                        child: SfCircularChart(
-                          legend: Legend(
-                            isVisible: true,
-                            position: LegendPosition.bottom,
-                            textStyle: const TextStyle(fontSize: 12),
-                          ),
-                          series: <CircularSeries>[
-                            PieSeries<InterviewStatusData, String>(
-                              dataSource: controller.interviewStatusData,
-                              xValueMapper: (data, _) => data.status,
-                              yValueMapper: (data, _) => data.count,
-                              dataLabelMapper: (data, _) => '${data.count}',
-                              dataLabelSettings: const DataLabelSettings(
-                                isVisible: true,
-                                labelPosition: ChartDataLabelPosition.outside,
-                              ),
-                              pointColorMapper: (data, index) {
-                                return const Color(0xFF2196F3);
-                              },
-                            ),
-                          ],
+                  const SizedBox(height: 16),
+                  _buildChartCard(
+                    title: 'Interview Status',
+                    subtitle: 'Last synced 6 hours ago',
+                    child: SizedBox(
+                      height: 250,
+                      child: SfCircularChart(
+                        legend: Legend(
+                          isVisible: true,
+                          position: LegendPosition.bottom,
+                          textStyle: const TextStyle(fontSize: 12),
                         ),
+                        series: <CircularSeries>[
+                          PieSeries<InterviewStatusData, String>(
+                            dataSource: controller.interviewStatusData,
+                            xValueMapper: (data, _) => data.status,
+                            yValueMapper: (data, _) => data.count,
+                            dataLabelMapper: (data, _) => '${data.count}',
+                            dataLabelSettings: const DataLabelSettings(
+                              isVisible: true,
+                              labelPosition: ChartDataLabelPosition.outside,
+                            ),
+                            pointColorMapper: (data, index) {
+                              return const Color(0xFF2196F3);
+                            },
+                          ),
+                        ],
                       ),
                     ),
                   ),
                 ],
               ),
+
 
               const SizedBox(height: 20),
 
