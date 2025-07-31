@@ -2,8 +2,7 @@
 
 on:
   push:
-    branches:
-      - master
+    branches: [master]
   workflow_dispatch:
 
 jobs:
@@ -17,19 +16,10 @@ jobs:
       - name: ✅ Checkout code
         uses: actions/checkout@v4
 
-      - name: 🛠️ Get Flutter version
-        run: |
-          if [ -f ".flutter-version" ]; then
-            FLUTTER_VERSION=$(cat .flutter-version)
-          else
-            FLUTTER_VERSION=$(grep 'flutter:' pubspec.yaml | awk '{print $2}' | tr -d '"')
-          fi
-          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> $GITHUB_ENV
-
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: "3.19.6" # Change if you're using a different version
 
       - name: 📦 Install dependencies
         run: flutter pub get
