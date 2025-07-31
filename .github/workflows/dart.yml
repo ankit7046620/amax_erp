@@ -1,9 +1,9 @@
-name: Flutter CI
+ name: Flutter CI
 
 on:
   push:
     branches:
-      - main   # 🔁 Change to 'master' if your repo uses that
+      - main  # Change if your main branch has a different name
   workflow_dispatch:
 
 jobs:
@@ -17,30 +17,21 @@ jobs:
       - name: ✅ Checkout code
         uses: actions/checkout@v4
 
-      - name: 🛠️ Get Flutter version
-        run: |
-          if [ -f ".flutter-version" ]; then
-            FLUTTER_VERSION=$(cat .flutter-version)
-          else
-            FLUTTER_VERSION=$(grep 'flutter:' pubspec.yaml | awk '{print $2}' | tr -d '"')
-          fi
-          echo "FLUTTER_VERSION=$FLUTTER_VERSION" >> $GITHUB_ENV
-
       - name: 🚀 Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: ${{ env.FLUTTER_VERSION }}
+          flutter-version: '3.19.6'  # Optional: specify your Flutter version
 
       - name: 📦 Install dependencies
         run: flutter pub get
 
-      - name: 🔍 Analyze code
+      - name: 🧪 Analyze code
         run: flutter analyze || true
 
       - name: 🏗️ Build APK
         run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/debug_info
 
-      - name: 📝 Rename APK with current date
+      - name: 📝 Rename APK with date
         run: |
           DATE=$(date +'%Y-%m-%d')
           ORIG_APK=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
@@ -59,15 +50,9 @@ jobs:
 
       - name: ☁️ Upload APK to Google Drive folder
         run: |
-          echo "Checking if gdrive is accessible..."
-          if rclone lsf "gdrive:" > /dev/null 2>&1; then
-            echo "Uploading APK..."
-            rclone copy "$APK_PATH" "gdrive:"
-            echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk" >> $GITHUB_ENV
-          else
-            echo "❌ ERROR: gdrive remote not accessible. Check your rclone.conf or credentials."
-            exit 1
-          fi
+          echo "Uploading APK to Google Drive..."
+          rclone copy "$APK_PATH" "gdrive:1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk"
+          echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk" >> $GITHUB_ENV
 
       - name: 📧 Send Email with APK Link
         uses: dawidd6/action-send-mail@v3
