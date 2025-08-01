@@ -5,6 +5,8 @@ import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
+import '../../AttendanceDashboard/views/attendance_dashboard_view.dart';
+
 class HrDashboarView extends GetView<HrDashboarController> {
   const HrDashboarView({super.key});
 
@@ -67,7 +69,7 @@ class HrDashboarView extends GetView<HrDashboarController> {
               icon: Icons.access_time,
               color: Colors.orange,
               expandedDashboard: expandedDashboard,
-              content: _buildAttendanceDashboardContent(),
+              content: AttendanceDashboardView(),
             ),
 
             // Expense Claims Dashboard Section
