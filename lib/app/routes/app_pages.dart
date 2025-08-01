@@ -2,10 +2,10 @@ import 'package:get/get.dart';
 
 import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
 import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
- 
+
 import '../modules/AttendanceDashboard/bindings/attendance_dashboard_binding.dart';
 import '../modules/AttendanceDashboard/views/attendance_dashboard_view.dart';
- 
+
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
@@ -76,11 +76,7 @@ class AppPages {
       page: () => const BottamView(),
       binding: BottamBinding(),
     ),
-    GetPage(
-      name: _Paths.CRM,
-      page: () => CrmView(),
-      binding: CrmBinding(),
-    ),
+    GetPage(name: _Paths.CRM, page: () => CrmView(), binding: CrmBinding()),
     GetPage(
       name: _Paths.SALES,
       page: () => const SalesView(),
@@ -137,15 +133,15 @@ class AppPages {
       binding: ProfileBinding(),
     ),
     GetPage(
- 
       name: _Paths.ATTENDANCE_DASHBOARD,
       page: () => const AttendanceDashboardView(),
       binding: AttendanceDashboardBinding(),
- 
+    ),
+
+    GetPage(
       name: _Paths.PROJECT_BOARD,
       page: () => const ProjectBoardView(),
       binding: ProjectBoardBinding(),
- 
     ),
   ];
 }
