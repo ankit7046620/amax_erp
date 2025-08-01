@@ -1,7 +1,9 @@
 import 'package:amax_hr/app/modules/AssetDashboar/views/asset_dashboar_view.dart';
 import 'package:amax_hr/app/modules/HrDashboar/views/hr_dashboar_view.dart';
 import 'package:amax_hr/app/modules/StockDashboard/views/stock_dashboard_view.dart';
+import 'package:amax_hr/app/modules/accounts/views/accounts_view.dart';
 import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
+import 'package:amax_hr/app/modules/payroll/views/payroll_view.dart';
 import 'package:amax_hr/app/modules/projectBoard/views/project_board_view.dart';
 import 'package:amax_hr/app/modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
 import 'package:amax_hr/app/modules/saleDashboard/views/sale_dashboard_view.dart';
@@ -149,6 +151,16 @@ class HomeTabController extends GetxController {
 
       case Module.projects:
         Get.to(() => ProjectBoardView());
+        break;
+
+
+
+      case Module.payroll:
+        Get.to(() => PayrollChartView());
+        break;
+
+      case Module.accounts:
+        Get.to(() => AccountsView());
         break;
 
     // Add remaining cases as needed

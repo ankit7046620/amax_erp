@@ -2,8 +2,7 @@ import 'package:amax_hr/constant/url.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:get/get.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
+
 
 class HrDashboarController extends GetxController {
   // Observable variables for dashboard stats
@@ -24,15 +23,12 @@ class HrDashboarController extends GetxController {
   var departmentChartData = <DepartmentChartData>[].obs;
   var designationChartData = <DesignationChartData>[].obs;
 
-  final String apiUrl = 'https://plastic.techcloudamax.ai/api/resource/Employee?limit_page_length=1000&fields=[%22*%22]';
-  final String cookie = 'sid=3d1a53c2caf7cfdc889e2f47e0bbcc81fe3454835c7386a2995c8860; full_name=Vignesh; sid=3d1a53c2caf7cfdc889e2f47e0bbcc81fe3454835c7386a2995c8860; system_user=yes; user_id=vignesh%40amaxconsultancyservices.com; user_image=';
 
   @override
   void onInit() {
     super.onInit();
     fetchEmployeeData();
   }
-
 
 
   Future<void> fetchEmployeeData() async {
