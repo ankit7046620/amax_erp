@@ -1,3 +1,6 @@
+import 'package:amax_hr/constant/url.dart';
+import 'package:amax_hr/manager/api_service.dart';
+import 'package:amax_hr/utils/app.dart';
 import 'package:get/get.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -30,36 +33,46 @@ class HrDashboarController extends GetxController {
     fetchEmployeeData();
   }
 
+
+
   Future<void> fetchEmployeeData() async {
     try {
       isLoading.value = true;
 
-      final response = await http.get(
-        Uri.parse(apiUrl),
-        headers: {
-          'Cookie': cookie,
-          'Content-Type': 'application/json',
+      final response = await ApiService.get(
+        ApiUri.getEmployee,
+        params: {
+          'fields': '["*"]',
+          'limit_page_length': '1000',
         },
       );
 
-      if (response.statusCode == 200) {
-        final data = json.decode(response.body);
-        final List<dynamic> employees = data['data'] ?? [];
+      if (response != null && response.statusCode == 200) {
+        final List<dynamic> employees = response.data['data'] ?? [];
 
-        // Filter employees by company "Amax Consultancy Services (Demo)"
+        // ✅ Optional: Use globalCompanyName instead of hardcoded value
         final companyEmployees = employees.where((employee) =>
-        employee['company'] == 'Amax Consultancy Services (Demo)').toList();
-
+        employee['company'] == globalCompanyName).toList();
         processEmployeeData(companyEmployees);
+
+        // ✅ Do something with companyEmployees
+        print('✅ Found ${companyEmployees.length} employees for $globalCompanyName');
+
+        // You can store them in a list if needed
+        // this.employeeList = companyEmployees.map((e) => EmployeeModel.fromJson(e)).toList();
+
       } else {
-        Get.snackbar('Error', 'Failed to fetch employee data');
+        print('❌ Failed to fetch employees');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Network error: $e');
+      print("❌ Error fetching employees: $e");
     } finally {
       isLoading.value = false;
     }
   }
+
+
+
 
   void processEmployeeData(List<dynamic> employees) {
     // Calculate basic stats
@@ -150,7 +163,7 @@ class HrDashboarController extends GetxController {
   }
 
   void processEmployeesByAgeData(List<dynamic> employees) {
-    Map<String, int> ageCounts = {
+    final Map<String, int> ageCounts = {
       '18-19': 0,
       '20-24': 0,
       '25-29': 0,
@@ -167,37 +180,74 @@ class HrDashboarController extends GetxController {
       '80+': 0,
     };
 
-    for (var employee in employees) {
-      if (employee['date_of_birth'] != null) {
-        try {
-          final birthDate = DateTime.parse(employee['date_of_birth']);
-          final age = DateTime.now().year - birthDate.year;
+    final now = DateTime.now();
 
-          if (age >= 18 && age <= 19) ageCounts['18-19'] = ageCounts['18-19']! + 1;
-          else if (age >= 20 && age <= 24) ageCounts['20-24'] = ageCounts['20-24']! + 1;
-          else if (age >= 25 && age <= 29) ageCounts['25-29'] = ageCounts['25-29']! + 1;
-          else if (age >= 30 && age <= 34) ageCounts['30-34'] = ageCounts['30-34']! + 1;
-          else if (age >= 35 && age <= 39) ageCounts['35-39'] = ageCounts['35-39']! + 1;
-          else if (age >= 40 && age <= 44) ageCounts['40-44'] = ageCounts['40-44']! + 1;
-          else if (age >= 45 && age <= 49) ageCounts['45-49'] = ageCounts['45-49']! + 1;
-          else if (age >= 50 && age <= 54) ageCounts['50-54'] = ageCounts['50-54']! + 1;
-          else if (age >= 55 && age <= 59) ageCounts['55-59'] = ageCounts['55-59']! + 1;
-          else if (age >= 60 && age <= 64) ageCounts['60-64'] = ageCounts['60-64']! + 1;
-          else if (age >= 65 && age <= 69) ageCounts['65-69'] = ageCounts['65-69']! + 1;
-          else if (age >= 70 && age <= 74) ageCounts['70-74'] = ageCounts['70-74']! + 1;
-          else if (age >= 75 && age <= 79) ageCounts['75-79'] = ageCounts['75-79']! + 1;
-          else if (age >= 80) ageCounts['80+'] = ageCounts['80+']! + 1;
-        } catch (e) {
-          // Handle invalid date format
+    for (var employee in employees) {
+      final dob = employee['date_of_birth'];
+      if (dob == null) continue;
+
+      try {
+        final birthDate = DateTime.parse(dob);
+        int age = now.year - birthDate.year;
+        if (birthDate.month > now.month || (birthDate.month == now.month && birthDate.day > now.day)) {
+          age--; // Adjust if birthday hasn't occurred yet this year
         }
+
+        switch (age) {
+          case >= 18 && <= 19:
+            ageCounts['18-19'] = ageCounts['18-19']! + 1;
+            break;
+          case >= 20 && <= 24:
+            ageCounts['20-24'] = ageCounts['20-24']! + 1;
+            break;
+          case >= 25 && <= 29:
+            ageCounts['25-29'] = ageCounts['25-29']! + 1;
+            break;
+          case >= 30 && <= 34:
+            ageCounts['30-34'] = ageCounts['30-34']! + 1;
+            break;
+          case >= 35 && <= 39:
+            ageCounts['35-39'] = ageCounts['35-39']! + 1;
+            break;
+          case >= 40 && <= 44:
+            ageCounts['40-44'] = ageCounts['40-44']! + 1;
+            break;
+          case >= 45 && <= 49:
+            ageCounts['45-49'] = ageCounts['45-49']! + 1;
+            break;
+          case >= 50 && <= 54:
+            ageCounts['50-54'] = ageCounts['50-54']! + 1;
+            break;
+          case >= 55 && <= 59:
+            ageCounts['55-59'] = ageCounts['55-59']! + 1;
+            break;
+          case >= 60 && <= 64:
+            ageCounts['60-64'] = ageCounts['60-64']! + 1;
+            break;
+          case >= 65 && <= 69:
+            ageCounts['65-69'] = ageCounts['65-69']! + 1;
+            break;
+          case >= 70 && <= 74:
+            ageCounts['70-74'] = ageCounts['70-74']! + 1;
+            break;
+          case >= 75 && <= 79:
+            ageCounts['75-79'] = ageCounts['75-79']! + 1;
+            break;
+          case >= 80:
+            ageCounts['80+'] = ageCounts['80+']! + 1;
+            break;
+        }
+      } catch (_) {
+        // skip invalid date
       }
     }
 
     employeesByAgeData.value = ageCounts.entries
-        .where((entry) => entry.value > 0) // Only include age groups with employees
+        .where((entry) => entry.value > 0)
         .map((e) => EmployeeAgeData(e.key, e.value))
         .toList();
   }
+
 
   void processGenderData(List<dynamic> employees) {
     Map<String, int> genderCounts = {'Male': 0, 'Female': 0};
