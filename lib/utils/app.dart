@@ -1,3 +1,5 @@
+const String globalCompanyName = GlobalCompany.vasani;
+
 class HeadersKey {
   static const String contentType = "Content-Type";
   static const String appSource = "AppSource";
@@ -8,24 +10,48 @@ class HeadersKey {
   static const String iOS = "iOS";
 }
 
+class GlobalCompany {
+  static const String vasani = "Vasani Polymers";
+  static const String amaxDemo = "Amax Consultancy Services (Demo)";
+  static const String tech = "techcloudamax";
 
-class CrmLeadStatus{
-  static const String converted ='converted';
+  static const String ams = "Amax Consultancy Services";
+  static const String cello = "cello";
+  static const String ap = "Amax Polymers";
+  static const String acd = "Amax Consultancy Services (Demo)";
+  static const String tp = "tata pips";
+  static const String tipendra = "tipendra";
+  static const String mayur = "mayur";
+  static const String akshar = "Akshar plastic for granual";
+  static const String reliance = "Reliance Industry";
 }
 
-class CardStatus{
-  static const String toReceiveAndBill= "To Receive and Bill";
+class CrmLeadStatus {
+  static const String converted = 'converted';
 }
 
-class ChartFilterType{
-  static const String yearly ='Yearly';
-  static const String quarterly ='Quarterly';
-  static const String monthly ='Monthly';
-  static const String weekly ='Weekly';
-  static const String daily ='Daily';
+class GlobalConstants {
+  static const String appName = "Plastic";
+  static const String appVersion = "1.0.0";
+  static const String appSource = "Plastic App";
+  static const String android = "Android";
+  static const String iOS = "iOS";
+  static const String defaultLanguage = "en";
+  static const String defaultCurrency = "USD";
+  static const String defaultDateFormat = "yyyy-MM-dd";
+  static const String defaultTimeFormat = "HH:mm:ss";
+}
 
+class CardStatus {
+  static const String toReceiveAndBill = "To Receive and Bill";
+}
 
-
+class ChartFilterType {
+  static const String yearly = 'Yearly';
+  static const String quarterly = 'Quarterly';
+  static const String monthly = 'Monthly';
+  static const String weekly = 'Weekly';
+  static const String daily = 'Daily';
 }
 
 class LocalKeys {
@@ -35,12 +61,10 @@ class LocalKeys {
   static const String userImage = 'userImage';
   static const String systemUser = 'systemUser';
   static const String cookieHeader = 'cookieHeader';
-  static const String onboardingSeen= "onboarding_seen";
+  static const String onboardingSeen = "onboarding_seen";
 
-  static const String eid= "eid";
-
+  static const String eid = "eid";
 }
-
 
 enum Module {
   accounts("Accounts"),
@@ -82,16 +106,9 @@ enum Module {
   workflow("Workflow");
 
   final String value;
+
   const Module(this.value);
 }
-
-
-
-
-
-
-
-
 
 class EdgeInsetType {
   static const double xxxxxxxs = 2;
