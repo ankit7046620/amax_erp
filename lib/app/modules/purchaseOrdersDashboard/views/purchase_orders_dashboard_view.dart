@@ -38,8 +38,8 @@ class PurchaseOrdersDashboardView extends StatelessWidget {
                   "onTap": () => Get.to(
                         () => const PurchaseGraphView(),
                     arguments: {
-                      // 'module': 'purchase',
-                      // 'model': controller.purchaseData,
+                      'module': 'purchase',
+                      'model': controller.purchaseOrders,
                     },
                   ),
                 },

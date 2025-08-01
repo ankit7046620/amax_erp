@@ -2,8 +2,10 @@ import 'package:get/get.dart';
 
 import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
 import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
+ 
 import '../modules/AttendanceDashboard/bindings/attendance_dashboard_binding.dart';
 import '../modules/AttendanceDashboard/views/attendance_dashboard_view.dart';
+ 
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
@@ -26,6 +28,8 @@ import '../modules/notification/bindings/notification_binding.dart';
 import '../modules/notification/views/notification_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
+import '../modules/projectBoard/bindings/project_board_binding.dart';
+import '../modules/projectBoard/views/project_board_view.dart';
 import '../modules/purchaseGraph/bindings/purchase_graph_binding.dart';
 import '../modules/purchaseGraph/views/purchase_graph_view.dart';
 import '../modules/purchaseOrdersDashboard/bindings/purchase_orders_dashboard_binding.dart';
@@ -133,9 +137,15 @@ class AppPages {
       binding: ProfileBinding(),
     ),
     GetPage(
+ 
       name: _Paths.ATTENDANCE_DASHBOARD,
       page: () => const AttendanceDashboardView(),
       binding: AttendanceDashboardBinding(),
+ 
+      name: _Paths.PROJECT_BOARD,
+      page: () => const ProjectBoardView(),
+      binding: ProjectBoardBinding(),
+ 
     ),
   ];
 }
