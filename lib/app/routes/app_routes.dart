@@ -27,6 +27,7 @@ abstract class Routes {
 
   static const ASSET_DASHBOAR = _Paths.ASSET_DASHBOAR;
   static const PROFILE = _Paths.PROFILE;
+  static const ATTENDANCE_DASHBOARD = _Paths.ATTENDANCE_DASHBOARD;
 }
 
 abstract class _Paths {
@@ -54,4 +55,5 @@ abstract class _Paths {
   static const SETTINGS = '/settings';
   static const PROFILE = '/profile';
   static const ASSET_DASHBOAR = '/asset-dashboar';
+  static const ATTENDANCE_DASHBOARD = '/attendance-dashboard';
 }

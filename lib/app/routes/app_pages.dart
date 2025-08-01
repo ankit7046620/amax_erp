@@ -1,7 +1,9 @@
-import 'package:amax_hr/app/modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
-import 'package:amax_hr/app/modules/AssetDashboar/views/asset_dashboar_view.dart';
 import 'package:get/get.dart';
 
+import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
+import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
+import '../modules/AttendanceDashboard/bindings/attendance_dashboard_binding.dart';
+import '../modules/AttendanceDashboard/views/attendance_dashboard_view.dart';
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
@@ -82,7 +84,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.LEAD_DETAILS,
-      page: () =>   LeadDetailsView(),
+      page: () => LeadDetailsView(),
       binding: LeadDetailsBinding(),
     ),
     GetPage(
@@ -112,7 +114,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HOME_TAB,
-      page: () =>   HomeTabView(),
+      page: () => HomeTabView(),
       binding: HomeTabBinding(),
     ),
     GetPage(
@@ -129,6 +131,11 @@ class AppPages {
       name: _Paths.PROFILE,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.ATTENDANCE_DASHBOARD,
+      page: () => const AttendanceDashboardView(),
+      binding: AttendanceDashboardBinding(),
     ),
   ];
 }
