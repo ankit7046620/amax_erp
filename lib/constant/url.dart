@@ -5,4 +5,6 @@ class ApiUri {
   static const String getLeadData =   "/api/resource/Lead";
   static const String getProject =   "/api/resource/Project";
   static const String getEmployee =   "/api/resource/Employee";
+  static const String getSalaryData =   "/api/resource/Salary Slip";
+  static const String getAccounts = "/api/resource/Account";
 }

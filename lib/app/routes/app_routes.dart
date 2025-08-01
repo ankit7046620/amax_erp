@@ -30,6 +30,8 @@ abstract class Routes {
   static const ATTENDANCE_DASHBOARD = _Paths.ATTENDANCE_DASHBOARD;
 
   static const PROJECT_BOARD = _Paths.PROJECT_BOARD;
+  static const PAYROLL = _Paths.PAYROLL;
+  static const ACCOUNTS = _Paths.ACCOUNTS;
 }
 
 abstract class _Paths {
@@ -60,4 +62,6 @@ abstract class _Paths {
   static const ATTENDANCE_DASHBOARD = '/attendance-dashboard';
 
   static const PROJECT_BOARD = '/project-board';
+  static const PAYROLL = '/payroll';
+  static const ACCOUNTS = '/accounts';
 }

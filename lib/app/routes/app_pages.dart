@@ -2,14 +2,14 @@ import 'package:get/get.dart';
 
 import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
 import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
-
 import '../modules/AttendanceDashboard/bindings/attendance_dashboard_binding.dart';
 import '../modules/AttendanceDashboard/views/attendance_dashboard_view.dart';
-
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
 import '../modules/StockDashboard/views/stock_dashboard_view.dart';
+import '../modules/accounts/bindings/accounts_binding.dart';
+import '../modules/accounts/views/accounts_view.dart';
 import '../modules/bottam/bindings/bottam_binding.dart';
 import '../modules/bottam/views/bottam_view.dart';
 import '../modules/crm/bindings/crm_binding.dart';
@@ -26,6 +26,8 @@ import '../modules/navBar/bindings/nav_bar_binding.dart';
 import '../modules/navBar/views/nav_bar_view.dart';
 import '../modules/notification/bindings/notification_binding.dart';
 import '../modules/notification/views/notification_view.dart';
+import '../modules/payroll/bindings/payroll_binding.dart';
+import '../modules/payroll/views/payroll_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/projectBoard/bindings/project_board_binding.dart';
@@ -137,11 +139,20 @@ class AppPages {
       page: () => const AttendanceDashboardView(),
       binding: AttendanceDashboardBinding(),
     ),
-
     GetPage(
       name: _Paths.PROJECT_BOARD,
       page: () => const ProjectBoardView(),
       binding: ProjectBoardBinding(),
+    ),
+    GetPage(
+      name: _Paths.PAYROLL,
+      page: () => PayrollChartView(),
+      binding: PayrollBinding(),
+    ),
+    GetPage(
+      name: _Paths.ACCOUNTS,
+      page: () => const AccountsView(),
+      binding: AccountsBinding(),
     ),
   ];
 }
