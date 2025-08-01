@@ -1,3 +1,5 @@
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
@@ -10,10 +12,8 @@ class PurchaseGraphView extends GetView<PurchaseGraphController> {
   Widget build(BuildContext context) {
     Get.put(PurchaseGraphController());
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('PurchaseGraphView'),
-        centerTitle: true,
-      ),
+        appBar:CommonAppBar(imagePath: AssetsConstant.tech_logo,showBack: true,),
+
       body: const Center(
         child: Text(
           'PurchaseGraphView is working',

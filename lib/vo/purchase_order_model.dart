@@ -248,6 +248,7 @@ class PurchaseOrderDataList {
     scheduleDate: json["schedule_date"] == null ? null : DateTime.tryParse(json["schedule_date"]),
     company: json["company"],
     currency: json["currency"],
+    grandTotal: json["grand_total"],
     buyingPriceList: json["buying_price_list"],
     priceListCurrency: json["price_list_currency"],
     taxCategory: json["tax_category"],
@@ -277,6 +278,7 @@ class PurchaseOrderDataList {
     "tax_category": taxCategory,
     "apply_discount_on": applyDiscountOn,
     "status": status,
+    "grand_total": grandTotal,
     "language": language,
     "party_account_currency": partyAccountCurrency,
   };

@@ -1,0 +1,61 @@
+ name: Flutter CI
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      RECIPIENT_EMAILS: vpprajapati19@gmail.com,sharmapratik151994@gmail.com
+
+    steps:
+      - name: ✅ Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.19.6"
+
+      - name: 📦 Install dependencies
+        run: flutter pub get
+
+      - name: 🏗️ Build APK
+        run: flutter build apk --release --split-per-abi --obfuscate --split-debug-info=build/debug_info
+
+      - name: 📝 Rename APK with current date
+        run: |
+          DATE=$(date +'%Y-%m-%d')
+          ORIG_APK=build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          RENAMED_APK=build/app/outputs/flutter-apk/demo-app-${DATE}.apk
+          mv "$ORIG_APK" "$RENAMED_APK"
+          echo "APK_NAME=demo-app-${DATE}.apk" >> $GITHUB_ENV
+          echo "APK_PATH=$RENAMED_APK" >> $GITHUB_ENV
+
+      - name: 📥 Install rclone
+        run: curl https://rclone.org/install.sh | sudo bash
+
+      - name: ⚙️ Setup rclone config
+        run: |
+          mkdir -p ~/.config/rclone
+          echo "${{ secrets.RCLONE_CONFIG }}" > ~/.config/rclone/rclone.conf
+
+      - name: ☁️ Upload APK to Google Drive folder
+        run: |
+          echo "Uploading APK to Google Drive..."
+          rclone copy "$APK_PATH" "gdrive:1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk"
+          echo "DOWNLOAD_LINK=https://drive.google.com/drive/folders/1vIXs8HlKygEoYRt7-qD9zvpG9-E75kNk" >> $GITHUB_ENV
+
+      - name: 📧 Send Email with APK Link
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 587
+          username: ${{ secrets.EMAIL_USERNAME }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          subject: "🚀 Demo App A
