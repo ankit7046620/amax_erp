@@ -1,7 +1,7 @@
-import 'package:amax_hr/app/modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
-import 'package:amax_hr/app/modules/AssetDashboar/views/asset_dashboar_view.dart';
 import 'package:get/get.dart';
 
+import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
+import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
@@ -24,6 +24,8 @@ import '../modules/notification/bindings/notification_binding.dart';
 import '../modules/notification/views/notification_view.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
+import '../modules/projectBoard/bindings/project_board_binding.dart';
+import '../modules/projectBoard/views/project_board_view.dart';
 import '../modules/purchaseGraph/bindings/purchase_graph_binding.dart';
 import '../modules/purchaseGraph/views/purchase_graph_view.dart';
 import '../modules/purchaseOrdersDashboard/bindings/purchase_orders_dashboard_binding.dart';
@@ -82,7 +84,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.LEAD_DETAILS,
-      page: () =>   LeadDetailsView(),
+      page: () => LeadDetailsView(),
       binding: LeadDetailsBinding(),
     ),
     GetPage(
@@ -112,7 +114,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.HOME_TAB,
-      page: () =>   HomeTabView(),
+      page: () => HomeTabView(),
       binding: HomeTabBinding(),
     ),
     GetPage(
@@ -129,6 +131,11 @@ class AppPages {
       name: _Paths.PROFILE,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
+    ),
+    GetPage(
+      name: _Paths.PROJECT_BOARD,
+      page: () => const ProjectBoardView(),
+      binding: ProjectBoardBinding(),
     ),
   ];
 }

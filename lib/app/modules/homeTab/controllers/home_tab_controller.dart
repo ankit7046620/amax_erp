@@ -2,6 +2,7 @@ import 'package:amax_hr/app/modules/AssetDashboar/views/asset_dashboar_view.dart
 import 'package:amax_hr/app/modules/HrDashboar/views/hr_dashboar_view.dart';
 import 'package:amax_hr/app/modules/StockDashboard/views/stock_dashboard_view.dart';
 import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
+import 'package:amax_hr/app/modules/projectBoard/views/project_board_view.dart';
 import 'package:amax_hr/app/modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
 import 'package:amax_hr/app/modules/saleDashboard/views/sale_dashboard_view.dart';
 import 'package:amax_hr/constant/url.dart';
@@ -144,10 +145,13 @@ class HomeTabController extends GetxController {
         break;
       case Module.assets:
         Get.to(() => AssetDashboardView());
-
         break;
 
-      // Add remaining cases as needed
+      case Module.projects:
+        Get.to(() => ProjectBoardView());
+        break;
+
+    // Add remaining cases as needed
       default:
         showSnackbar("Coming Soon", "$moduleName module is not ready yet.");
         print("Module ${module.value} is not yet handled.");
