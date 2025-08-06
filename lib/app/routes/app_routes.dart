@@ -32,6 +32,10 @@ abstract class Routes {
   static const PROJECT_BOARD = _Paths.PROJECT_BOARD;
   static const PAYROLL = _Paths.PAYROLL;
   static const ACCOUNTS = _Paths.ACCOUNTS;
+ 
+ 
+  static const EMPLOYEE_CHECKIN = _Paths.EMPLOYEE_CHECKIN;
+ 
   static const HR_ADMIN = _Paths.HR_ADMIN;
   static const HR_REQIREMENT = _Paths.HR_REQIREMENT;
   static const EMPOLYEE_DASH_BOARD = _Paths.EMPOLYEE_DASH_BOARD;
@@ -39,6 +43,7 @@ abstract class Routes {
   static const HR_SETTING = _Paths.HR_SETTING;
 
   static const HR_VIEW = _Paths.HR_VIEW;
+ 
 }
 
 abstract class _Paths {
@@ -71,6 +76,11 @@ abstract class _Paths {
   static const PROJECT_BOARD = '/project-board';
   static const PAYROLL = '/payroll';
   static const ACCOUNTS = '/accounts';
+ 
+ 
+  static const EMPLOYEE_CHECKIN = '/employee-checkin';
+ 
+ 
   static const HR_ADMIN = '/hr-admin';
   static const HR_REQIREMENT = '/hr-reqirement';
   static const EMPOLYEE_DASH_BOARD = '/empolyee-dash-board';
@@ -78,4 +88,5 @@ abstract class _Paths {
   static const HR_SETTING = '/hr-setting';
 
   static const HR_VIEW = '/hr-view';
+ 
 }
