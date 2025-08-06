@@ -1,7 +1,12 @@
 import 'package:amax_hr/app/modules/EmployeeCheckin/views/employee_checkin_view.dart' show EmployeeCheckinView;
 import 'package:amax_hr/app/modules/HrDashboar/controllers/hr_dashboar_controller.dart';
 import 'package:amax_hr/app/modules/HrDashboar/controllers/recruitment_dashboard_controller.dart';
+ 
 import 'package:amax_hr/app/routes/app_pages.dart' show Routes;
+ 
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
+ 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -19,17 +24,9 @@ class HrDashboarView extends GetView<HrDashboarController> {
     // Reactive variables for managing expanded states
     final RxInt expandedDashboard = (-1).obs; // HR Dashboard expanded by default
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('HR Dashboard'),
-        centerTitle: true,
-        backgroundColor: Colors.indigo.shade600,
-        foregroundColor: Colors.white,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: controller.refreshData,
-          ),
-        ],
+     appBar: CommonAppBar(
+        showBack: true,
+        imagePath:AssetsConstant.tech_logo
       ),
       body: SingleChildScrollView(
         child: Column(

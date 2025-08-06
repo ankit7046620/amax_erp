@@ -56,7 +56,7 @@ class CrmController extends GetxController {
         ApiUri.getLeadData,
         params: {
           'fields':
-              '["name","lead_name","email_id","company_name","status","creation","modified","source","territory"]',
+              '["*"]',
           'limit_page_length': '1000',
         },
       );
@@ -120,14 +120,26 @@ class CrmController extends GetxController {
     final leads = leadsGroupedByStatus[trimmedStatus] ?? [];
 
     filteredLeads.value = leads;
-
+    //
+    // Get.to(
+    //   () =>   LeadDetailsView(),
+    //   arguments: {
+    //     'status': trimmedStatus,
+    //     'leads': allLeads, // not RxList, just raw List<Data>
+    //   },
+    // );
     Get.to(
-      () =>   LeadDetailsView(),
+          () => LeadDetailsView(),
       arguments: {
         'status': trimmedStatus,
-        'leads': leads, // not RxList, just raw List<Data>
+        'leads': allLeads,
       },
-    );
+    )?.then((_) {
+      // 👇 Refresh data when user comes back
+      fetchLeadData();
+      update();
+    });
+
   }
 
   void clearFilter() {

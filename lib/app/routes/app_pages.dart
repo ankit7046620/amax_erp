@@ -12,14 +12,28 @@ import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
 import '../modules/StockDashboard/views/stock_dashboard_view.dart';
 import '../modules/accounts/bindings/accounts_binding.dart';
 import '../modules/accounts/views/accounts_view.dart';
+import '../modules/attendenceBoard/bindings/attendence_board_binding.dart';
+import '../modules/attendenceBoard/views/attendence_board_view.dart';
 import '../modules/bottam/bindings/bottam_binding.dart';
 import '../modules/bottam/views/bottam_view.dart';
 import '../modules/crm/bindings/crm_binding.dart';
 import '../modules/crm/views/crm_view.dart';
+import '../modules/empolyeeDashBoard/bindings/empolyee_dash_board_binding.dart';
+import '../modules/empolyeeDashBoard/views/empolyee_dash_board_view.dart';
 import '../modules/home/bindings/home_binding.dart';
 import '../modules/home/views/home_view.dart';
 import '../modules/homeTab/bindings/home_tab_binding.dart';
 import '../modules/homeTab/views/home_tab_view.dart';
+import '../modules/hrAdmin/bindings/hr_admin_binding.dart';
+import '../modules/hrAdmin/bindings/hr_admin_binding.dart';
+import '../modules/hrAdmin/views/hr_admin_view.dart';
+import '../modules/hrAdmin/views/hr_admin_view.dart';
+import '../modules/hrReqirement/bindings/hr_reqirement_binding.dart';
+import '../modules/hrReqirement/views/hr_reqirement_view.dart';
+import '../modules/hrSetting/bindings/hr_setting_binding.dart';
+import '../modules/hrSetting/views/hr_setting_view.dart';
+import '../modules/hrView/bindings/hr_view_binding.dart';
+import '../modules/hrView/views/hr_view_view.dart';
 import '../modules/leadDetails/bindings/lead_details_binding.dart';
 import '../modules/leadDetails/views/lead_details_view.dart';
 import '../modules/login/bindings/login_binding.dart';
@@ -157,9 +171,47 @@ class AppPages {
       binding: AccountsBinding(),
     ),
     GetPage(
+ 
       name: _Paths.EMPLOYEE_CHECKIN,
       page: () => const EmployeeCheckinView(),
       binding: EmployeeCheckinBinding(),
+ 
+      name: _Paths.HR_ADMIN,
+      page: () => const HrAdminView(),
+      binding: HrAdminBinding(),
+      children: [
+        GetPage(
+          name: _Paths.HR_ADMIN,
+          page: () => const HrAdminView(),
+          binding: HrAdminBinding(),
+        ),
+      ],
+    ),
+    GetPage(
+      name: _Paths.HR_REQIREMENT,
+      page: () => const HrReqirementView(),
+      binding: HrReqirementBinding(),
+    ),
+    GetPage(
+      name: _Paths.EMPOLYEE_DASH_BOARD,
+      page: () => const EmpolyeeDashBoardView(),
+      binding: EmpolyeeDashBoardBinding(),
+    ),
+    GetPage(
+      name: _Paths.ATTENDENCE_BOARD,
+      page: () => const AttendenceBoardView(),
+      binding: AttendenceBoardBinding(),
+    ),
+    GetPage(
+      name: _Paths.HR_SETTING,
+      page: () => const HrSettingView(),
+      binding: HrSettingBinding(),
+    ),
+    GetPage(
+      name: _Paths.HR_VIEW,
+      page: () => const HrViewView(),
+      binding: HrViewBinding(),
+ 
     ),
   ];
 }
