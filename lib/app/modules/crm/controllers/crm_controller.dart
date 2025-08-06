@@ -142,6 +142,23 @@ class CrmController extends GetxController {
 
   }
 
+
+  void gotoLeadDetailsView() {
+    Get.to(
+      () => LeadDetailsView(),
+      arguments: {
+        'status': "status",
+        'leads': allLeads, // not RxList, just raw List<Data>
+      },
+    )?.then((_) {
+      // 👇 Refresh data when user comes back
+      fetchLeadData();
+      update();
+    });
+  }
+
+
+
   void clearFilter() {
     filteredLeads.value = allLeads;
   }

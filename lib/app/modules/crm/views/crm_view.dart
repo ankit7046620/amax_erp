@@ -1,9 +1,9 @@
 import 'dart:math';
+import 'package:amax_hr/app/modules/leadDetails/views/lead_details_view.dart';
 import 'package:amax_hr/common/component/custom_appbar.dart';
 import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import 'package:amax_hr/app/modules/crm/controllers/crm_controller.dart';
 import 'package:amax_hr/app/modules/crmGraph/views/crm_graph_view.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -16,188 +16,341 @@ class CrmView extends GetView<CrmController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar:CommonAppBar(imagePath: AssetsConstant.tech_logo,showBack: true,),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: GetBuilder<CrmController>(
-          builder: (controller) {
-            if (controller.isLoading.value) {
-              // Shimmer for top cards and 6 grid boxes
-              return Column(
-                children: [
-                  Row(
-                    children: [
-                      Expanded(child: _buildShimmerTopCard()),
-                      const SizedBox(width: 16),
-                      Expanded(child: _buildShimmerTopCard()),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  Expanded(
-                    child: GridView.builder(
-                      itemCount: 6,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 3,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                            childAspectRatio: 0.8,
-                          ),
-                      itemBuilder: (context, index) {
-                        return Shimmer(
-                          duration: const Duration(seconds: 2),
-                          color: Colors.grey.shade300,
-                          colorOpacity: 0.5,
-                          enabled: true,
-                          direction: const ShimmerDirection.fromLTRB(),
-                          child: _containerBox(
-                            child: Padding(
-                              padding: const EdgeInsets.all(12.0),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: Colors.grey.shade300,
-                                      borderRadius: BorderRadius.circular(12),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 10),
-                                  Container(
-                                    height: 10,
-                                    width: 60,
-                                    color: Colors.grey.shade300,
-                                  ),
-                                  const SizedBox(height: 6),
-                                  Container(
-                                    height: 12,
-                                    width: 40,
-                                    color: Colors.grey.shade300,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ],
-              );
-            }
+      backgroundColor: Colors.grey.shade50,
+      appBar: CommonAppBar(
+        imagePath: AssetsConstant.tech_logo,
+        showBack: true,
+      ),
+      body: GetBuilder<CrmController>(
+        builder: (controller) {
+          if (controller.isLoading.value) {
+            return _buildLoadingState();
+          }
 
-            // Show real data when loaded
-            return Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Expanded(
-                      child: _topCard(
-                        title: "Total Leads",
-                        value: controller.allLeads.length.toString(),
-                        onTap: () => Get.to(
-                          () => CrmGraphView(),
-                          arguments: controller.allLeads,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(width: 16),
-                    Expanded(
-                      child: _topCard(
-                        title: "View Graph",
-                        value: '',
-                        onTap: () => Get.to(
-                          () => CrmGraphView(),
-                          arguments: controller.allLeads,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
-                Expanded(
-                  child: GridView.builder(
-                    itemCount: controller.leadsGroupedByStatus.length,
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 3,
-                          crossAxisSpacing: 10,
-                          mainAxisSpacing: 10,
-                          childAspectRatio: 0.8,
-                        ),
-                    itemBuilder: (context, index) {
-                      final status = controller.leadsGroupedByStatus.keys
-                          .elementAt(index);
-                      final count = controller.leadCountsArray[index];
-                      final color = _getRandomMaterialColor();
-                      final icon = _getStatusIcon(status.toLowerCase());
-
-                      return GestureDetector(
-                        onTap: () => controller.filterLeadsByStatus(status),
-                        child: _buildStatusCard(
-                          title: status,
-                          count: count,
-                          color: color,
-                          icon: icon,
-                        ),
-                      );
-                    },
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
+          return CustomScrollView(
+            physics: const BouncingScrollPhysics(),
+            slivers: [
+              SliverToBoxAdapter(child: _buildHeaderSection(controller)),
+              SliverToBoxAdapter(child: _buildGridSection(controller)),
+            ],
+          );
+        },
       ),
     );
   }
 
-  Widget _topCard({
-    required String title,
-    required String value,
-    required VoidCallback onTap,
-  }) {
-    final IconData icon = title.toLowerCase().contains("graph")
-        ? Icons.show_chart
-        : Icons.leaderboard;
-
-    return GestureDetector(
-      onTap: onTap,
-      child: _containerBox(
-        child: Container(
-          height: 70,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
+  Widget _buildLoadingState() {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        children: [
+          Row(
             children: [
-              CircleAvatar(
-                backgroundColor: Colors.indigo.withOpacity(0.15),
-                radius: 20,
-                child: Icon(icon, color: Colors.indigo, size: 20),
+              Expanded(child: _buildShimmerTopCard()),
+              const SizedBox(width: 16),
+              Expanded(child: _buildShimmerTopCard()),
+            ],
+          ),
+          const SizedBox(height: 32),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: Shimmer(
+              child: Container(
+                width: 150,
+                height: 20,
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade300,
+                  borderRadius: BorderRadius.circular(10),
+                ),
               ),
-              const SizedBox(width: 12),
+            ),
+          ),
+          const SizedBox(height: 16),
+          Expanded(
+            child: _buildShimmerStatusCard(),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeaderSection(CrmController controller) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
               Expanded(
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        color: Colors.black54,
-                        fontWeight: FontWeight.w500,
+                      "CRM Dashboard",
+                      style: TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.grey.shade800,
+                        letterSpacing: -1,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
+                      "Manage your leads effectively",
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.grey.shade600,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      Colors.indigo.shade400,
+                      Colors.purple.shade400,
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(16),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.indigo.withOpacity(0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: const Icon(
+                  Icons.analytics_outlined,
+                  color: Colors.white,
+                  size: 28,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 32),
+          Row(
+            children: [
+              Expanded(
+                child: _buildEnhancedTopCard(
+                  title: "Total Leads",
+                  value: controller.allLeads.length.toString(),
+                  subtitle: "Active leads in pipeline",
+                  icon: Icons.people_outline,
+                  gradient: [Colors.blue.shade400, Colors.blue.shade600],
+                  onTap: () => controller.gotoLeadDetailsView()
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _buildEnhancedTopCard(
+                  title: "Analytics",
+                  value: "View",
+                  subtitle: "Detailed insights & graphs",
+                  icon: Icons.show_chart,
+                  gradient: [Colors.purple.shade400, Colors.purple.shade600],
+                  onTap: () => Get.to(() => CrmGraphView(),
+                      arguments: controller.allLeads),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildGridSection(CrmController controller) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 4,
+                height: 24,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [Colors.indigo.shade400, Colors.purple.shade400],
+                  ),
+                  borderRadius: BorderRadius.circular(2),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                "Lead Status Overview",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w700,
+                  color: Colors.grey.shade800,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+
+          // ✅ Single Card With All Status Counts
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(20),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.1),
+                  blurRadius: 12,
+                  offset: const Offset(0, 4),
+                ),
+              ],
+            ),
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'All Lead Status Counts',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 12,
+                    children: controller.leadsGroupedByStatus.entries
+                        .map((entry) => Chip(
+                      label: Text(
+                        '${_formatTitle(entry.key)}: ${entry.value.length}',
+                        style: const TextStyle(
+                            fontWeight: FontWeight.w600),
+                      ),
+                      backgroundColor: Colors.grey.shade100,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ))
+                        .toList(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+
+          const SizedBox(height: 32),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildEnhancedTopCard({
+    required String title,
+    required String value,
+    required String subtitle,
+    required IconData icon,
+    required List<Color> gradient,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        height: 140,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(colors: gradient),
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: gradient[0].withOpacity(0.3),
+              blurRadius: 20,
+              offset: const Offset(0, 8),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(20),
+          child: Stack(
+            children: [
+              Positioned(
+                right: -20,
+                top: -20,
+                child: Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              Positioned(
+                right: -30,
+                bottom: -30,
+                child: Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.05),
+                    shape: BoxShape.circle,
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.all(18),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(8),
+                          decoration: BoxDecoration(
+                            color: Colors.white.withOpacity(0.2),
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Icon(icon, color: Colors.white, size: 20),
+                        ),
+                        const Spacer(),
+                        Icon(Icons.arrow_forward_ios,
+                            color: Colors.white.withOpacity(0.7), size: 14),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
                       value,
                       style: const TextStyle(
+                        fontSize: 28,
+                        fontWeight: FontWeight.w800,
+                        color: Colors.white,
+                        height: 1.1,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      title,
+                      style: const TextStyle(
                         fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Expanded(
+                      child: Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontSize: 11,
+                          color: Colors.white.withOpacity(0.85),
+                          fontWeight: FontWeight.w500,
+                          height: 1.3,
+                        ),
                       ),
                     ),
                   ],
@@ -207,175 +360,37 @@ class CrmView extends GetView<CrmController> {
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildStatusCard({
-    required String title,
-    required int count,
-    required Color color,
-    required IconData icon,
-  }) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final width = constraints.maxWidth;
-        final iconSize = width * 0.24;
-        final fontSize = width * 0.11;
-        final countFontSize = width * 0.16;
-        final paddingV = width * 0.12;
-        final paddingH = width * 0.08;
-        final titleHeight = fontSize.clamp(9, 14) * 2.2; // Fixed height for 2 lines
-
-        return _containerBox(
-          child: Padding(
-            padding: EdgeInsets.symmetric(
-              vertical: paddingV.clamp(6, 14),
-              horizontal: paddingH.clamp(4, 12),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: [
-                Container(
-                  width: iconSize.clamp(24, 48),
-                  height: iconSize.clamp(24, 48),
-                  decoration: BoxDecoration(
-                    color: color.withOpacity(0.8),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Icon(
-                    icon,
-                    color: Colors.white,
-                    size: iconSize.clamp(18, 28),
-                  ),
-                ),
-                SizedBox(height: 10),
-                SizedBox(
-                  height: titleHeight,
-                  child: Text(
-                    title.toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontWeight: FontWeight.w600,
-                      fontSize: fontSize.clamp(9, 14),
-                      color: color,
-                    ),
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-                SizedBox(height: (width * 0.05).clamp(3, 8)),
-                Text(
-                  count.toString(),
-                  style: TextStyle(
-                    fontSize: countFontSize.clamp(12, 20),
-                    fontWeight: FontWeight.bold,
-                    color: color,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-  Widget _containerBox({required Widget child}) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 2,
-            blurRadius: 5,
-            offset: const Offset(0, 3),
-          ),
-        ],
-      ),
-      child: child,
     );
   }
 
   Widget _buildShimmerTopCard() {
     return Shimmer(
-      duration: const Duration(seconds: 2),
-      color: Colors.grey.shade300,
-      colorOpacity: 0.5,
-      enabled: true,
-      direction: const ShimmerDirection.fromLTRB(),
-      child: _containerBox(
-        child: Container(
-          height: 70,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            children: [
-              CircleAvatar(backgroundColor: Colors.grey.shade300, radius: 20),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      height: 10,
-                      width: 60,
-                      color: Colors.grey.shade300,
-                    ),
-                    const SizedBox(height: 4),
-                    Container(
-                      height: 12,
-                      width: 40,
-                      color: Colors.grey.shade300,
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+      child: Container(
+        height: 120,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(20),
         ),
       ),
     );
   }
 
-  Color _getRandomMaterialColor() {
-    final colors = [
-      Colors.deepPurple,
-      Colors.teal,
-      Colors.indigo,
-      Colors.orange,
-      Colors.pink,
-      Colors.cyan,
-      Colors.amber,
-      Colors.deepOrange,
-      Colors.green,
-      Colors.blueGrey,
-    ];
-    return colors[Random().nextInt(colors.length)].shade400;
+  Widget _buildShimmerStatusCard() {
+    return Shimmer(
+      child: Container(
+        height: 300,
+        decoration: BoxDecoration(
+          color: Colors.grey.shade300,
+          borderRadius: BorderRadius.circular(20),
+        ),
+      ),
+    );
   }
 
-  IconData _getStatusIcon(String status) {
-    switch (status) {
-      case 'open':
-        return Icons.hourglass_empty;
-      case 'converted':
-        return Icons.verified;
-      case 'interested':
-        return Icons.thumb_up_alt_outlined;
-      case 'lost':
-        return Icons.cancel;
-      case 'replied':
-        return Icons.reply;
-      case 'do not contact':
-        return Icons.block;
-      case 'attempted to contact':
-        return Icons.phone_forwarded;
-      case 'qualified':
-        return Icons.star;
-      default:
-        return Icons.insert_chart_outlined;
-    }
+  String _formatTitle(String title) {
+    return title.split(' ').map((word) {
+      if (word.isEmpty) return word;
+      return word[0].toUpperCase() + word.substring(1).toLowerCase();
+    }).join(' ');
   }
 }

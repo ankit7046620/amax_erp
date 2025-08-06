@@ -15,7 +15,19 @@ class LeadDetailsController extends GetxController {
   RxBool isLoading = true.obs;
   final count = 0.obs;
 
-  final List<String> statusList = [ 'Open',
+  // Status-based lists for local management
+  var openLeads = <CrmModel>[].obs;
+  var leadLeads = <CrmModel>[].obs;
+  var opportunityLeads = <CrmModel>[].obs;
+  var quotationLeads = <CrmModel>[].obs;
+  var convertedLeads = <CrmModel>[].obs;
+  var doNotContactLeads = <CrmModel>[].obs;
+  var interestedLeads = <CrmModel>[].obs;
+  var wonLeads = <CrmModel>[].obs;
+  var lostLeads = <CrmModel>[].obs;
+
+  final List<String> statusList = [
+    'Open',
     'Lead',
     'Opportunity',
     'Quotation',
@@ -23,7 +35,8 @@ class LeadDetailsController extends GetxController {
     'Do Not Contact',
     'Interested',
     'Won',
-    'Lost'];
+    'Lost'
+  ];
 
   @override
   void onInit() {
@@ -31,11 +44,218 @@ class LeadDetailsController extends GetxController {
     final args = Get.arguments as Map<String, dynamic>? ?? {};
     status.value = args['status'] ?? 'Unknown';
     leads.value = List<CrmModel>.from(args['leads'] ?? []);
+
+    // Organize leads by status on initialization
+    _organizeLeadsByStatus();
+
     isLoading.value = false;
     super.onInit();
   }
 
+  // Method to organize leads into status-based lists
+  void _organizeLeadsByStatus() {
+    // Clear all status lists
+    openLeads.clear();
+    leadLeads.clear();
+    opportunityLeads.clear();
+    quotationLeads.clear();
+    convertedLeads.clear();
+    doNotContactLeads.clear();
+    interestedLeads.clear();
+    wonLeads.clear();
+    lostLeads.clear();
 
+    // Organize leads by their current status
+    for (var lead in leads) {
+      _addLeadToStatusList(lead);
+    }
+  }
+
+  // Helper method to add lead to appropriate status list
+  void _addLeadToStatusList(CrmModel lead) {
+    switch (lead.status?.toLowerCase()) {
+      case 'open':
+        if (!openLeads.contains(lead)) openLeads.add(lead);
+        break;
+      case 'lead':
+        if (!leadLeads.contains(lead)) leadLeads.add(lead);
+        break;
+      case 'opportunity':
+        if (!opportunityLeads.contains(lead)) opportunityLeads.add(lead);
+        break;
+      case 'quotation':
+        if (!quotationLeads.contains(lead)) quotationLeads.add(lead);
+        break;
+      case 'converted':
+        if (!convertedLeads.contains(lead)) convertedLeads.add(lead);
+        break;
+      case 'do not contact':
+        if (!doNotContactLeads.contains(lead)) doNotContactLeads.add(lead);
+        break;
+      case 'interested':
+        if (!interestedLeads.contains(lead)) interestedLeads.add(lead);
+        break;
+      case 'won':
+        if (!wonLeads.contains(lead)) wonLeads.add(lead);
+        break;
+      case 'lost':
+        if (!lostLeads.contains(lead)) lostLeads.add(lead);
+        break;
+    }
+  }
+
+  // Method to remove lead from current list
+  void removeLeadFromCurrentList(int index) {
+    try {
+      if (index >= 0 && index < leads.length) {
+        final removedLead = leads[index];
+        leads.removeAt(index);
+
+        logger.d('Lead removed from current list at index $index');
+        logger.d('Remaining leads count: ${leads.length}');
+
+        // Also remove from status-specific lists
+        _removeFromAllStatusLists(removedLead);
+
+        update(); // Update UI immediately
+      }
+    } catch (e) {
+      logger.e('Error removing lead from current list: $e');
+    }
+  }
+
+  // Method to remove lead from all status lists
+  void _removeFromAllStatusLists(CrmModel lead) {
+    openLeads.remove(lead);
+    leadLeads.remove(lead);
+    opportunityLeads.remove(lead);
+    quotationLeads.remove(lead);
+    convertedLeads.remove(lead);
+    doNotContactLeads.remove(lead);
+    interestedLeads.remove(lead);
+    wonLeads.remove(lead);
+    lostLeads.remove(lead);
+  }
+
+  // Method to move lead to appropriate status list
+  void moveLeadToStatusList(CrmModel lead, String newStatus) {
+    try {
+      logger.d('Moving lead to $newStatus list');
+
+      // Remove from all lists first
+      _removeFromAllStatusLists(lead);
+
+      // Add to appropriate status list
+      _addLeadToStatusList(lead);
+
+      logger.d('Lead successfully moved to $newStatus list');
+      update();
+
+    } catch (e) {
+      logger.e('Error moving lead to status list: $e');
+    }
+  }
+
+  // Method to get leads by status
+  List<CrmModel> getLeadsByStatus(String statusName) {
+    switch (statusName.toLowerCase()) {
+      case 'open':
+        return openLeads;
+      case 'lead':
+        return leadLeads;
+      case 'opportunity':
+        return opportunityLeads;
+      case 'quotation':
+        return quotationLeads;
+      case 'converted':
+        return convertedLeads;
+      case 'do not contact':
+        return doNotContactLeads;
+      case 'interested':
+        return interestedLeads;
+      case 'won':
+        return wonLeads;
+      case 'lost':
+        return lostLeads;
+      default:
+        return leads.where((lead) =>
+        lead.status?.toLowerCase() == statusName.toLowerCase()).toList();
+    }
+  }
+
+  // Method to get status count
+  int getStatusCount(String statusName) {
+    return getLeadsByStatus(statusName).length;
+  }
+
+  // Method to filter current leads by status
+  void filterLeadsByStatus(String? statusName) {
+    if (statusName == null || statusName.isEmpty || statusName == 'All') {
+      // Show all leads
+      leads.assignAll(_getAllLeads());
+    } else {
+      // Filter by specific status
+      final filteredLeads = getLeadsByStatus(statusName);
+      leads.assignAll(filteredLeads);
+    }
+    status.value = statusName ?? 'All';
+    update();
+  }
+
+  // Method to get all leads from all status lists
+  List<CrmModel> _getAllLeads() {
+    List<CrmModel> allLeads = [];
+    allLeads.addAll(openLeads);
+    allLeads.addAll(leadLeads);
+    allLeads.addAll(opportunityLeads);
+    allLeads.addAll(quotationLeads);
+    allLeads.addAll(convertedLeads);
+    allLeads.addAll(doNotContactLeads);
+    allLeads.addAll(interestedLeads);
+    allLeads.addAll(wonLeads);
+    allLeads.addAll(lostLeads);
+    return allLeads;
+  }
+
+  // Method to refresh leads
+  void refreshLeads() async {
+    try {
+      isLoading.value = true;
+      update();
+
+      // Simulate refresh - replace with actual API call
+      await Future.delayed(const Duration(seconds: 1));
+
+      // Re-organize leads by status
+      _organizeLeadsByStatus();
+
+      isLoading.value = false;
+      update();
+
+      Get.showSnackbar(
+        GetSnackBar(
+          title: 'Success',
+          message: 'Leads refreshed successfully',
+          duration: Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+
+    } catch (e) {
+      logger.e('Error refreshing leads: $e');
+      isLoading.value = false;
+      update();
+
+      Get.showSnackbar(
+        GetSnackBar(
+          title: 'Error',
+          message: 'Failed to refresh leads',
+          duration: Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+        ),
+      );
+    }
+  }
 
   Future<void> updateLeadStatus({
     required CrmModel crm,
@@ -44,70 +264,154 @@ class LeadDetailsController extends GetxController {
     required int index,
   }) async {
     final leadName = crm.name;
-    final mobileNo =mobile_no;
+    final mobileNo = mobile_no;
+
+    // Store original status for rollback if needed
+    final originalStatus = crm.status;
+
     logger.d("message:::=mobile_no========>>>>$mobile_no:");
     logger.d("message:::=========>>>>$mobile_no:");
+
     if (leadName.isEmpty) {
-      print('❌ Invalid lead name');
+      logger.e('❌ Invalid lead name');
+      Get.showSnackbar(
+        GetSnackBar(
+          title: 'Error',
+          message: 'Invalid lead name',
+          duration: Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
     // Ensure both mobile_no and phone have values (server requires both)
     final phoneNumber = mobileNo ?? '';
     logger.d("message:::=========>>>>$phoneNumber:");
-    logger.d("message:::=========>>>>$phoneNumber:");
 
     if (phoneNumber.isEmpty) {
-      print('❌ Mobile number is required for lead update');
+      logger.e('❌ Mobile number is required for lead update');
+      Get.showSnackbar(
+        GetSnackBar(
+          title: 'Error',
+          message: 'Mobile number is required',
+          duration: Duration(seconds: 2),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+        ),
+      );
       return;
     }
 
     final endpoint = '/api/resource/Lead/$leadName';
-
     final data = {
       'status': newStatus,
       'mobile_no': phoneNumber,
-      'phone':phoneNumber, // Use same value for both fields
+      'phone': phoneNumber, // Use same value for both fields
     };
-    Get.back();
-
 
     try {
+      // Set updating state for this lead
+      if (index < leads.length) {
+        leads[index].isUpdating = true;
+        update();
+      }
+
       EasyLoading.show(status: 'Updating lead "$leadName"...');
       final response = await ApiService.put(endpoint, data: data);
 
       if (response != null && response.statusCode == 200) {
-        print('✅ Lead "$leadName" updated successfully: ${response.data}');
-        crm.status=newStatus;
-        leads[index].status=newStatus; // Update the lead in the list
-        update();
+        logger.d('✅ Lead "$leadName" updated successfully: ${response.data}');
+
+        // Update lead status
+        crm.status = newStatus;
+        if (index < leads.length) {
+          leads[index].status = newStatus;
+          leads[index].isUpdating = false;
+        }
+
+        // Handle local list management only if status actually changed
+        if (originalStatus != newStatus) {
+          // Remove from current list
+          removeLeadFromCurrentList(index);
+
+          // Move to appropriate status list
+          moveLeadToStatusList(crm, newStatus);
+
+          logger.d('Lead moved from $originalStatus to $newStatus');
+        }
+
         EasyLoading.dismiss();
+
+        String message = originalStatus != newStatus
+            ? 'Lead "$leadName" moved from "$originalStatus" to "$newStatus"'
+            : 'Lead "$leadName" updated successfully';
+
         Get.showSnackbar(
           GetSnackBar(
             title: 'Success',
-            message: 'Lead "$leadName" updated to "$newStatus"',
-            duration: Duration(seconds: 2),
+            message: message,
+            duration: Duration(seconds: 3),
             snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.green,
           ),
         );
+
+        update();
+
       } else {
+        // API call failed - rollback changes
+        if (originalStatus != null) {
+          crm.status = originalStatus;
+          if (index < leads.length) {
+            leads[index].status = originalStatus;
+            leads[index].isUpdating = false;
+          }
+        }
+
         EasyLoading.dismiss();
-         Get.showSnackbar(
+        Get.showSnackbar(
           GetSnackBar(
             title: 'Error',
             message: 'Failed to update lead "$leadName"',
-            duration: Duration(seconds: 2),
+            duration: Duration(seconds: 3),
             snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: Colors.red,
           ),
         );
-        print('❌ Failed to update lead "$leadName" - Status: ${response?.statusCode}');
+
+        logger.e('❌ Failed to update lead "$leadName" - Status: ${response?.statusCode}');
         if (response?.data != null) {
-          print('📄 Response data: ${response!.data}');
+          logger.d('📄 Response data: ${response!.data}');
         }
+
+        update();
       }
     } catch (e) {
+      // Exception occurred - rollback changes
+      if (originalStatus != null) {
+        crm.status = originalStatus;
+        if (index < leads.length) {
+          leads[index].status = originalStatus;
+          leads[index].isUpdating = false;
+        }
+      }
+
       EasyLoading.dismiss();
-      print('❌ Exception while updating lead "$leadName": $e');
+      logger.e('❌ Exception while updating lead "$leadName": $e');
+
+      Get.showSnackbar(
+        GetSnackBar(
+          title: 'Error',
+          message: 'Exception occurred while updating lead: $e',
+          duration: Duration(seconds: 5),
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red,
+        ),
+      );
+
+      update();
     }
   }
 

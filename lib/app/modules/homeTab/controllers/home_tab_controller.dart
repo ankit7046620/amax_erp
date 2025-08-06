@@ -69,7 +69,7 @@ class HomeTabController extends GetxController {
     try {
       final response = await ApiService.get(
         ApiUri.getAllModule,
-        params: {'fields': '["module_name"]', 'limit_page_length': '1000'},
+        params: {'fields': '["*"]', 'limit_page_length': '1000'},
       );
 
       if (response != null && response.statusCode == 200) {
