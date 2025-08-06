@@ -172,6 +172,7 @@ class AppPages {
     ),
     GetPage(
  
+ 
       name: _Paths.EMPLOYEE_CHECKIN,
       page: () => const EmployeeCheckinView(),
       binding: EmployeeCheckinBinding(),

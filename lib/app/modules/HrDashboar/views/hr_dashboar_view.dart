@@ -2,7 +2,11 @@ import 'package:amax_hr/app/modules/EmployeeCheckin/views/employee_checkin_view.
 import 'package:amax_hr/app/modules/HrDashboar/controllers/hr_dashboar_controller.dart';
 import 'package:amax_hr/app/modules/HrDashboar/controllers/recruitment_dashboard_controller.dart';
  
+ 
 import 'package:amax_hr/app/routes/app_pages.dart' show Routes;
+ 
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
  
 import 'package:amax_hr/common/component/custom_appbar.dart';
 import 'package:amax_hr/constant/assets_constant.dart';

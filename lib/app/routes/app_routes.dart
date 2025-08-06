@@ -33,6 +33,7 @@ abstract class Routes {
   static const PAYROLL = _Paths.PAYROLL;
   static const ACCOUNTS = _Paths.ACCOUNTS;
  
+ 
   static const EMPLOYEE_CHECKIN = _Paths.EMPLOYEE_CHECKIN;
  
   static const HR_ADMIN = _Paths.HR_ADMIN;
@@ -76,7 +77,9 @@ abstract class _Paths {
   static const PAYROLL = '/payroll';
   static const ACCOUNTS = '/accounts';
  
+ 
   static const EMPLOYEE_CHECKIN = '/employee-checkin';
+ 
  
   static const HR_ADMIN = '/hr-admin';
   static const HR_REQIREMENT = '/hr-reqirement';
