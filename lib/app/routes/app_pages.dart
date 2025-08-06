@@ -176,7 +176,9 @@ class AppPages {
       name: _Paths.EMPLOYEE_CHECKIN,
       page: () => const EmployeeCheckinView(),
       binding: EmployeeCheckinBinding(),
- 
+  ),
+
+  GetPage(
       name: _Paths.HR_ADMIN,
       page: () => const HrAdminView(),
       binding: HrAdminBinding(),
