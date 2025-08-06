@@ -1,8 +1,11 @@
+import 'package:amax_hr/app/modules/hrAdmin/views/hr_admin_view.dart';
+import 'package:amax_hr/app/modules/hrReqirement/views/hr_reqirement_view.dart';
+import 'package:amax_hr/app/modules/hrSetting/views/hr_setting_view.dart';
 import 'package:amax_hr/constant/url.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/utils/app.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
-
 
 class HrDashboarController extends GetxController {
   // Observable variables for dashboard stats
@@ -23,13 +26,11 @@ class HrDashboarController extends GetxController {
   var departmentChartData = <DepartmentChartData>[].obs;
   var designationChartData = <DesignationChartData>[].obs;
 
-
   @override
   void onInit() {
     super.onInit();
     fetchEmployeeData();
   }
-
 
   Future<void> fetchEmployeeData() async {
     try {
@@ -37,26 +38,25 @@ class HrDashboarController extends GetxController {
 
       final response = await ApiService.get(
         ApiUri.getEmployee,
-        params: {
-          'fields': '["*"]',
-          'limit_page_length': '1000',
-        },
+        params: {'fields': '["*"]', 'limit_page_length': '1000'},
       );
 
       if (response != null && response.statusCode == 200) {
         final List<dynamic> employees = response.data['data'] ?? [];
 
         // ✅ Optional: Use globalCompanyName instead of hardcoded value
-        final companyEmployees = employees.where((employee) =>
-        employee['company'] == globalCompanyName).toList();
+        final companyEmployees = employees
+            .where((employee) => employee['company'] == globalCompanyName)
+            .toList();
         processEmployeeData(companyEmployees);
 
         // ✅ Do something with companyEmployees
-        print('✅ Found ${companyEmployees.length} employees for $globalCompanyName');
+        print(
+          '✅ Found ${companyEmployees.length} employees for $globalCompanyName',
+        );
 
         // You can store them in a list if needed
         // this.employeeList = companyEmployees.map((e) => EmployeeModel.fromJson(e)).toList();
-
       } else {
         print('❌ Failed to fetch employees');
       }
@@ -66,9 +66,6 @@ class HrDashboarController extends GetxController {
       isLoading.value = false;
     }
   }
-
-
-
 
   void processEmployeeData(List<dynamic> employees) {
     // Calculate basic stats
@@ -122,7 +119,8 @@ class HrDashboarController extends GetxController {
         try {
           final relievingDate = DateTime.parse(emp['relieving_date']);
           final relievingQuarter = ((relievingDate.month - 1) ~/ 3) + 1;
-          return relievingDate.year == currentYear && relievingQuarter == currentQuarter;
+          return relievingDate.year == currentYear &&
+              relievingQuarter == currentQuarter;
         } catch (e) {
           return false;
         }
@@ -148,8 +146,10 @@ class HrDashboarController extends GetxController {
     for (String month in months) {
       // For demo purposes, using sample data
       // You can replace this with actual calculations based on your data
-      final hiringCount = (employees.length * 0.1).round(); // Sample calculation
-      final attritionCount = (employees.length * 0.05).round(); // Sample calculation
+      final hiringCount = (employees.length * 0.1)
+          .round(); // Sample calculation
+      final attritionCount = (employees.length * 0.05)
+          .round(); // Sample calculation
 
       data.add(HiringAttritionData(month, hiringCount, "Hiring Count"));
       data.add(HiringAttritionData(month, attritionCount, "Attrition Count"));
@@ -185,7 +185,8 @@ class HrDashboarController extends GetxController {
       try {
         final birthDate = DateTime.parse(dob);
         int age = now.year - birthDate.year;
-        if (birthDate.month > now.month || (birthDate.month == now.month && birthDate.day > now.day)) {
+        if (birthDate.month > now.month ||
+            (birthDate.month == now.month && birthDate.day > now.day)) {
           age--; // Adjust if birthday hasn't occurred yet this year
         }
 
@@ -244,7 +245,6 @@ class HrDashboarController extends GetxController {
         .toList();
   }
 
-
   void processGenderData(List<dynamic> employees) {
     Map<String, int> genderCounts = {'Male': 0, 'Female': 0};
 
@@ -265,7 +265,8 @@ class HrDashboarController extends GetxController {
     Map<String, int> typeCounts = {};
 
     for (var employee in employees) {
-      final employeeType = employee['employment_type'] ?? 'Full-time'; // Default to Full-time
+      final employeeType =
+          employee['employment_type'] ?? 'Full-time'; // Default to Full-time
       typeCounts[employeeType] = (typeCounts[employeeType] ?? 0) + 1;
     }
 
@@ -318,7 +319,8 @@ class HrDashboarController extends GetxController {
 
     for (var employee in employees) {
       final designation = employee['designation'] ?? 'Employee';
-      designationCounts[designation] = (designationCounts[designation] ?? 0) + 1;
+      designationCounts[designation] =
+          (designationCounts[designation] ?? 0) + 1;
     }
 
     designationChartData.value = designationCounts.entries
@@ -340,6 +342,8 @@ class HrDashboarController extends GetxController {
     super.onClose();
   }
 }
+
+List<Widget> pages = [HrReqirementView(),HrAdminView(),HrSettingView()];
 
 // Data models for charts
 class HiringAttritionData {

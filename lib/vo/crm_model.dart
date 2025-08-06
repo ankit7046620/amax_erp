@@ -9,6 +9,8 @@ class CrmModel {
   String modified;
   String source;
   String territory;
+  String mobile_no;
+  bool isUpdating;
 
   CrmModel({
     required this.name,
@@ -20,6 +22,8 @@ class CrmModel {
     required this.modified,
     required this.source,
     required this.territory,
+    required this.mobile_no,
+    this.isUpdating = false,
   });
 
   factory CrmModel.fromJson(Map<String, dynamic> json) {
@@ -33,6 +37,8 @@ class CrmModel {
       modified: json['modified'] ?? '',
       source: json['source'] ?? '',
       territory: json['territory'] ?? '',
+      mobile_no: json['mobile_no'] ?? '',
+      isUpdating: false,
     );
   }
 
@@ -47,6 +53,8 @@ class CrmModel {
       'modified': modified,
       'source': source,
       'territory': territory,
+      'isUpdating': isUpdating,
+      'mobile_no': mobile_no,
     };
   }
 }
