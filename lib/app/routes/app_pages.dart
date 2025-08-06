@@ -4,6 +4,8 @@ import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
 import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
 import '../modules/AttendanceDashboard/bindings/attendance_dashboard_binding.dart';
 import '../modules/AttendanceDashboard/views/attendance_dashboard_view.dart';
+import '../modules/EmployeeCheckin/bindings/employee_checkin_binding.dart';
+import '../modules/EmployeeCheckin/views/employee_checkin_view.dart';
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
@@ -153,6 +155,11 @@ class AppPages {
       name: _Paths.ACCOUNTS,
       page: () => const AccountsView(),
       binding: AccountsBinding(),
+    ),
+    GetPage(
+      name: _Paths.EMPLOYEE_CHECKIN,
+      page: () => const EmployeeCheckinView(),
+      binding: EmployeeCheckinBinding(),
     ),
   ];
 }

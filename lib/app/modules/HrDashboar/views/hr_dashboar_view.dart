@@ -1,5 +1,7 @@
+import 'package:amax_hr/app/modules/EmployeeCheckin/views/employee_checkin_view.dart' show EmployeeCheckinView;
 import 'package:amax_hr/app/modules/HrDashboar/controllers/hr_dashboar_controller.dart';
 import 'package:amax_hr/app/modules/HrDashboar/controllers/recruitment_dashboard_controller.dart';
+import 'package:amax_hr/app/routes/app_pages.dart' show Routes;
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -15,7 +17,7 @@ class HrDashboarView extends GetView<HrDashboarController> {
     Get.put(HrDashboarController());
 
     // Reactive variables for managing expanded states
-    final RxInt expandedDashboard = 0.obs; // HR Dashboard expanded by default
+    final RxInt expandedDashboard = (-1).obs; // HR Dashboard expanded by default
     return Scaffold(
       appBar: AppBar(
         title: const Text('HR Dashboard'),
@@ -81,6 +83,28 @@ class HrDashboarView extends GetView<HrDashboarController> {
               expandedDashboard: expandedDashboard,
               content: _buildExpenseClaimsDashboardContent(),
             ),
+            Container(
+              width: double.infinity,
+              height: 55,
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Get.toNamed(Routes.EMPLOYEE_CHECKIN);
+                 // Get.to(() => EmployeeCheckinView());
+                },
+                child: const Text(
+                  'Employee Checkin',
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            ),
+
           ],
         ),
       ),

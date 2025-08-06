@@ -32,6 +32,7 @@ abstract class Routes {
   static const PROJECT_BOARD = _Paths.PROJECT_BOARD;
   static const PAYROLL = _Paths.PAYROLL;
   static const ACCOUNTS = _Paths.ACCOUNTS;
+  static const EMPLOYEE_CHECKIN = _Paths.EMPLOYEE_CHECKIN;
 }
 
 abstract class _Paths {
@@ -64,4 +65,5 @@ abstract class _Paths {
   static const PROJECT_BOARD = '/project-board';
   static const PAYROLL = '/payroll';
   static const ACCOUNTS = '/accounts';
+  static const EMPLOYEE_CHECKIN = '/employee-checkin';
 }
