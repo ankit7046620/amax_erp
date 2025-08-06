@@ -12,7 +12,7 @@ class HomeTabView extends StatelessWidget {
       init: HomeTabController(),
       builder: (controller) {
         return Scaffold(
-          backgroundColor: const Color(0xFFF7F8FA),
+          backgroundColor: const Color(0xFFF5F6FA),
           body: controller.isLoading.value
               ? _buildShimmerLoading()
               : _buildModuleContent(context, controller),
@@ -23,7 +23,7 @@ class HomeTabView extends StatelessWidget {
 
   Widget _buildModuleContent(BuildContext context, HomeTabController controller) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -34,10 +34,9 @@ class HomeTabView extends StatelessWidget {
             colors: controller.popularColor,
             onTap: controller.handleModuleOnTap,
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 28),
           _gridSection(
             context: context,
-
             title: "Other Modules",
             items: controller.otherModules,
             colors: controller.popularColor,
@@ -60,20 +59,20 @@ class HomeTabView extends StatelessWidget {
       children: [
         Text(title,
             style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+              fontSize: 20,
+              fontWeight: FontWeight.w700,
               color: Colors.black87,
             )),
-        const SizedBox(height: 12),
+        const SizedBox(height: 14),
         GridView.builder(
           itemCount: items.length,
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 3,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.95,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.88,
           ),
           itemBuilder: (context, index) {
             final item = items[index];
@@ -89,34 +88,40 @@ class HomeTabView extends StatelessWidget {
   }
 
   Widget _moduleCard(String title, IconData icon, Color color) {
-    return Material(
-      borderRadius: BorderRadius.circular(16),
-      elevation: 3,
-      shadowColor: Colors.black12,
-      color: Colors.white,
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(16),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(icon, color: color, size: 26),
-            const SizedBox(height: 10),
-            Text(
-              capitalizeFirstOnly(title),
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: const [
+          BoxShadow(
+            color: Color(0x11000000),
+            blurRadius: 10,
+            offset: Offset(0, 4),
+          )
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          CircleAvatar(
+            backgroundColor: color.withOpacity(0.1),
+            radius: 22,
+            child: Icon(icon, color: color, size: 24),
+          ),
+          const SizedBox(height: 10),
+          Text(
+            capitalizeFirstOnly(title),
+            textAlign: TextAlign.center,
+            style: const TextStyle(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: Colors.black87,
             ),
-          ],
-        ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ],
       ),
     );
   }
@@ -126,7 +131,7 @@ class HomeTabView extends StatelessWidget {
 
   Widget _buildShimmerLoading() {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         children: [
           _shimmerGrid(title: "Popular Modules"),
@@ -145,10 +150,13 @@ class HomeTabView extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Container(
-          height: 20,
+          height: 22,
           width: 140,
-          color: Colors.grey.shade300,
-          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(8),
+            color: Colors.grey.shade300,
+          ),
+          margin: const EdgeInsets.only(bottom: 16),
         ),
         GridView.builder(
           shrinkWrap: true,
@@ -156,9 +164,9 @@ class HomeTabView extends StatelessWidget {
           itemCount: itemCount,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: crossAxisCount,
-            crossAxisSpacing: 16,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.95,
+            crossAxisSpacing: 14,
+            mainAxisSpacing: 14,
+            childAspectRatio: 0.88,
           ),
           itemBuilder: (context, index) {
             return Shimmer(
@@ -175,14 +183,17 @@ class HomeTabView extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CircleAvatar(
-                      radius: 18,
+                      radius: 20,
                       backgroundColor: Colors.grey.shade300,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: 12),
                     Container(
                       height: 12,
-                      width: 90,
-                      color: Colors.grey.shade300,
+                      width: 80,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.shade300,
+                        borderRadius: BorderRadius.circular(6),
+                      ),
                     ),
                   ],
                 ),

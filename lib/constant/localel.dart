@@ -29,4 +29,9 @@ class LabelConstants {
   static const String pleaseCheckYourNetwork = "Please check your network.";
   //button
   static const String buttonLogin = 'Login';
+  static const String totalEmployee = 'Total Employee';
+  static const String newHiresYear = 'New Hires(This Year)';
+  static const String empolyeeExitYear = 'Empolyee Exit(This year)';
+  static const String joinQuarter = 'Employees Joining (This Quarter)';
+
 }

@@ -41,16 +41,42 @@ class ApiService {
     }
   }
 
-  static Future<Response?> put(String endpoint, Map<String, dynamic> data) async {
+  static Future<Response?> put(String endpoint, {required Map<String, dynamic> data}) async {
     try {
-      await _attachSession();
-      final response = await dio.put(endpoint, data: data);
+      await _attachSession(); // Make sure session headers/cookies are attached
+
+      final response = await dio.put(
+        endpoint,
+        data: data,
+        options: Options(
+          headers: {
+            'content-type': 'application/json',
+            'accept': 'application/json',
+          },
+        ),
+      );
       return response;
+    } on DioError catch (e) {
+      if (e.response != null) {
+        // Server responded with error (4xx or 5xx)
+        print("❌ PUT Error → ${e.requestOptions.uri}");
+        print("📦 Status: ${e.response?.statusCode}");
+        print("📄 Body: ${e.response?.data}");
+      } else {
+        // Network error, timeout, etc.
+        print("❌ PUT Network Error → ${e.requestOptions.uri}");
+        print("📄 Message: ${e.message}");
+      }
+      return null;
     } catch (e) {
-      print("❌ PUT Error ($endpoint): $e");
+      // Unexpected error
+      print("❌ PUT Unexpected Error → $endpoint");
+      print("📄 Exception: $e");
       return null;
     }
   }
+
+
 
   static Future<Response?> delete(String endpoint, {Map<String, dynamic>? data}) async {
     try {

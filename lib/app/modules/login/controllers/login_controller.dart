@@ -33,9 +33,7 @@ class LoginController extends GetxController {
     setData();
     checkBiometricSupport();
     super.onInit();
-    frappeClient = FrappeV15(
-      baseUrl: 'https://plastic.techcloudamax.ai/',
-    );
+    frappeClient = FrappeV15(baseUrl: 'https://plastic.techcloudamax.ai/');
   }
 
   @override
@@ -45,11 +43,13 @@ class LoginController extends GetxController {
     super.onClose();
   }
 
-  setData(){
-    emailController.text="vignesh@amaxconsultancyservices.com";
-    passwordController.text="Welcome@@123#";
+  setData() {
+    emailController.text = "vignesh@amaxconsultancyservices.com";
+    passwordController.text = "Welcome@@123#";
+    //
+    // emailController.text = "ankit22@yopmail.com";
+    // passwordController.text = "Test@123";
   }
-
 
   void togglePasswordVisibility() {
     isPasswordVisible.value = !isPasswordVisible.value;
@@ -80,8 +80,7 @@ class LoginController extends GetxController {
       final isDeviceSupported = await _localAuth.isDeviceSupported();
       final canCheckBiometrics = await _localAuth.canCheckBiometrics;
       final biometrics = await _localAuth.getAvailableBiometrics();
-      isBiometricAvailable.value =
-          isDeviceSupported && canCheckBiometrics && biometrics.isNotEmpty;
+      isBiometricAvailable.value = isDeviceSupported;
       update();
     } catch (e) {
       isBiometricAvailable.value = false;
@@ -144,8 +143,6 @@ class LoginController extends GetxController {
     }
   }
 
-
-
   login() async {
     EasyLoading.show();
 
@@ -160,8 +157,9 @@ class LoginController extends GetxController {
 
     final cookieString = authResponse.toJson().toString();
 
-    final cookieRegex =
-    RegExp(r'(full_name|sid|system_user|user_id|user_image)=([^;]+)');
+    final cookieRegex = RegExp(
+      r'(full_name|sid|system_user|user_id|user_image)=([^;]+)',
+    );
     final matches = cookieRegex.allMatches(cookieString);
 
     Map<String, String> cookieMap = {};
@@ -169,8 +167,9 @@ class LoginController extends GetxController {
       cookieMap[match.group(1)!] = match.group(2)!;
     }
 
-    final cookieHeader =
-    cookieMap.entries.map((e) => '${e.key}=${e.value}').join('; ');
+    final cookieHeader = cookieMap.entries
+        .map((e) => '${e.key}=${e.value}')
+        .join('; ');
 
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(LocalKeys.cookieHeader, cookieHeader);

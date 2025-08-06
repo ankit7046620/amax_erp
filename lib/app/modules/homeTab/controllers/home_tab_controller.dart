@@ -3,6 +3,7 @@ import 'package:amax_hr/app/modules/HrDashboar/views/hr_dashboar_view.dart';
 import 'package:amax_hr/app/modules/StockDashboard/views/stock_dashboard_view.dart';
 import 'package:amax_hr/app/modules/accounts/views/accounts_view.dart';
 import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
+import 'package:amax_hr/app/modules/hrView/views/hr_view_view.dart';
 import 'package:amax_hr/app/modules/payroll/views/payroll_view.dart';
 import 'package:amax_hr/app/modules/projectBoard/views/project_board_view.dart';
 import 'package:amax_hr/app/modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
