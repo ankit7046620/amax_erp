@@ -1,5 +1,7 @@
 // lead_details_view.dart
 
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/vo/crm_model.dart';
 import 'package:flutter/material.dart';
@@ -41,51 +43,22 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     );
   }
 
+
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: GetBuilder<LeadDetailsController>(
-        builder: (controller) => Text(
-          "Lead Management - ${controller.status.value}",
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-            fontSize: 18,
-          ),
-        ),
+    return  CommonAppBar(imagePath: AssetsConstant.tech_logo, actions: [
+      IconButton(
+        icon: _iconContainer(Icons.refresh),
+        onPressed: () {
+          leadDetailsController.refreshLeads();
+        },
       ),
-      centerTitle: true,
-      elevation: 0,
-      flexibleSpace: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.indigo.shade700,
-              Colors.indigo.shade500,
-              Colors.blue.shade400,
-            ],
-          ),
-        ),
+      IconButton(
+        icon: _iconContainer(Icons.filter_list),
+        onPressed: () => _showStatusFilterDialog(),
       ),
-      leading: IconButton(
-        icon: _iconContainer(Icons.arrow_back_ios),
-        onPressed: () => Get.back(),
-      ),
-      actions: [
-        IconButton(
-            icon: _iconContainer(Icons.refresh),
-            onPressed: () {
-              controller.refreshLeads();
-            }
-        ),
-        IconButton(
-          icon: _iconContainer(Icons.filter_list),
-          onPressed: () => _showStatusFilterDialog(),
-        ),
-      ],
-    );
+    ]);
   }
+
 
   Widget _buildStatusTabs() {
     return GetBuilder<LeadDetailsController>(

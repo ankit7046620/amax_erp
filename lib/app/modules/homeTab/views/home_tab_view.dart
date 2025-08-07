@@ -4,8 +4,8 @@ import 'package:shimmer_animation/shimmer_animation.dart';
 import '../controllers/home_tab_controller.dart';
 
 class HomeTabView extends StatelessWidget {
-  const HomeTabView({super.key});
-
+    HomeTabView({super.key});
+  final HomeTabController controller = Get.put(HomeTabController());
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HomeTabController>(
@@ -35,13 +35,13 @@ class HomeTabView extends StatelessWidget {
             onTap: controller.handleModuleOnTap,
           ),
           const SizedBox(height: 28),
-          _gridSection(
+          if(controller.otherModules.isNotEmpty)...[        _gridSection(
             context: context,
             title: "Other Modules",
             items: controller.otherModules,
             colors: controller.popularColor,
             onTap: controller.handleModuleOnTap,
-          ),
+          ),]
         ],
       ),
     );
@@ -136,6 +136,7 @@ class HomeTabView extends StatelessWidget {
         children: [
           _shimmerGrid(title: "Popular Modules"),
           const SizedBox(height: 32),
+
           _shimmerGrid(title: "Other Modules"),
         ],
       ),
