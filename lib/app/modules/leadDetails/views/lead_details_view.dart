@@ -1,5 +1,7 @@
 // lead_details_view.dart
 
+import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/vo/crm_model.dart';
 import 'package:flutter/material.dart';
@@ -20,52 +22,142 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     return Scaffold(
       backgroundColor: Colors.grey.shade50,
       appBar: _buildAppBar(),
-      body: GetBuilder<LeadDetailsController>(
-        builder: (controller) {
-          if (controller.isLoading.value) {
-            return _buildLoadingList();
-          }
-          if (controller.leads.isEmpty) {
-            return _buildEmptyState();
-          }
-          return _buildLeadList();
-        },
+      body: Column(
+        children: [
+          _buildStatusTabs(),
+          Expanded(
+            child: GetBuilder<LeadDetailsController>(
+              builder: (controller) {
+                if (controller.isLoading.value) {
+                  return _buildLoadingList();
+                }
+                if (controller.leads.isEmpty) {
+                  return _buildEmptyState();
+                }
+                return _buildLeadList();
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
 
+
   PreferredSizeWidget _buildAppBar() {
-    return AppBar(
-      title: const Text(
-        "Lead Management",
-        style: TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-          fontSize: 20,
+    return  CommonAppBar(imagePath: AssetsConstant.tech_logo, actions: [
+      IconButton(
+        icon: _iconContainer(Icons.refresh),
+        onPressed: () {
+          leadDetailsController.refreshLeads();
+        },
+      ),
+      IconButton(
+        icon: _iconContainer(Icons.filter_list),
+        onPressed: () => _showStatusFilterDialog(),
+      ),
+    ]);
+  }
+
+
+  Widget _buildStatusTabs() {
+    return GetBuilder<LeadDetailsController>(
+      builder: (controller) => Container(
+        height: 60,
+        margin: const EdgeInsets.all(8),
+        child: ListView.builder(
+          scrollDirection: Axis.horizontal,
+          itemCount: controller.statusList.length + 1,
+          itemBuilder: (context, index) {
+            if (index == 0) {
+              return _buildStatusChip(
+                'All',
+                controller.leads.length,
+                controller.status.value == 'All' || controller.status.value == 'Unknown',
+                    () => controller.filterLeadsByStatus('All'),
+              );
+            }
+
+            final statusName = controller.statusList[index - 1];
+            final count = controller.getStatusCount(statusName);
+            final isSelected = controller.status.value == statusName;
+
+            return _buildStatusChip(
+              statusName,
+              count,
+              isSelected,
+                  () => controller.filterLeadsByStatus(statusName),
+            );
+          },
         ),
       ),
-      centerTitle: true,
-      elevation: 0,
-      flexibleSpace: Container(
+    );
+  }
+
+  Widget _buildStatusChip(String status, int count, bool isSelected, VoidCallback onTap) {
+    final color = _getStatusColor(status);
+
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Colors.indigo.shade700,
-              Colors.indigo.shade500,
-              Colors.blue.shade400,
+          color: isSelected ? color : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: isSelected ? color : Colors.grey.shade300,
+            width: isSelected ? 2 : 1,
+          ),
+          boxShadow: [
+            if (isSelected)
+              BoxShadow(
+                color: color.withOpacity(0.3),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+          ],
+        ),
+        child: Center(
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                _getStatusIcon(status),
+                size: 16,
+                color: isSelected ? Colors.white : color,
+              ),
+              const SizedBox(width: 6),
+              Text(
+                status,
+                style: TextStyle(
+                  color: isSelected ? Colors.white : color,
+                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  fontSize: 12,
+                ),
+              ),
+              if (count > 0) ...[
+                const SizedBox(width: 6),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: isSelected ? Colors.white.withOpacity(0.2) : color.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Text(
+                    count.toString(),
+                    style: TextStyle(
+                      color: isSelected ? Colors.white : color,
+                      fontSize: 10,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ],
             ],
           ),
         ),
       ),
-      leading: IconButton(
-        icon: _iconContainer(Icons.arrow_back_ios),
-        onPressed: () => Get.back(),
-      ),
-      actions: [
-        IconButton(icon: _iconContainer(Icons.refresh), onPressed: () {}),
-      ],
     );
   }
 
@@ -92,13 +184,17 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
       children: [
         Icon(Icons.people_outline, size: 64, color: Colors.indigo.shade300),
         const SizedBox(height: 16),
-        Text(
-          "No Leads Found",
-          style: TextStyle(fontSize: 20, color: Colors.grey.shade700),
+        GetBuilder<LeadDetailsController>(
+          builder: (controller) => Text(
+            "No ${controller.status.value} Leads Found",
+            style: TextStyle(fontSize: 20, color: Colors.grey.shade700),
+          ),
         ),
         const SizedBox(height: 8),
         ElevatedButton.icon(
-          onPressed: () {},
+          onPressed: () {
+            controller.refreshLeads();
+          },
           icon: const Icon(Icons.refresh),
           label: const Text("Refresh"),
           style: ElevatedButton.styleFrom(
@@ -120,8 +216,8 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
         child: AnimatedContainer(
           duration: Duration(milliseconds: 300 + (index * 100)),
           curve: Curves.easeOutBack,
-          margin: EdgeInsets.only(bottom: 16),
-          child: _buildModernLeadCard(lead),
+          margin: const EdgeInsets.only(bottom: 16),
+          child: _buildModernLeadCard(lead, index),
         ),
       );
     },
@@ -140,8 +236,33 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     ),
   );
 
-  Widget _buildModernLeadCard(CrmModel lead) {
-    if (lead.isUpdating) return _buildShimmerCard();
+  Widget _buildModernLeadCard(CrmModel lead, int index) {
+    // Check if this specific lead is updating
+    final isUpdating = lead.isUpdating ?? false;
+
+    if (isUpdating) {
+      return Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        child: Shimmer(
+          child: Container(
+            height: 160,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: const Center(
+              child: Text(
+                'Updating...',
+                style: TextStyle(
+                  color: Colors.grey,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
 
     final date = _formatDate(lead.creation);
     final statusColor = _getStatusColor(lead.status);
@@ -185,6 +306,33 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                   ),
                 ),
               ),
+              Positioned(
+                top: 16,
+                right: 16,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: statusColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: statusColor.withOpacity(0.3)),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(statusIcon, color: statusColor, size: 14),
+                      const SizedBox(width: 4),
+                      Text(
+                        lead.status ?? 'N/A',
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
               Padding(
                 padding: const EdgeInsets.all(20),
                 child: Column(
@@ -195,7 +343,16 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                         CircleAvatar(
                           radius: 24,
                           backgroundColor: statusColor,
-                          child: Icon(Icons.person, color: Colors.white),
+                          child: Text(
+                            (lead.leadName ?? lead.name ?? 'N')
+                                .substring(0, 1)
+                                .toUpperCase(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18,
+                            ),
+                          ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
@@ -203,22 +360,26 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                lead.leadName ?? 'No Name',
+                                lead.leadName ?? lead.name ?? 'No Name',
                                 style: const TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.w600,
                                 ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              Text(
-                                lead.name ?? '',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  color: Colors.grey.shade600,
+                              if (lead.leadName != null && lead.name != null && lead.leadName != lead.name)
+                                Text(
+                                  lead.name ?? '',
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    color: Colors.grey.shade600,
+                                  ),
                                 ),
-                              ),
                             ],
                           ),
                         ),
+                        const SizedBox(width: 40), // Space for status badge
                       ],
                     ),
                     const SizedBox(height: 16),
@@ -229,19 +390,22 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                         lead.companyName!,
                         Colors.blue.shade600,
                       ),
-                    const SizedBox(height: 10),
+                    if (lead.companyName?.isNotEmpty ?? false)
+                      const SizedBox(height: 10),
+                    if (lead.mobile_no?.isNotEmpty ?? false)
+                      _buildInfoCard(
+                        Icons.phone_outlined,
+                        "Mobile",
+                        lead.mobile_no!,
+                        Colors.green.shade600,
+                      ),
+                    if (lead.mobile_no?.isNotEmpty ?? false)
+                      const SizedBox(height: 10),
                     _buildInfoCard(
                       Icons.calendar_today_outlined,
                       "Created",
                       date,
                       Colors.orange.shade600,
-                    ),
-                    const SizedBox(height: 10),
-                    _buildInfoCard(
-                      statusIcon,
-                      "Status",
-                      lead.status ?? 'N/A',
-                      statusColor,
                     ),
                   ],
                 ),
@@ -254,11 +418,11 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
   }
 
   Widget _buildInfoCard(
-    IconData icon,
-    String label,
-    String value,
-    Color color,
-  ) {
+      IconData icon,
+      String label,
+      String value,
+      Color color,
+      ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -285,8 +449,66 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     );
   }
 
+  void _showStatusFilterDialog() {
+    showDialog(
+      context: Get.context!,
+      builder: (context) => AlertDialog(
+        title: const Text('Filter by Status'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: controller.statusList.length + 1,
+            itemBuilder: (context, index) {
+              String statusName;
+              int count;
+
+              if (index == 0) {
+                statusName = 'All';
+                count = controller.leads.length;
+              } else {
+                statusName = controller.statusList[index - 1];
+                count = controller.getStatusCount(statusName);
+              }
+
+              final isSelected = controller.status.value == statusName ||
+                  (statusName == 'All' && (controller.status.value == 'All' || controller.status.value == 'Unknown'));
+
+              return ListTile(
+                leading: Icon(
+                  _getStatusIcon(statusName),
+                  color: _getStatusColor(statusName),
+                ),
+                title: Text(statusName),
+                trailing: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _getStatusColor(statusName).withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    count.toString(),
+                    style: TextStyle(
+                      color: _getStatusColor(statusName),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                selected: isSelected,
+                onTap: () {
+                  Get.back();
+                  controller.filterLeadsByStatus(statusName == 'All' ? null : statusName);
+                },
+              );
+            },
+          ),
+        ),
+      ),
+    );
+  }
+
   void _showEditLeadDialog(BuildContext context, CrmModel lead, int index) {
-    final nameController = TextEditingController(text: lead.leadName);
+    final nameController = TextEditingController(text: lead.leadName ?? lead.name);
     final companyController = TextEditingController(text: lead.companyName);
     final mobileController = TextEditingController(text: lead.mobile_no);
     String selectedStatus = lead.status ?? 'Open';
@@ -294,117 +516,249 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
 
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text("Edit Lead"),
-        content: SingleChildScrollView(
-          child: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                _buildTextField(
-                  "Lead Name",
-                  nameController,
-                  validator: _requiredValidator,
-                  enabled: false,
-                ),
-                _buildTextField(
-                  "Company",
-                  companyController,
-                  validator: _requiredValidator,
-                  enabled: false,
-                ),
-                _buildTextField(
-                  "Mobile",
-                  mobileController,
-                  keyboard: TextInputType.phone,
-                  validator: _requiredValidator,
-                ),
-                DropdownButtonFormField<String>(
-                  value: selectedStatus,
-                  items: controller.statusList.map((status) {
-                    return DropdownMenuItem(value: status, child: Text(status));
-                  }).toList(),
-                  onChanged: (val) => selectedStatus = val ?? selectedStatus,
-                  decoration: const InputDecoration(labelText: "Status"),
-                ),
-              ],
+      barrierDismissible: false,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.edit, color: Colors.indigo.shade600),
+              const SizedBox(width: 8),
+              const Text("Edit Lead"),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  _buildTextField(
+                    "Lead Name",
+                    nameController,
+                    Icons.person_outline,
+                    validator: _requiredValidator,
+                    enabled: false,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    "Company",
+                    companyController,
+                    Icons.business_outlined,
+                    enabled: false,
+                  ),
+                  const SizedBox(height: 12),
+                  _buildTextField(
+                    "Mobile",
+                    mobileController,
+                    Icons.phone_outlined,
+                    keyboard: TextInputType.phone,
+                    validator: _mobileValidator,
+                  ),
+                  const SizedBox(height: 16),
+                  Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey.shade300),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: 12),
+                    child: DropdownButtonFormField<String>(
+                      value: selectedStatus,
+                      decoration: const InputDecoration(
+                        labelText: "Status",
+                        border: InputBorder.none,
+                        prefixIcon: Icon(Icons.flag_outlined),
+                      ),
+                      items: controller.statusList.map((status) {
+                        return DropdownMenuItem(
+                          value: status,
+                          child: Row(
+                            children: [
+                              Icon(
+                                _getStatusIcon(status),
+                                color: _getStatusColor(status),
+                                size: 18,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(status),
+                            ],
+                          ),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setState(() {
+                            selectedStatus = val;
+                          });
+                        }
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
+          actions: [
+            TextButton(
+              onPressed: () => Get.back(),
+              child: Text(
+                "Cancel",
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  // Close the edit dialog first
+                  Get.back();
+
+                  try {
+                    // Update the lead object locally first
+                    lead.leadName = nameController.text.trim();
+                    lead.companyName = companyController.text.trim();
+                    lead.mobile_no = mobileController.text.trim();
+
+                    // Call the controller method - it will handle everything
+                    await controller.updateLeadStatus(
+                      newStatus: selectedStatus,
+                      crm: lead,
+                      mobile_no: mobileController.text.trim(),
+                      index: index,
+                    );
+
+                  } catch (e) {
+                    logger.e('Error in UI: $e');
+                    // Controller already handles error display
+                  }
+                } else {
+                  // Show validation error using controller's snackbar style
+                  Get.showSnackbar(
+                    GetSnackBar(
+                      title: 'Validation Error',
+                      message: 'Please fill in all required fields correctly',
+                      duration: const Duration(seconds: 3),
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.orange.shade600,
+                    ),
+                  );
+                }
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.indigo.shade600,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              child: const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.save, size: 18),
+                  SizedBox(width: 8),
+                  Text("Save Changes"),
+                ],
+              ),
+            ),
+          ],
         ),
-        actions: [
-          TextButton(onPressed: () => Get.back(), child: const Text("Cancel")),
-          ElevatedButton(
-            onPressed: () {
-              if (formKey.currentState!.validate()) {
-                lead.leadName = nameController.text.trim();
-                lead.companyName = companyController.text.trim();
-                lead.mobile_no = mobileController.text.trim();
-                lead.status = selectedStatus;
-                controller.update();
-                controller.updateLeadStatus(
-                  newStatus: selectedStatus,
-                  crm: lead,
-                  mobile_no: mobileController.text.trim(),
-                  index: index,
-                );
-              }
-            },
-            child: const Text("Save"),
-          ),
-        ],
       ),
     );
   }
 
   Widget _buildTextField(
-    String label,
-    TextEditingController controller, {
-    TextInputType keyboard = TextInputType.text,
-    String? Function(String?)? validator,
-    bool enabled = true,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 12),
-      child: TextFormField(
-        controller: controller,
-        keyboardType: keyboard,
-        validator: validator,
-        enabled: enabled,
-        decoration: InputDecoration(
-          labelText: label,
-          border: OutlineInputBorder(),
-          isDense: true,
+      String label,
+      TextEditingController controller,
+      IconData icon, {
+        TextInputType keyboard = TextInputType.text,
+        String? Function(String?)? validator,
+        bool enabled = true,
+      }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: keyboard,
+      validator: validator,
+      enabled: enabled,
+      decoration: InputDecoration(
+        labelText: label,
+        prefixIcon: Icon(icon),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
         ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.indigo.shade600, width: 2),
+        ),
+        disabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: Colors.grey.shade200),
+        ),
+        filled: !enabled,
+        fillColor: enabled ? null : Colors.grey.shade50,
+        isDense: true,
+        contentPadding: const EdgeInsets.all(16),
       ),
     );
   }
 
-  String? _requiredValidator(String? value) =>
-      value == null || value.trim().isEmpty ? 'Required' : null;
+  String? _requiredValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'This field is required';
+    }
+    return null;
+  }
+
+  String? _mobileValidator(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Mobile number is required';
+    }
+    if (value.trim().length < 10) {
+      return 'Please enter a valid mobile number';
+    }
+    return null;
+  }
 
   String _formatDate(String? dateStr) {
-    if (dateStr == null) return 'N/A';
+    if (dateStr == null || dateStr.isEmpty) return 'N/A';
     try {
       final date = DateTime.parse(dateStr);
-      return DateFormat.yMMMd().format(date);
-    } catch (_) {
+      return DateFormat('MMM dd, yyyy').format(date);
+    } catch (e) {
       return dateStr;
     }
   }
 
   Color _getStatusColor(String? status) {
     switch (status?.toLowerCase()) {
+      case 'all':
+        return Colors.indigo.shade600;
       case 'open':
         return Colors.green.shade600;
-      case 'lost':
-        return Colors.red.shade600;
-      case 'converted':
-        return Colors.purple.shade600;
-      case 'qualified':
+      case 'lead':
         return Colors.blue.shade600;
-      case 'interested':
+      case 'opportunity':
+        return Colors.purple.shade600;
+      case 'quotation':
         return Colors.orange.shade600;
+      case 'converted':
+        return Colors.teal.shade600;
+      case 'do not contact':
+        return Colors.red.shade600;
+      case 'interested':
+        return Colors.amber.shade700;
+      case 'won':
+        return Colors.green.shade700;
+      case 'lost':
+        return Colors.grey.shade600;
       default:
         return Colors.grey.shade600;
     }
@@ -412,16 +766,26 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
 
   IconData _getStatusIcon(String? status) {
     switch (status?.toLowerCase()) {
+      case 'all':
+        return Icons.list_alt;
       case 'open':
         return Icons.radio_button_unchecked;
-      case 'lost':
-        return Icons.close_rounded;
+      case 'lead':
+        return Icons.person_outline;
+      case 'opportunity':
+        return Icons.trending_up;
+      case 'quotation':
+        return Icons.description_outlined;
       case 'converted':
         return Icons.check_circle_outline;
-      case 'qualified':
-        return Icons.verified_outlined;
+      case 'do not contact':
+        return Icons.block;
       case 'interested':
         return Icons.favorite_outline;
+      case 'won':
+        return Icons.emoji_events_outlined;
+      case 'lost':
+        return Icons.close_rounded;
       default:
         return Icons.help_outline;
     }
