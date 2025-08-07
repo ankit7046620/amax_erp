@@ -30,7 +30,18 @@ class ApiService {
   }
 
   /// 🔹 POST Method
-  static Future<Response?> post(String endpoint, Map<String, dynamic> data) async {
+  // static Future<Response?> post(String endpoint, Map<String, dynamic> data) async {
+  //   try {
+  //     await _attachSession(); // Load session before every request
+  //     final response = await dio.post(endpoint, data: data);
+  //     return response;
+  //   } catch (e) {
+  //     print("❌ POST Error ($endpoint): $e");
+  //     return null;
+  //   }
+  // }
+
+  static Future<Response?> post(String endpoint, {required Map<String, dynamic> data}) async {
     try {
       await _attachSession(); // Load session before every request
       final response = await dio.post(endpoint, data: data);
@@ -40,6 +51,7 @@ class ApiService {
       return null;
     }
   }
+
 
   static Future<Response?> put(String endpoint, {required Map<String, dynamic> data}) async {
     try {
