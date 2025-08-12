@@ -44,13 +44,11 @@ class LoginController extends GetxController {
   }
 
   setData() {
-    emailController.text = "vignesh@amaxconsultancyservices.com";
-    passwordController.text = "Welcome@@123#";
+    // emailController.text = "vignesh@amaxconsultancyservices.com";
+    // passwordController.text = "Welcome@@123#";
 
-    // emailController.text = "ankit22@yopmail.com";
-    // passwordController.text = "Test@123";
-    // emailController.text = "ankit123@yopmail.com";
-    // passwordController.text = "Test@123";
+    emailController.text = "ankit22@yopmail.com";
+    passwordController.text = "Test@123";
   }
 
   void togglePasswordVisibility() {
