@@ -4,6 +4,7 @@ import 'package:amax_hr/constant/url.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/vo/crm_model.dart';
+import 'package:amax_hr/vo/user_vo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -11,6 +12,8 @@ import 'package:get/get.dart';
 
 class LeadDetailsController extends GetxController {
   var leads = <CrmModel>[].obs;
+  List<UserModel> userList = [];
+  List<String> assignees = [];
   var status = 'Open'.obs;
   RxBool isLoading = true.obs;
   final count = 0.obs;
@@ -41,6 +44,7 @@ class LeadDetailsController extends GetxController {
   @override
   void onInit() {
     isLoading.value = true;
+    fetchUser();
     final args = Get.arguments as Map<String, dynamic>? ?? {};
     status.value = args['status'] ?? 'Unknown';
     leads.value = List<CrmModel>.from(args['leads'] ?? []);
@@ -201,6 +205,71 @@ class LeadDetailsController extends GetxController {
     status.value = statusName ?? 'All';
     update();
   }
+
+
+  //add event call
+  Future<void> addEventApicall() async {
+
+    Map<String, dynamic> eventData = {
+
+      'title': 'New Event',
+      'date': DateTime.now().toIso8601String(),
+      'description': 'Event description',
+    };
+
+    try {
+      final response = await ApiService.post(
+        ApiUri.addEvents,eventData
+      );
+
+      if (response != null && response.statusCode == 200) {
+
+
+        update();
+      } else {
+        print('❌ Failed to fetch leads');
+      }
+    } catch (e) {
+      print("❌ Error fetching leads: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+
+
+  Future<void> fetchUser() async {
+    try {
+      final response = await ApiService.get(
+        ApiUri.getAllUser,
+        params: {
+          'fields':
+          '["*"]',
+          'limit_page_length': '1000',
+        },
+      );
+
+      if (response != null && response.statusCode == 200) {
+
+        userList = (response.data['data'] as List)
+            .map((e) => UserModel.fromJson(e))
+            .toList();
+
+        assignees= userList.map((user) => user.name ?? '').toList();
+        logger.d('userList===>#${userList.length}');
+
+
+        update();
+      } else {
+        print('❌ Failed to fetch leads');
+      }
+    } catch (e) {
+      print("❌ Error fetching leads: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
 
   // Method to get all leads from all status lists
   List<CrmModel> _getAllLeads() {

@@ -4,8 +4,10 @@ import 'package:shimmer_animation/shimmer_animation.dart';
 import '../controllers/home_tab_controller.dart';
 
 class HomeTabView extends StatelessWidget {
-    HomeTabView({super.key});
+  HomeTabView({super.key});
+
   final HomeTabController controller = Get.put(HomeTabController());
+
   @override
   Widget build(BuildContext context) {
     return GetBuilder<HomeTabController>(
@@ -21,27 +23,34 @@ class HomeTabView extends StatelessWidget {
     );
   }
 
-  Widget _buildModuleContent(BuildContext context, HomeTabController controller) {
+  Widget _buildModuleContent(
+    BuildContext context,
+    HomeTabController controller,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _gridSection(
-            context: context,
-            title: "Popular Modules",
-            items: controller.popularModules,
-            colors: controller.popularColor,
-            onTap: controller.handleModuleOnTap,
-          ),
+          if (controller.popularModules.isNotEmpty) ...[
+            _gridSection(
+              context: context,
+              title: "Popular Modules",
+              items: controller.popularModules,
+              colors: controller.popularColor,
+              onTap: controller.handleModuleOnTap,
+            ),
+          ],
           const SizedBox(height: 28),
-          if(controller.otherModules.isNotEmpty)...[        _gridSection(
-            context: context,
-            title: "Other Modules",
-            items: controller.otherModules,
-            colors: controller.popularColor,
-            onTap: controller.handleModuleOnTap,
-          ),]
+          if (controller.otherModules.isNotEmpty) ...[
+            _gridSection(
+              context: context,
+              title: "Other Modules",
+              items: controller.otherModules,
+              colors: controller.popularColor,
+              onTap: controller.handleModuleOnTap,
+            ),
+          ],
         ],
       ),
     );
@@ -57,12 +66,14 @@ class HomeTabView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(title,
-            style: const TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.w700,
-              color: Colors.black87,
-            )),
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+          ),
+        ),
         const SizedBox(height: 14),
         GridView.builder(
           itemCount: items.length,
@@ -97,7 +108,7 @@ class HomeTabView extends StatelessWidget {
             color: Color(0x11000000),
             blurRadius: 10,
             offset: Offset(0, 4),
-          )
+          ),
         ],
       ),
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 18),

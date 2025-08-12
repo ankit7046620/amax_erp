@@ -4,6 +4,7 @@ import 'package:amax_hr/common/component/custom_appbar.dart';
 import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/vo/crm_model.dart';
+import 'package:dropdown_search/dropdown_search.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -43,22 +44,24 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     );
   }
 
-
   PreferredSizeWidget _buildAppBar() {
-    return  CommonAppBar(imagePath: AssetsConstant.tech_logo, actions: [
-      IconButton(
-        icon: _iconContainer(Icons.refresh),
-        onPressed: () {
-          leadDetailsController.refreshLeads();
-        },
-      ),
-      IconButton(
-        icon: _iconContainer(Icons.filter_list),
-        onPressed: () => _showStatusFilterDialog(),
-      ),
-    ]);
+    return CommonAppBar(
+      imagePath: AssetsConstant.tech_logo,
+      showBack: true,
+      actions: [
+        IconButton(
+          icon: _iconContainer(Icons.refresh),
+          onPressed: () {
+            leadDetailsController.refreshLeads();
+          },
+        ),
+        IconButton(
+          icon: _iconContainer(Icons.filter_list),
+          onPressed: () => _showStatusFilterDialog(),
+        ),
+      ],
+    );
   }
-
 
   Widget _buildStatusTabs() {
     return GetBuilder<LeadDetailsController>(
@@ -73,8 +76,9 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
               return _buildStatusChip(
                 'All',
                 controller.leads.length,
-                controller.status.value == 'All' || controller.status.value == 'Unknown',
-                    () => controller.filterLeadsByStatus('All'),
+                controller.status.value == 'All' ||
+                    controller.status.value == 'Unknown',
+                () => controller.filterLeadsByStatus('All'),
               );
             }
 
@@ -86,7 +90,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
               statusName,
               count,
               isSelected,
-                  () => controller.filterLeadsByStatus(statusName),
+              () => controller.filterLeadsByStatus(statusName),
             );
           },
         ),
@@ -94,7 +98,12 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     );
   }
 
-  Widget _buildStatusChip(String status, int count, bool isSelected, VoidCallback onTap) {
+  Widget _buildStatusChip(
+    String status,
+    int count,
+    bool isSelected,
+    VoidCallback onTap,
+  ) {
     final color = _getStatusColor(status);
 
     return GestureDetector(
@@ -139,9 +148,14 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
               if (count > 0) ...[
                 const SizedBox(width: 6),
                 Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
                   decoration: BoxDecoration(
-                    color: isSelected ? Colors.white.withOpacity(0.2) : color.withOpacity(0.1),
+                    color: isSelected
+                        ? Colors.white.withOpacity(0.2)
+                        : color.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(10),
                   ),
                   child: Text(
@@ -310,7 +324,10 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                 top: 16,
                 right: 16,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: statusColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -368,7 +385,9 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
                               ),
-                              if (lead.leadName != null && lead.name != null && lead.leadName != lead.name)
+                              if (lead.leadName != null &&
+                                  lead.name != null &&
+                                  lead.leadName != lead.name)
                                 Text(
                                   lead.name ?? '',
                                   style: TextStyle(
@@ -382,6 +401,10 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                         const SizedBox(width: 40), // Space for status badge
                       ],
                     ),
+
+                    const SizedBox(height: 12),
+
+                    _eventButton(),
                     const SizedBox(height: 16),
                     if (lead.companyName?.isNotEmpty ?? false)
                       _buildInfoCard(
@@ -417,12 +440,83 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     );
   }
 
+  Widget _eventButton() {
+    return Row(
+      children: [
+        _actionButton(
+          label: "Add Event",
+          color: Colors.red,
+          icon: Icons.add,
+          onTap: () {
+            logger.d("Add Event button tapped");
+            showNewEventDialog( );
+            Get.snackbar(
+              "Coming Soon",
+              "Add Event feature is not yet implemented.",
+            );
+            logger.w("Add Event feature is not yet implemented.");
+          },
+        ),
+        const SizedBox(width: 16),
+        _actionButton(
+          label: "Add Task",
+          color: Colors.blue,
+          icon: Icons.add_task,
+          onTap: () {
+    logger.d("Add Task button tapped");
+            // Handle second event button tap
+            // You can implement your task creation logic here
+            Get.snackbar(
+              "Coming Soon",
+              "Add Task feature is not yet implemented.",
+            );
+            logger.w("Add Task feature is not yet implemented.");
+          },
+        ),
+      ],
+    );
+  }
+
+  Widget _actionButton({
+    required String label,
+    required Color color,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: color.withOpacity(0.1),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: color.withOpacity(0.3)),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: color.withOpacity(0.7), size: 14),
+            const SizedBox(width: 4),
+            Text(
+              label,
+              style: TextStyle(
+                color: color.withOpacity(0.7),
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildInfoCard(
-      IconData icon,
-      String label,
-      String value,
-      Color color,
-      ) {
+    IconData icon,
+    String label,
+    String value,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -471,8 +565,11 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                 count = controller.getStatusCount(statusName);
               }
 
-              final isSelected = controller.status.value == statusName ||
-                  (statusName == 'All' && (controller.status.value == 'All' || controller.status.value == 'Unknown'));
+              final isSelected =
+                  controller.status.value == statusName ||
+                  (statusName == 'All' &&
+                      (controller.status.value == 'All' ||
+                          controller.status.value == 'Unknown'));
 
               return ListTile(
                 leading: Icon(
@@ -481,7 +578,10 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                 ),
                 title: Text(statusName),
                 trailing: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
                   decoration: BoxDecoration(
                     color: _getStatusColor(statusName).withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
@@ -497,7 +597,9 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                 selected: isSelected,
                 onTap: () {
                   Get.back();
-                  controller.filterLeadsByStatus(statusName == 'All' ? null : statusName);
+                  controller.filterLeadsByStatus(
+                    statusName == 'All' ? null : statusName,
+                  );
                 },
               );
             },
@@ -508,7 +610,9 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
   }
 
   void _showEditLeadDialog(BuildContext context, CrmModel lead, int index) {
-    final nameController = TextEditingController(text: lead.leadName ?? lead.name);
+    final nameController = TextEditingController(
+      text: lead.leadName ?? lead.name,
+    );
     final companyController = TextEditingController(text: lead.companyName);
     final mobileController = TextEditingController(text: lead.mobile_no);
     String selectedStatus = lead.status ?? 'Open';
@@ -627,7 +731,6 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                       mobile_no: mobileController.text.trim(),
                       index: index,
                     );
-
                   } catch (e) {
                     logger.e('Error in UI: $e');
                     // Controller already handles error display
@@ -672,13 +775,13 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
   }
 
   Widget _buildTextField(
-      String label,
-      TextEditingController controller,
-      IconData icon, {
-        TextInputType keyboard = TextInputType.text,
-        String? Function(String?)? validator,
-        bool enabled = true,
-      }) {
+    String label,
+    TextEditingController controller,
+    IconData icon, {
+    TextInputType keyboard = TextInputType.text,
+    String? Function(String?)? validator,
+    bool enabled = true,
+  }) {
     return TextFormField(
       controller: controller,
       keyboardType: keyboard,
@@ -687,9 +790,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: Colors.grey.shade300),
@@ -790,4 +891,169 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
         return Icons.help_outline;
     }
   }
+
+
+  void showNewEventDialog() {
+    final _formKey = GlobalKey<FormState>();
+
+    String selectedCategory = "Event";
+    String selectedAssignee = "";
+    String summary = "";
+    String description = "";
+    DateTime? selectedDate;
+
+    List<String> categories = [
+      "Event",
+      "Meeting",
+      "Call",
+      "Sent/Received Email",
+      "Other",
+    ];
+
+    List<String> assignees = controller.assignees;
+
+    showDialog(
+      context: Get.context!,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          title: Text("New Event"),
+          content: StatefulBuilder(
+            builder: (context, setState) {
+              return Padding(
+                padding: MediaQuery.of(context).viewInsets, // Shift up on keyboard open
+                child: SingleChildScrollView(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        // Category Dropdown
+                        DropdownButtonFormField<String>(
+                          value: selectedCategory,
+                          decoration: InputDecoration(labelText: "Category"),
+                          items: categories
+                              .map((cat) => DropdownMenuItem(
+                            value: cat,
+                            child: Text(cat),
+                          ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedCategory = value!;
+                            });
+                          },
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Date Picker
+                        TextFormField(
+                          readOnly: true,
+                          decoration: InputDecoration(
+                            labelText: "Date *",
+                            suffixIcon: Icon(Icons.calendar_today),
+                          ),
+                          onTap: () async {
+                            final pickedDate = await showDatePicker(
+                              context: context,
+                              initialDate: DateTime.now(),
+                              firstDate: DateTime(2020),
+                              lastDate: DateTime(2100),
+                            );
+                            if (pickedDate != null) {
+                              setState(() {
+                                selectedDate = pickedDate;
+                              });
+                            }
+                          },
+                          controller: TextEditingController(
+                            text: selectedDate == null
+                                ? ""
+                                : "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}",
+                          ),
+                          validator: (value) =>
+                          value!.isEmpty ? "Please select a date" : null,
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Assigned To - Regular Dropdown
+                        DropdownButtonFormField<String>(
+                          value: selectedAssignee.isEmpty ? null : selectedAssignee,
+                          decoration: InputDecoration(
+                            labelText: "Assigned To",
+                            border: OutlineInputBorder(),
+                          ),
+                          items: assignees
+                              .map((assignee) => DropdownMenuItem(
+                            value: assignee,
+                            child: Text(assignee),
+                          ))
+                              .toList(),
+                          onChanged: (value) {
+                            setState(() {
+                              selectedAssignee = value ?? "";
+                            });
+                          },
+                          validator: (value) => value == null || value.isEmpty
+                              ? "Please select an assignee"
+                              : null,
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Summary
+                        TextFormField(
+                          decoration: InputDecoration(labelText: "Summary *"),
+                          validator: (value) =>
+                          value!.isEmpty ? "Please enter a summary" : null,
+                          onChanged: (value) => summary = value,
+                        ),
+                        const SizedBox(height: 10),
+
+                        // Description
+                        TextFormField(
+                          decoration: InputDecoration(
+                            labelText: "Description",
+                            alignLabelWithHint: true,
+                            border: OutlineInputBorder(),
+                          ),
+                          maxLines: 4,
+                          onChanged: (value) => description = value,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                if (_formKey.currentState!.validate()) {
+                  Navigator.pop(context);
+                  // TODO: Call your API here with form data
+                  print("Category: $selectedCategory");
+                  print("Date: $selectedDate");
+                  print("Assigned To: $selectedAssignee");
+                  print("Summary: $summary");
+                  print("Description: $description");
+                }
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+              child: Text("Create"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+
+
+
 }
