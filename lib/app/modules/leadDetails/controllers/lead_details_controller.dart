@@ -219,7 +219,7 @@ class LeadDetailsController extends GetxController {
 
     try {
       final response = await ApiService.post(
-        ApiUri.addEvents,eventData
+        ApiUri.addEvents, data:eventData
       );
 
       if (response != null && response.statusCode == 200) {

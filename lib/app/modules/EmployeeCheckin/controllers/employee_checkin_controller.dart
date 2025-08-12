@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:syncfusion_flutter_charts/charts.dart' hide Position;
 
 class Employee {
   final String name;
