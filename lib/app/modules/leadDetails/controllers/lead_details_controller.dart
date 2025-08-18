@@ -208,13 +208,23 @@ class LeadDetailsController extends GetxController {
 
 
   //add event call
-  Future<void> addEventApicall() async {
-
+  Future<void> addEventApicall({required String title,required String date,required String assign,required String summry,required String desc}) async {
+Get.back();
     Map<String, dynamic> eventData = {
+      //
+      // 'title': title,
+      // 'date': date,
+      // 'description': desc,
+      // 'summary': summry,
+      // 'assign': assign,
 
-      'title': 'New Event',
-      'date': DateTime.now().toIso8601String(),
-      'description': 'Event description',
+      "subject": "Event for Lead",
+      "starts_on": "2025-08-27 10:00:00",
+      "ends_on": "2025-08-27 11:00:00",
+      "description": "Follow-up call",
+      "event_type": "Private",
+      "reference_doctype": "Lead",
+      "reference_docname": "LEAD-0001"
     };
 
     try {

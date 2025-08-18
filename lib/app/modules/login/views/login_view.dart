@@ -111,7 +111,7 @@ class LoginView extends GetView<LoginController> {
                               ),
                               onPressed: () {
                                 FocusScope.of(context).unfocus();
-                                controller.login();
+                                controller.loginLocal();
                               },
                               child: const Text(
                                 'Login',

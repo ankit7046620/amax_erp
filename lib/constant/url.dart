@@ -7,6 +7,6 @@ class ApiUri {
   static const String getEmployee =   "/api/resource/Employee";
   static const String getSalaryData =   "/api/resource/Salary Slip";
   static const String getAccounts = "/api/resource/Account";
-  static const String addEvents = "/api/resource/events";
+  static const String addEvents = "/api/resource/Event";
   static const String getAllUser = "/api/resource/User";
 }

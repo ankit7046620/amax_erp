@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:amax_hr/app/modules/homeTab/controllers/home_tab_controller.dart';
 import 'package:amax_hr/app/modules/navBar/views/nav_bar_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
 import 'package:amax_hr/main.dart';
@@ -6,6 +9,8 @@ import 'package:amax_hr/manager/auth_manager.dart';
 import 'package:amax_hr/manager/shared_pref_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/utils/app_funcation.dart';
+import 'package:amax_hr/vo/user_info.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
@@ -30,10 +35,11 @@ class LoginController extends GetxController {
 
   @override
   void onInit() {
-    setData();
     checkBiometricSupport();
     super.onInit();
-    frappeClient = FrappeV15(baseUrl: 'https://plastic.techcloudamax.ai/');
+    setData();
+    //loginLocal();
+    //frappeClient = FrappeV15(baseUrl: 'https://plastic.techcloudamax.ai/');
   }
 
   @override
@@ -43,12 +49,90 @@ class LoginController extends GetxController {
     super.onClose();
   }
 
-  setData() {
-    // emailController.text = "vignesh@amaxconsultancyservices.com";
-    // passwordController.text = "Welcome@@123#";
+  loginLocal() async {
+    EasyLoading.show();
+    try {
+      var dio = Dio(
+        BaseOptions(
+          connectTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 15),
+        ),
+      );
 
-    emailController.text = "ankit22@yopmail.com";
-    passwordController.text = "Test@123";
+      var response = await dio.request(
+        'https://plastic.techcloudamax.ai/api/method/theme1.api.login_api.login_with_permissions?usr=${emailController.text}&pwd=${passwordController.text}',
+        options: Options(method: 'POST'),
+      );
+
+      if (response.statusCode == 200) {
+        logger.d("calllll====");
+
+        // ✅ Log data only, not headers object
+        print(json.encode(response.data));
+
+        // Get cookies safely
+        final cookies = response.headers['set-cookie'] ?? [];
+
+        String? sidValue;
+        String? fullName;
+        String? userId;
+
+        for (var cookie in cookies) {
+          var parts = cookie.split(';').first.split('=');
+          if (parts.length == 2) {
+            var key = parts[0];
+            var value = parts[1];
+
+            if (key == 'sid') sidValue = value;
+            if (key == 'full_name') fullName = value;
+            if (key == 'user_id') userId = value;
+          }
+        }
+
+        print('SID: $sidValue');
+        print('Full Name: $fullName');
+        print('User ID: $userId');
+
+        // Store in SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        if (sidValue != null) await prefs.setString('sid', sidValue);
+        if (fullName != null) await prefs.setString('full_name', fullName);
+        if (userId != null) await prefs.setString('user_id', userId);
+
+        // ✅ Set default cookie header for future requests
+        dio.options.headers['Cookie'] =
+            'sid=$sidValue; full_name=$fullName; user_id=$userId';
+
+        UserInfo userInfo = UserInfo.fromJson(response.data);
+        logger.d("=========userInfo: ${userInfo.toJson()}");
+
+        List<String> modules = userInfo.message?.modules ?? [];
+        update();
+        EasyLoading.dismiss();
+
+//
+        Get.offAllNamed(Routes.NAV_BAR, arguments: {'modules': modules});
+      } else {
+        EasyLoading.dismiss();
+        print(response.statusMessage);
+      }
+    } catch (e) {
+      EasyLoading.dismiss();
+      logger.e("Error in loginLocal: $e");
+    }
+  }
+
+  setData() {
+    emailController.text = "vignesh@amaxconsultancyservices.com";
+    passwordController.text = "Welcome@@123%23";
+    // emailController.text = "test3@gmail.com";
+    // passwordController.text = "test3@123";
+
+    // test3@gmail.com
+    // test3@123
+
+    // emailController.text = "ankit22@yopmail.com";
+    // passwordController.text = "Test@123";
   }
 
   void togglePasswordVisibility() {
@@ -124,7 +208,7 @@ class LoginController extends GetxController {
 
       if (isAuthenticated) {
         ApiService.dio.options.headers['cookie'] = cookieHeader;
-        Get.offAll(() => NavBarView());
+        Get.offAllNamed(Routes.NAV_BAR);
       } else {
         Get.snackbar(
           "Authentication Failed",
@@ -198,7 +282,7 @@ class LoginController extends GetxController {
         email = Uri.decodeComponent(trimmed.substring(8));
       }
     }
-    logger.d("get email>>>>${email}");
+    logger.d("get email>>>>$email");
 
     if (sid != null) await prefs.setString(LocalKeys.sid, sid);
     if (fullName != null) await prefs.setString(LocalKeys.fullName, fullName);

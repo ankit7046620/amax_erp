@@ -62,6 +62,7 @@ class LocalKeys {
   static const String systemUser = 'systemUser';
   static const String cookieHeader = 'cookieHeader';
   static const String onboardingSeen = "onboarding_seen";
+  static const String module = "module";
 
   static const String eid = "eid";
 }

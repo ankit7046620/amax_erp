@@ -53,6 +53,7 @@ dependencies:
   shimmer_animation: ^2.2.2
   local_auth: ^2.3.0
   geolocator: ^14.0.2
+  dropdown_search: ^6.0.2
 
 
 flutter_launcher_icons:

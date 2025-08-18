@@ -127,7 +127,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.NAV_BAR,
-      page: () => const NavBarView(),
+      page: () =>   NavBarView(),
       binding: NavBarBinding(),
     ),
     GetPage(

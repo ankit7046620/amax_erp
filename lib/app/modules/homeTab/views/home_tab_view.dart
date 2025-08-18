@@ -1,3 +1,4 @@
+import 'package:amax_hr/app/modules/navBar/controllers/nav_bar_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -6,10 +7,13 @@ import '../controllers/home_tab_controller.dart';
 class HomeTabView extends StatelessWidget {
   HomeTabView({super.key});
 
+
+
   final HomeTabController controller = Get.put(HomeTabController());
 
   @override
   Widget build(BuildContext context) {
+
     return GetBuilder<HomeTabController>(
       init: HomeTabController(),
       builder: (controller) {
