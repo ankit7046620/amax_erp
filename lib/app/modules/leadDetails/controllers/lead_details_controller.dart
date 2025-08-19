@@ -4,6 +4,7 @@ import 'package:amax_hr/constant/url.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/vo/crm_model.dart';
+import 'package:amax_hr/vo/event_reqest_vo.dart';
 import 'package:amax_hr/vo/user_vo.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
@@ -38,7 +39,7 @@ class LeadDetailsController extends GetxController {
     'Do Not Contact',
     'Interested',
     'Won',
-    'Lost'
+    'Lost',
   ];
 
   @override
@@ -154,7 +155,6 @@ class LeadDetailsController extends GetxController {
 
       logger.d('Lead successfully moved to $newStatus list');
       update();
-
     } catch (e) {
       logger.e('Error moving lead to status list: $e');
     }
@@ -182,8 +182,11 @@ class LeadDetailsController extends GetxController {
       case 'lost':
         return lostLeads;
       default:
-        return leads.where((lead) =>
-        lead.status?.toLowerCase() == statusName.toLowerCase()).toList();
+        return leads
+            .where(
+              (lead) => lead.status?.toLowerCase() == statusName.toLowerCase(),
+            )
+            .toList();
     }
   }
 
@@ -206,68 +209,70 @@ class LeadDetailsController extends GetxController {
     update();
   }
 
-
   //add event call
-  Future<void> addEventApicall({required String title,required String date,required String assign,required String summry,required String desc}) async {
-Get.back();
-    Map<String, dynamic> eventData = {
-      //
-      // 'title': title,
-      // 'date': date,
-      // 'description': desc,
-      // 'summary': summry,
-      // 'assign': assign,
+  Future<void> addEventApicall({
+    required String category,
+    required String startDateTime,
+    required String endDateTime,
+    required String assignTo,
+    required String summry,
+    required String desc,
+    required String refLead,
+    required isPublic,
+  }) async {
+    Get.back();
+    isLoading.value = true;
 
-      "subject": "Event for Lead",
-      "starts_on": "2025-08-27 10:00:00",
-      "ends_on": "2025-08-27 11:00:00",
-      "description": "Follow-up call",
-      "event_type": "Private",
+    Map<String, dynamic> eventData = {
+      "subject": category,
+      "starts_on": startDateTime, // format: "2025-08-27 10:00:00"
+      "ends_on": endDateTime, // format: "2025-08-27 11:00:00"
+      "event_type": "Public", // or make it parameterized if needed
+      "owner": assignTo,
+      "summary": summry,
+      "description": desc,
       "reference_doctype": "Lead",
-      "reference_docname": "LEAD-0001"
+      "reference_docname": refLead,
+      "event_participants": [
+        {
+          "reference_doctype": "Lead",
+          "reference_docname": refLead
+        }
+      ]
     };
 
+    logger.d("this refrecnces >>>${eventData}");
+
     try {
-      final response = await ApiService.post(
-        ApiUri.addEvents, data:eventData
-      );
+      final response = await ApiService.post(ApiUri.addEvents, data: eventData);
 
       if (response != null && response.statusCode == 200) {
-
-
+        print("✅ Event created successfully: ${response.data}");
         update();
       } else {
-        print('❌ Failed to fetch leads');
+        print("❌ Failed to create event: ${response?.statusCode}");
       }
     } catch (e) {
-      print("❌ Error fetching leads: $e");
+      print("❌ Error creating event: $e");
     } finally {
       isLoading.value = false;
     }
   }
-
-
 
   Future<void> fetchUser() async {
     try {
       final response = await ApiService.get(
         ApiUri.getAllUser,
-        params: {
-          'fields':
-          '["*"]',
-          'limit_page_length': '1000',
-        },
+        params: {'fields': '["*"]', 'limit_page_length': '1000'},
       );
 
       if (response != null && response.statusCode == 200) {
-
         userList = (response.data['data'] as List)
             .map((e) => UserModel.fromJson(e))
             .toList();
 
-        assignees= userList.map((user) => user.name ?? '').toList();
+        assignees = userList.map((user) => user.name ?? '').toList();
         logger.d('userList===>#${userList.length}');
-
 
         update();
       } else {
@@ -279,7 +284,6 @@ Get.back();
       isLoading.value = false;
     }
   }
-
 
   // Method to get all leads from all status lists
   List<CrmModel> _getAllLeads() {
@@ -319,7 +323,6 @@ Get.back();
           snackPosition: SnackPosition.BOTTOM,
         ),
       );
-
     } catch (e) {
       logger.e('Error refreshing leads: $e');
       isLoading.value = false;
@@ -438,7 +441,6 @@ Get.back();
         );
 
         update();
-
       } else {
         // API call failed - rollback changes
         if (originalStatus != null) {
@@ -460,7 +462,9 @@ Get.back();
           ),
         );
 
-        logger.e('❌ Failed to update lead "$leadName" - Status: ${response?.statusCode}');
+        logger.e(
+          '❌ Failed to update lead "$leadName" - Status: ${response?.statusCode}',
+        );
         if (response?.data != null) {
           logger.d('📄 Response data: ${response!.data}');
         }

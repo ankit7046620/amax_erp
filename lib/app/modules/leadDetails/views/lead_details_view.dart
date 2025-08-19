@@ -4,6 +4,7 @@ import 'package:amax_hr/common/component/custom_appbar.dart';
 import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/vo/crm_model.dart';
+import 'package:amax_hr/vo/event_reqest_vo.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
 import 'package:flutter/material.dart';
@@ -405,7 +406,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
 
                     const SizedBox(height: 12),
 
-                    _eventButton(),
+                    _eventButton(lead.name),
                     const SizedBox(height: 16),
                     if (lead.companyName?.isNotEmpty ?? false)
                       _buildInfoCard(
@@ -441,7 +442,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     );
   }
 
-  Widget _eventButton() {
+  Widget _eventButton(String ref) {
     return Row(
       children: [
         _actionButton(
@@ -450,9 +451,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           icon: Icons.add,
           onTap: () {
             logger.d("Add Event button tapped");
-            showNewEventDialog(controller.assignees);
-
-
+            showNewEventDialog(controller.assignees, ref);
           },
         ),
         const SizedBox(width: 16),
@@ -461,7 +460,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           color: Colors.blue,
           icon: Icons.add_task,
           onTap: () {
-    logger.d("Add Task button tapped");
+            logger.d("Add Task button tapped");
             // Handle second event button tap
             // You can implement your task creation logic here
             Get.snackbar(
@@ -890,8 +889,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     }
   }
 
-
-  void showNewEventDialog(List<String> assignees) {
+  void showNewEventDialog(List<String> assignees, String ref) {
     final _formKey = GlobalKey<FormState>();
 
     String selectedCategory = "Event";
@@ -913,9 +911,14 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
       context: Get.context!,
       builder: (context) {
         return Dialog(
-          insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
+          ),
           backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 500),
             child: Padding(
@@ -964,10 +967,12 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                                 border: OutlineInputBorder(),
                               ),
                               items: categories
-                                  .map((cat) => DropdownMenuItem(
-                                value: cat,
-                                child: Text(cat),
-                              ))
+                                  .map(
+                                    (cat) => DropdownMenuItem(
+                                      value: cat,
+                                      child: Text(cat),
+                                    ),
+                                  )
                                   .toList(),
                               onChanged: (value) {
                                 setState(() {
@@ -1037,9 +1042,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                               popupProps: const PopupProps.menu(
                                 showSearchBox: true,
                                 fit: FlexFit.loose,
-                                constraints: BoxConstraints(
-                                  maxHeight: 400,
-                                ),
+                                constraints: BoxConstraints(maxHeight: 400),
                               ),
                             ),
                             const SizedBox(height: 14),
@@ -1087,7 +1090,16 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
                           const SizedBox(width: 8),
                           ElevatedButton(
                             onPressed: () async {
-controller.addEventApicall(title:selectedCategory , date: dateController.text, assign: selectedAssignee??'', summry: summary, desc: description);
+                              controller.addEventApicall(
+                                category: selectedCategory,
+                                startDateTime: dateController.text,
+                                endDateTime: dateController.text,
+                                assignTo: selectedAssignee ?? '',
+                                isPublic: isPublic,
+                                summry: summary,
+                                desc: description,
+                                refLead: ref,
+                              );
                             },
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.green,
@@ -1095,7 +1107,9 @@ controller.addEventApicall(title:selectedCategory , date: dateController.text, a
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               padding: const EdgeInsets.symmetric(
-                                  horizontal: 20, vertical: 12),
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
                             ),
                             child: const Text(
                               "Create",
@@ -1114,12 +1128,4 @@ controller.addEventApicall(title:selectedCategory , date: dateController.text, a
       },
     );
   }
-
-
-
-
-
-
-
-
 }
