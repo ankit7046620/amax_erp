@@ -460,14 +460,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           color: Colors.blue,
           icon: Icons.add_task,
           onTap: () {
-            logger.d("Add Task button tapped");
-            // Handle second event button tap
-            // You can implement your task creation logic here
-            Get.snackbar(
-              "Coming Soon",
-              "Add Task feature is not yet implemented.",
-            );
-            logger.w("Add Task feature is not yet implemented.");
+            controller.showTaskDialog(Get.context!);
           },
         ),
       ],

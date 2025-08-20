@@ -9,4 +9,5 @@ class ApiUri {
   static const String getAccounts = "/api/resource/Account";
   static const String addEvents = "/api/resource/Event";
   static const String getAllUser = "/api/resource/User";
+  static const String createTask = "/api/resource/Task";
 }

@@ -60,6 +60,8 @@ import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
+import '../modules/task/bindings/task_binding.dart';
+import '../modules/task/views/task_view.dart';
 
 part 'app_routes.dart';
 
@@ -127,7 +129,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.NAV_BAR,
-      page: () =>   NavBarView(),
+      page: () => NavBarView(),
       binding: NavBarBinding(),
     ),
     GetPage(
@@ -171,14 +173,11 @@ class AppPages {
       binding: AccountsBinding(),
     ),
     GetPage(
- 
- 
       name: _Paths.EMPLOYEE_CHECKIN,
       page: () => const EmployeeCheckinView(),
       binding: EmployeeCheckinBinding(),
-  ),
-
-  GetPage(
+    ),
+    GetPage(
       name: _Paths.HR_ADMIN,
       page: () => const HrAdminView(),
       binding: HrAdminBinding(),
@@ -214,7 +213,11 @@ class AppPages {
       name: _Paths.HR_VIEW,
       page: () => const HrViewView(),
       binding: HrViewBinding(),
- 
+    ),
+    GetPage(
+      name: _Paths.TASK,
+      page: () => const TaskView(),
+      binding: TaskBinding(),
     ),
   ];
 }
