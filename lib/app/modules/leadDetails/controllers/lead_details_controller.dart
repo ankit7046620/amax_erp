@@ -36,6 +36,9 @@ class LeadDetailsController extends GetxController {
   var wonLeads = <CrmModel>[].obs;
   var lostLeads = <CrmModel>[].obs;
 
+  final searchController = TextEditingController();
+
+
   final List<String> statusList = [
     'Open',
     'Lead',
