@@ -18,6 +18,8 @@ import '../modules/attendenceBoard/bindings/attendence_board_binding.dart';
 import '../modules/attendenceBoard/views/attendence_board_view.dart';
 import '../modules/bottam/bindings/bottam_binding.dart';
 import '../modules/bottam/views/bottam_view.dart';
+import '../modules/calendar/bindings/calendar_binding.dart';
+import '../modules/calendar/views/calendar_view.dart';
 import '../modules/crm/bindings/crm_binding.dart';
 import '../modules/crm/views/crm_view.dart';
 import '../modules/empolyeeDashBoard/bindings/empolyee_dash_board_binding.dart';
@@ -217,16 +219,19 @@ class AppPages {
       binding: HrViewBinding(),
     ),
     GetPage(
- 
       name: _Paths.LEAVE_APPLICATION,
       page: () => const LeaveApplicationView(),
       binding: LeaveApplicationBinding(),
-  ),
+    ),
     GetPage(
       name: _Paths.TASK,
       page: () => const TaskView(),
       binding: TaskBinding(),
- 
+    ),
+    GetPage(
+      name: _Paths.CALENDAR,
+      page: () => const CalendarView(),
+      binding: CalendarBinding(),
     ),
   ];
 }

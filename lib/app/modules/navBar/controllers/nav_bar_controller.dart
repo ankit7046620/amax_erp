@@ -8,6 +8,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../../calendar/views/calendar_view.dart';
+
 class NavBarController extends GetxController {
   //TODO: Implement NavBarController
 
@@ -34,7 +36,8 @@ class NavBarController extends GetxController {
 
   final List<Widget> pages = [
     HomeTabView(),
-    NotificationView(),
+    CalendarView(),
+    //NotificationView(),
     SettingsView(),
     ProfileView(),
   ];

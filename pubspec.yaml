@@ -55,6 +55,7 @@ dependencies:
   geolocator: ^14.0.2
   dropdown_search: ^6.0.2
   file_picker: ^10.3.1
+  syncfusion_flutter_calendar: ^30.2.6
 
 
 flutter_launcher_icons:

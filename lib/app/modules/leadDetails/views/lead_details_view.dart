@@ -1,6 +1,7 @@
 // lead_details_view.dart
 
 import 'package:amax_hr/common/component/custom_appbar.dart';
+import 'package:amax_hr/common/component/custom_text_field.dart';
 import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/vo/crm_model.dart';
@@ -11,6 +12,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
+import '../../calendar/views/calendar_view.dart';
 import '../controllers/lead_details_controller.dart';
 
 class LeadDetailsView extends GetView<LeadDetailsController> {
@@ -28,18 +30,48 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
       body: Column(
         children: [
           _buildStatusTabs(),
-          Expanded(
-            child: GetBuilder<LeadDetailsController>(
-              builder: (controller) {
-                if (controller.isLoading.value) {
-                  return _buildLoadingList();
-                }
-                if (controller.leads.isEmpty) {
-                  return _buildEmptyState();
-                }
-                return _buildLeadList();
-              },
+
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16),
+            child: Row(
+              children: [
+                Expanded(
+                  child: CustomTextField(
+                    controller: controller.searchController,
+                    labelText: '',
+                  ),
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  onPressed: () {
+                    Get.to(
+                      () => CalendarView(),
+                      arguments: {
+                        'screen': 'LeadScreen', // pass screen name
+                        'data': controller.leads, // pass your leads
+                      },
+                    );
+                  },
+                  icon: Icon(
+                    Icons.calendar_month,
+                    color: Colors.indigo.shade600,
+                  ),
+                ),
+              ],
             ),
+          ),
+
+          Expanded(
+            child: Obx(() {
+              // Use Obx to listen reactively to RxBool and RxList
+              if (controller.isLoading.value) {
+                return _buildLoadingList();
+              }
+              if (controller.leads.isEmpty) {
+                return _buildEmptyState();
+              }
+              return _buildLeadList();
+            }),
           ),
         ],
       ),
@@ -460,7 +492,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           color: Colors.blue,
           icon: Icons.add_task,
           onTap: () {
-            controller.showTaskDialog(Get.context!,ref);
+            controller.showTaskDialog(Get.context!, ref);
           },
         ),
       ],

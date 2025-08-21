@@ -42,11 +42,11 @@ abstract class Routes {
   static const HR_SETTING = _Paths.HR_SETTING;
 
   static const HR_VIEW = _Paths.HR_VIEW;
- 
+
   static const LEAVE_APPLICATION = _Paths.LEAVE_APPLICATION;
- 
+
   static const TASK = _Paths.TASK;
- 
+  static const CALENDAR = _Paths.CALENDAR;
 }
 
 abstract class _Paths {
@@ -89,9 +89,9 @@ abstract class _Paths {
   static const HR_SETTING = '/hr-setting';
 
   static const HR_VIEW = '/hr-view';
- 
+
   static const LEAVE_APPLICATION = '/leave-application';
- 
+
   static const TASK = '/task';
- 
+  static const CALENDAR = '/calendar';
 }
