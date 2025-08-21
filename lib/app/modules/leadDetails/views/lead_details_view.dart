@@ -4,7 +4,9 @@ import 'package:amax_hr/common/component/custom_appbar.dart';
 import 'package:amax_hr/constant/assets_constant.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/vo/crm_model.dart';
- 
+import 'package:amax_hr/vo/event_reqest_vo.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -404,7 +406,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
 
                     const SizedBox(height: 12),
 
-                    _eventButton(),
+                    _eventButton(lead.name),
                     const SizedBox(height: 16),
                     if (lead.companyName?.isNotEmpty ?? false)
                       _buildInfoCard(
@@ -440,7 +442,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     );
   }
 
-  Widget _eventButton() {
+  Widget _eventButton(String ref) {
     return Row(
       children: [
         _actionButton(
@@ -449,12 +451,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           icon: Icons.add,
           onTap: () {
             logger.d("Add Event button tapped");
-            showNewEventDialog( );
-            Get.snackbar(
-              "Coming Soon",
-              "Add Event feature is not yet implemented.",
-            );
-            logger.w("Add Event feature is not yet implemented.");
+            showNewEventDialog(controller.assignees, ref);
           },
         ),
         const SizedBox(width: 16),
@@ -463,14 +460,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           color: Colors.blue,
           icon: Icons.add_task,
           onTap: () {
-    logger.d("Add Task button tapped");
-            // Handle second event button tap
-            // You can implement your task creation logic here
-            Get.snackbar(
-              "Coming Soon",
-              "Add Task feature is not yet implemented.",
-            );
-            logger.w("Add Task feature is not yet implemented.");
+            controller.showTaskDialog(Get.context!);
           },
         ),
       ],
@@ -892,15 +882,15 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
     }
   }
 
-
-  void showNewEventDialog() {
+  void showNewEventDialog(List<String> assignees, String ref) {
     final _formKey = GlobalKey<FormState>();
 
     String selectedCategory = "Event";
-    String selectedAssignee = "";
+    String? selectedAssignee;
     String summary = "";
     String description = "";
     DateTime? selectedDate;
+    bool isPublic = false;
 
     List<String> categories = [
       "Event",
@@ -910,150 +900,225 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
       "Other",
     ];
 
-    List<String> assignees = controller.assignees;
-
     showDialog(
       context: Get.context!,
       builder: (context) {
-        return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          title: Text("New Event"),
-          content: StatefulBuilder(
-            builder: (context, setState) {
-              return Padding(
-                padding: MediaQuery.of(context).viewInsets, // Shift up on keyboard open
-                child: SingleChildScrollView(
-                  child: Form(
-                    key: _formKey,
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Category Dropdown
-                        DropdownButtonFormField<String>(
-                          value: selectedCategory,
-                          decoration: InputDecoration(labelText: "Category"),
-                          items: categories
-                              .map((cat) => DropdownMenuItem(
-                            value: cat,
-                            child: Text(cat),
-                          ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedCategory = value!;
-                            });
-                          },
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Date Picker
-                        TextFormField(
-                          readOnly: true,
-                          decoration: InputDecoration(
-                            labelText: "Date *",
-                            suffixIcon: Icon(Icons.calendar_today),
-                          ),
-                          onTap: () async {
-                            final pickedDate = await showDatePicker(
-                              context: context,
-                              initialDate: DateTime.now(),
-                              firstDate: DateTime(2020),
-                              lastDate: DateTime(2100),
-                            );
-                            if (pickedDate != null) {
-                              setState(() {
-                                selectedDate = pickedDate;
-                              });
-                            }
-                          },
-                          controller: TextEditingController(
-                            text: selectedDate == null
-                                ? ""
-                                : "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}",
-                          ),
-                          validator: (value) =>
-                          value!.isEmpty ? "Please select a date" : null,
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Assigned To - Regular Dropdown
-                        DropdownButtonFormField<String>(
-                          value: selectedAssignee.isEmpty ? null : selectedAssignee,
-                          decoration: InputDecoration(
-                            labelText: "Assigned To",
-                            border: OutlineInputBorder(),
-                          ),
-                          items: assignees
-                              .map((assignee) => DropdownMenuItem(
-                            value: assignee,
-                            child: Text(assignee),
-                          ))
-                              .toList(),
-                          onChanged: (value) {
-                            setState(() {
-                              selectedAssignee = value ?? "";
-                            });
-                          },
-                          validator: (value) => value == null || value.isEmpty
-                              ? "Please select an assignee"
-                              : null,
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Summary
-                        TextFormField(
-                          decoration: InputDecoration(labelText: "Summary *"),
-                          validator: (value) =>
-                          value!.isEmpty ? "Please enter a summary" : null,
-                          onChanged: (value) => summary = value,
-                        ),
-                        const SizedBox(height: 10),
-
-                        // Description
-                        TextFormField(
-                          decoration: InputDecoration(
-                            labelText: "Description",
-                            alignLabelWithHint: true,
-                            border: OutlineInputBorder(),
-                          ),
-                          maxLines: 4,
-                          onChanged: (value) => description = value,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
+        return Dialog(
+          insetPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 24,
           ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text("Cancel"),
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 500),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+              child: StatefulBuilder(
+                builder: (context, setState) {
+                  final dateController = TextEditingController(
+                    text: selectedDate == null
+                        ? ""
+                        : "${selectedDate!.year}-${selectedDate!.month.toString().padLeft(2, '0')}-${selectedDate!.day.toString().padLeft(2, '0')}",
+                  );
+
+                  return Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Header
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text(
+                            "New Event",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.close, color: Colors.grey),
+                            onPressed: () => Navigator.pop(context),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Form
+                      Form(
+                        key: _formKey,
+                        child: Column(
+                          children: [
+                            // Category Dropdown
+                            DropdownButtonFormField<String>(
+                              value: selectedCategory,
+                              decoration: const InputDecoration(
+                                labelText: "Category",
+                                border: OutlineInputBorder(),
+                              ),
+                              items: categories
+                                  .map(
+                                    (cat) => DropdownMenuItem(
+                                      value: cat,
+                                      child: Text(cat),
+                                    ),
+                                  )
+                                  .toList(),
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedCategory = value!;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 14),
+
+                            // Date Picker
+                            TextFormField(
+                              readOnly: true,
+                              controller: dateController,
+                              decoration: const InputDecoration(
+                                labelText: "Date *",
+                                suffixIcon: Icon(Icons.calendar_today),
+                                border: OutlineInputBorder(),
+                              ),
+                              onTap: () async {
+                                final pickedDate = await showDatePicker(
+                                  context: context,
+                                  initialDate: DateTime.now(),
+                                  firstDate: DateTime(2020),
+                                  lastDate: DateTime(2100),
+                                );
+                                if (pickedDate != null) {
+                                  setState(() {
+                                    selectedDate = pickedDate;
+                                  });
+                                }
+                              },
+                              validator: (value) => (value ?? "").isEmpty
+                                  ? "Please select a date"
+                                  : null,
+                            ),
+                            const SizedBox(height: 14),
+
+                            // Public Checkbox
+                            CheckboxListTile(
+                              title: const Text("Public"),
+                              value: isPublic,
+                              onChanged: (value) {
+                                setState(() {
+                                  isPublic = value ?? false;
+                                });
+                              },
+                              controlAffinity: ListTileControlAffinity.leading,
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                            const SizedBox(height: 14),
+
+                            // Assignee DropdownSearch
+                            DropdownSearch<String>(
+                              selectedItem: selectedAssignee,
+                              items: (filter, infiniteScrollProps) => assignees,
+                              onChanged: (value) {
+                                setState(() {
+                                  selectedAssignee = value;
+                                });
+                              },
+                              decoratorProps: const DropDownDecoratorProps(
+                                decoration: InputDecoration(
+                                  labelText: 'Assign To',
+                                  border: OutlineInputBorder(),
+                                ),
+                              ),
+                              popupProps: const PopupProps.menu(
+                                showSearchBox: true,
+                                fit: FlexFit.loose,
+                                constraints: BoxConstraints(maxHeight: 400),
+                              ),
+                            ),
+                            const SizedBox(height: 14),
+
+                            // Summary
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: "Summary *",
+                                border: OutlineInputBorder(),
+                              ),
+                              validator: (value) => (value ?? "").isEmpty
+                                  ? "Please enter a summary"
+                                  : null,
+                              onChanged: (value) => summary = value,
+                            ),
+                            const SizedBox(height: 14),
+
+                            // Description
+                            TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: "Description",
+                                alignLabelWithHint: true,
+                                border: OutlineInputBorder(),
+                              ),
+                              maxLines: 4,
+                              onChanged: (value) => description = value,
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 20),
+
+                      // Action buttons
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: const Text(
+                              "Cancel",
+                              style: TextStyle(color: Colors.grey),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          ElevatedButton(
+                            onPressed: () async {
+                              controller.addEventApicall(
+                                category: selectedCategory,
+                                startDateTime: dateController.text,
+                                endDateTime: dateController.text,
+                                assignTo: selectedAssignee ?? '',
+                                isPublic: isPublic,
+                                summry: summary,
+                                desc: description,
+                                refLead: ref,
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.green,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 12,
+                              ),
+                            ),
+                            child: const Text(
+                              "Create",
+                              style: TextStyle(color: Colors.white),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
-            ElevatedButton(
-              onPressed: () {
-                if (_formKey.currentState!.validate()) {
-                  Navigator.pop(context);
-                  // TODO: Call your API here with form data
-                  print("Category: $selectedCategory");
-                  print("Date: $selectedDate");
-                  print("Assigned To: $selectedAssignee");
-                  print("Summary: $summary");
-                  print("Description: $description");
-                }
-              },
-              style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-              child: Text("Create"),
-            ),
-          ],
+          ),
         );
       },
     );
   }
-
-
-
-
 }

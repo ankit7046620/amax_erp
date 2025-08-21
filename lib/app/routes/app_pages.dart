@@ -62,6 +62,8 @@ import '../modules/settings/bindings/settings_binding.dart';
 import '../modules/settings/views/settings_view.dart';
 import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
+import '../modules/task/bindings/task_binding.dart';
+import '../modules/task/views/task_view.dart';
 
 part 'app_routes.dart';
 
@@ -129,7 +131,7 @@ class AppPages {
     ),
     GetPage(
       name: _Paths.NAV_BAR,
-      page: () => const NavBarView(),
+      page: () => NavBarView(),
       binding: NavBarBinding(),
     ),
     GetPage(
@@ -215,9 +217,15 @@ class AppPages {
       binding: HrViewBinding(),
     ),
     GetPage(
+ 
       name: _Paths.LEAVE_APPLICATION,
       page: () => const LeaveApplicationView(),
       binding: LeaveApplicationBinding(),
+ 
+      name: _Paths.TASK,
+      page: () => const TaskView(),
+      binding: TaskBinding(),
+ 
     ),
   ];
 }

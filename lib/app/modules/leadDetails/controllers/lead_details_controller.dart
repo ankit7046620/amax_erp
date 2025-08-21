@@ -1,14 +1,21 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:amax_hr/constant/url.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/vo/crm_model.dart';
+import 'package:amax_hr/vo/event_reqest_vo.dart';
 import 'package:amax_hr/vo/user_vo.dart';
 import 'package:dio/dio.dart';
+import 'package:dropdown_search/dropdown_search.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_easyloading/flutter_easyloading.dart';
-import 'package:get/get.dart';
+import 'package:get/get.dart' hide FormData, MultipartFile, Response;
+
+import 'package:file_picker/file_picker.dart';
+import '../../task/controllers/task_controller.dart';
 
 class LeadDetailsController extends GetxController {
   var leads = <CrmModel>[].obs;
@@ -38,7 +45,7 @@ class LeadDetailsController extends GetxController {
     'Do Not Contact',
     'Interested',
     'Won',
-    'Lost'
+    'Lost',
   ];
 
   @override
@@ -154,7 +161,6 @@ class LeadDetailsController extends GetxController {
 
       logger.d('Lead successfully moved to $newStatus list');
       update();
-
     } catch (e) {
       logger.e('Error moving lead to status list: $e');
     }
@@ -182,8 +188,11 @@ class LeadDetailsController extends GetxController {
       case 'lost':
         return lostLeads;
       default:
-        return leads.where((lead) =>
-        lead.status?.toLowerCase() == statusName.toLowerCase()).toList();
+        return leads
+            .where(
+              (lead) => lead.status?.toLowerCase() == statusName.toLowerCase(),
+            )
+            .toList();
     }
   }
 
@@ -206,35 +215,287 @@ class LeadDetailsController extends GetxController {
     update();
   }
 
-
   //add event call
-  Future<void> addEventApicall() async {
+  Future<void> addEventApicall({
+    required String category,
+    required String startDateTime,
+    required String endDateTime,
+    required String assignTo,
+    required String summry,
+    required String desc,
+    required String refLead,
+    required isPublic,
+  }) async {
+    Get.back();
+    isLoading.value = true;
 
     Map<String, dynamic> eventData = {
-
-      'title': 'New Event',
-      'date': DateTime.now().toIso8601String(),
-      'description': 'Event description',
+      "subject": category,
+      "starts_on": startDateTime, // format: "2025-08-27 10:00:00"
+      "ends_on": endDateTime, // format: "2025-08-27 11:00:00"
+      "event_type": "Public", // or make it parameterized if needed
+      "owner": assignTo,
+      "summary": summry,
+      "description": desc,
+      "reference_doctype": "Lead",
+      "reference_docname": refLead,
+      "event_participants": [
+        {
+          "reference_doctype": "Lead",
+          "reference_docname": refLead
+        }
+      ]
     };
 
+    logger.d("this refrecnces >>>${eventData}");
+
     try {
-      final response = await ApiService.post(
-        ApiUri.addEvents, data:eventData
-      );
+      final response = await ApiService.post(ApiUri.addEvents, data: eventData);
 
       if (response != null && response.statusCode == 200) {
-
-
+        print("✅ Event created successfully: ${response.data}");
         update();
       } else {
-        print('❌ Failed to fetch leads');
+        print("❌ Failed to create event: ${response?.statusCode}");
       }
     } catch (e) {
-      print("❌ Error fetching leads: $e");
+      print("❌ Error creating event: $e");
     } finally {
       isLoading.value = false;
     }
   }
+
+
+
+
+  void pickFile() async {
+    final TaskController controller = Get.put(TaskController());
+    FilePickerResult? result = await FilePicker.platform.pickFiles();
+    if (result != null) {
+      controller.  file.value = File(result.files.single.path!);
+    }
+  }
+
+
+//   Future<void> createTask() async {
+//     final TaskController controller = Get.put(TaskController());
+//     // Here you should call your ERPNext API
+//     debugPrint("Date: ${controller. date.value}");
+//     debugPrint("Assigned To: ${controller.assignedTo.value}");
+//     debugPrint("Description: ${controller.description.value}");
+//     debugPrint("File: ${controller.file.value?.path ?? "No file"}");
+//
+//     FormData formData = FormData();
+//     formData.fields
+//       ..add(MapEntry('date', controller.date.value.toString()))
+//       ..add(MapEntry('assigned_to', controller.assignedTo.value))
+//       ..add(MapEntry('description', controller.description.value));
+//
+//     if (controller.file.value != null) {
+//       formData.files.add(
+//         MapEntry(
+//           'attachment',
+//           await MultipartFile.fromFile(
+//         controller.file.value!.path,
+//           filename: controller.file.value!.path.split('/').last,
+//         ),
+//       ),
+//     );
+//     }
+//
+//     ApiService.postWithFile(ApiUri.createTask, data: formData);
+//
+//     Get.back(); // Close dialog
+//     Get.snackbar("Success", "Task Created with Attachment",
+//         snackPosition: SnackPosition.BOTTOM);
+//
+// }
+  Future<void> createTask() async {
+    final TaskController controller = Get.put(TaskController());
+
+    debugPrint("Date: ${controller.date.value}");
+    debugPrint("Assigned To: ${controller.assignedTo.value}");
+    debugPrint("Description: ${controller.description.value}");
+    debugPrint("File: ${controller.file.value?.path ?? "No file"}");
+
+    // Prepare data map with mandatory ERPNext field 'doctype'
+    Map<String, dynamic> data = {
+      'doctype': 'Task', // mandatory for ERPNext API
+      'date': controller.date.value.toString(),
+      'assigned_to': controller.assignedTo.value,
+      'description': controller.description.value,
+    };
+
+    try {
+      // Call API using postWithFile method
+      Response? response = await ApiService.postWithFile(
+        ApiUri.createTask,
+        data: data,
+        file: controller.file.value, // optional file
+        fileField: 'attachment',     // ERPNext field name for file
+      );
+
+      // Check response
+      if (response != null && (response.statusCode == 200 || response.statusCode == 201)) {
+        Get.back(); // Close dialog
+        Get.snackbar(
+          "Success",
+          "Task Created with Attachment",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        debugPrint("✅ Task created successfully: ${response.data}");
+      } else {
+        Get.snackbar(
+          "Error",
+          "Failed to create task",
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        debugPrint("❌ Task creation failed: ${response?.data}");
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Something went wrong",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      debugPrint("❌ Exception in createTask: $e");
+    }
+  }
+
+
+
+  String taskselectedAssignee='';
+
+  void showTaskDialog(BuildContext context) {
+    final TaskController controller = Get.put(TaskController());
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Obx(() => Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text("New Task", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                const SizedBox(height: 16),
+
+                // Date Picker
+                ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text("Date: ${controller.date.value.toLocal().toString().split(' ')[0]}"),
+                  trailing: Icon(Icons.calendar_today),
+                  onTap: () async {
+                    DateTime? picked = await showDatePicker(
+                      context: context,
+                      initialDate: controller.date.value,
+                      firstDate: DateTime(2020),
+                      lastDate: DateTime(2100),
+                    );
+                    if (picked != null) controller.date.value = picked;
+                  },
+                ),
+                const SizedBox(height: 12),
+
+                // Assigned To
+                // TextField(
+                //   decoration: InputDecoration(
+                //     labelText: "Assigned To",
+                //     border: OutlineInputBorder(),
+                //   ),
+                //   onChanged: (val) => controller.assignedTo.value = val,
+                // ),
+
+
+                DropdownSearch<String>(
+                  selectedItem: taskselectedAssignee,
+                  items: (filter, infiniteScrollProps) => assignees,
+                  onChanged: (value) {
+                    taskselectedAssignee = value!;
+                    update();
+                  },
+                  decoratorProps: const DropDownDecoratorProps(
+                    decoration: InputDecoration(
+                      labelText: 'Assign To',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  popupProps: const PopupProps.menu(
+                    showSearchBox: true,
+                    fit: FlexFit.loose,
+                    constraints: BoxConstraints(maxHeight: 400),
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Description
+                TextField(
+                  decoration: InputDecoration(
+                    labelText: "Description",
+                    border: OutlineInputBorder(),
+                  ),
+                  maxLines: 3,
+                  onChanged: (val) => controller.description.value = val,
+                ),
+                const SizedBox(height: 12),
+
+                // Attachment
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    ElevatedButton.icon(
+                      icon: Icon(Icons.attach_file),
+                      label: Text("Add Attachment"),
+                      onPressed:  (){
+                        pickFile();
+                        update();
+                      },
+                    ),
+                    if (controller.file.value != null)
+                      Text("Selected: ${controller.file.value!.path.split('/').last}"),
+                  ],
+                ),
+                const SizedBox(height: 20),
+
+                // Action Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(onPressed: () => Get.back(), child: Text("Cancel")),
+                    ElevatedButton(
+                      onPressed:() {
+                        createTask();
+
+                      },
+                      child: Text("Create"),
+                    ),
+                  ],
+                )
+              ],
+            )),
+          ),
+        );
+      },
+    );
+  }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -242,22 +503,16 @@ class LeadDetailsController extends GetxController {
     try {
       final response = await ApiService.get(
         ApiUri.getAllUser,
-        params: {
-          'fields':
-          '["*"]',
-          'limit_page_length': '1000',
-        },
+        params: {'fields': '["*"]', 'limit_page_length': '1000'},
       );
 
       if (response != null && response.statusCode == 200) {
-
         userList = (response.data['data'] as List)
             .map((e) => UserModel.fromJson(e))
             .toList();
 
-        assignees= userList.map((user) => user.name ?? '').toList();
+        assignees = userList.map((user) => user.name ?? '').toList();
         logger.d('userList===>#${userList.length}');
-
 
         update();
       } else {
@@ -269,7 +524,6 @@ class LeadDetailsController extends GetxController {
       isLoading.value = false;
     }
   }
-
 
   // Method to get all leads from all status lists
   List<CrmModel> _getAllLeads() {
@@ -309,7 +563,6 @@ class LeadDetailsController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         ),
       );
-
     } catch (e) {
       logger.e('Error refreshing leads: $e');
       isLoading.value = false;
@@ -428,7 +681,6 @@ class LeadDetailsController extends GetxController {
         );
 
         update();
-
       } else {
         // API call failed - rollback changes
         if (originalStatus != null) {
@@ -450,7 +702,9 @@ class LeadDetailsController extends GetxController {
           ),
         );
 
-        logger.e('❌ Failed to update lead "$leadName" - Status: ${response?.statusCode}');
+        logger.e(
+          '❌ Failed to update lead "$leadName" - Status: ${response?.statusCode}',
+        );
         if (response?.data != null) {
           logger.d('📄 Response data: ${response!.data}');
         }

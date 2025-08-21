@@ -15,10 +15,16 @@ import 'package:amax_hr/utils/app.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../navBar/controllers/nav_bar_controller.dart';
 
 enum ModuleType { CRM, Selling, Buying, Stock }
 
 class HomeTabController extends GetxController {
+
+  // final navBarController = Get.find<NavBarController>();
+  //
   final count = 0.obs;
 
   List<Color> popularColor = [
@@ -33,7 +39,7 @@ class HomeTabController extends GetxController {
   List<ModuleItem> popularModules = [];
   List<ModuleItem> otherModules = [];
 
-  final isLoading = true.obs;
+  final isLoading = false.obs;
 
   Map<String, IconData> moduleIcons = {
     "CRM": FontAwesomeIcons.userGroup,
@@ -50,7 +56,20 @@ class HomeTabController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    //getMOdules();
     fetchAndStoreModules();
+    //fetchAndStoreModules();
+    //sortModuleNamesWithIcons(navBarController.modules);
+
+  }
+
+  Future<void> getMOdules() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String>moduleNames = prefs.getStringList(LocalKeys.module) ?? [];
+    sortModuleNamesWithIcons(moduleNames);
+    // final navBarController = Get.find<NavBarController>();
+    // moduleNames = navBarController.modules;
+    // sortModuleNamesWithIcons(moduleNames);
   }
 
   @override
@@ -64,6 +83,7 @@ class HomeTabController extends GetxController {
   }
 
   void increment() => count.value++;
+
 
   Future<void> fetchAndStoreModules() async {
     try {
@@ -114,6 +134,7 @@ class HomeTabController extends GetxController {
     }
     logger.d("popularModules: $popularModules");
     logger.d("otherModules: $otherModules");
+    isLoading.value= false;
     update();
   }
 
