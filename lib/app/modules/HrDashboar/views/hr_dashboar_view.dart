@@ -101,7 +101,28 @@ class HrDashboarView extends GetView<HrDashboarController> {
                 },
                 child: const Text(
                   'Employee Checkin',
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
+            Container(
+              width: double.infinity,
+              height: 55,
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Get.toNamed(Routes.LEAVE_APPLICATION);
+                  // Get.to(() => EmployeeCheckinView());
+                },
+                child: const Text(
+                  'Leave Application',
+                  style: TextStyle(fontSize: 18),
                 ),
               ),
             ),

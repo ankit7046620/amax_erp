@@ -6,6 +6,8 @@ import '../modules/AttendanceDashboard/bindings/attendance_dashboard_binding.dar
 import '../modules/AttendanceDashboard/views/attendance_dashboard_view.dart';
 import '../modules/EmployeeCheckin/bindings/employee_checkin_binding.dart';
 import '../modules/EmployeeCheckin/views/employee_checkin_view.dart';
+import '../modules/LeaveApplication/bindings/leave_application_binding.dart';
+import '../modules/LeaveApplication/views/leave_application_view.dart';
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
 import '../modules/Onboarding/views/onboarding_view.dart';
 import '../modules/StockDashboard/bindings/stock_dashboard_binding.dart';
@@ -171,14 +173,11 @@ class AppPages {
       binding: AccountsBinding(),
     ),
     GetPage(
- 
- 
       name: _Paths.EMPLOYEE_CHECKIN,
       page: () => const EmployeeCheckinView(),
       binding: EmployeeCheckinBinding(),
-  ),
-
-  GetPage(
+    ),
+    GetPage(
       name: _Paths.HR_ADMIN,
       page: () => const HrAdminView(),
       binding: HrAdminBinding(),
@@ -214,7 +213,11 @@ class AppPages {
       name: _Paths.HR_VIEW,
       page: () => const HrViewView(),
       binding: HrViewBinding(),
- 
+    ),
+    GetPage(
+      name: _Paths.LEAVE_APPLICATION,
+      page: () => const LeaveApplicationView(),
+      binding: LeaveApplicationBinding(),
     ),
   ];
 }
