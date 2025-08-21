@@ -221,7 +221,8 @@ class AppPages {
       name: _Paths.LEAVE_APPLICATION,
       page: () => const LeaveApplicationView(),
       binding: LeaveApplicationBinding(),
- 
+  ),
+    GetPage(
       name: _Paths.TASK,
       page: () => const TaskView(),
       binding: TaskBinding(),

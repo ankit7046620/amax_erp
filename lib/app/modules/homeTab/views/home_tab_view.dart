@@ -13,7 +13,7 @@ class HomeTabView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-
+    Get.put(HomeTabController());
     return GetBuilder<HomeTabController>(
       init: HomeTabController(),
       builder: (controller) {

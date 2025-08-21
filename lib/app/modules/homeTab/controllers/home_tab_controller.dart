@@ -56,21 +56,37 @@ class HomeTabController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    //getMOdules();
-    fetchAndStoreModules();
+    getAllModules();
+  //  fetchAndStoreModules();
     //fetchAndStoreModules();
     //sortModuleNamesWithIcons(navBarController.modules);
 
   }
 
-  Future<void> getMOdules() async {
+
+  Future<void> getAllModules() async {
     final prefs = await SharedPreferences.getInstance();
-    List<String>moduleNames = prefs.getStringList(LocalKeys.module) ?? [];
-    sortModuleNamesWithIcons(moduleNames);
-    // final navBarController = Get.find<NavBarController>();
-    // moduleNames = navBarController.modules;
-    // sortModuleNamesWithIcons(moduleNames);
+    List<String>?moduleNames =   prefs.getStringList(LocalKeys.module);
+    sortModuleNamesWithIcons(moduleNames!);
+
+    // final args = Get.arguments as Map<String, dynamic>?;
+    // if (args != null && args['modules'] != null) {
+    //   List<String>moduleNames = args['modules'];
+    //   sortModuleNamesWithIcons(moduleNames);
+    // }
+    update();
+    logger.d("modulesget>>>>>>>${moduleNames}");
   }
+  //
+  // Future<void> getMOdules() async {
+  //   final prefs = await SharedPreferences.getInstance();
+  //   List<String>moduleNames = prefs.getStringList(LocalKeys.module) ?? [];
+  //   update();
+  //   sortModuleNamesWithIcons(moduleNames);
+  //   // final navBarController = Get.find<NavBarController>();
+  //   // moduleNames = navBarController.modules;
+  //   // sortModuleNamesWithIcons(moduleNames);
+  // }
 
   @override
   void onReady() {

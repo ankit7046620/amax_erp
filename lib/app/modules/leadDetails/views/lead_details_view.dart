@@ -460,7 +460,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           color: Colors.blue,
           icon: Icons.add_task,
           onTap: () {
-            controller.showTaskDialog(Get.context!);
+            controller.showTaskDialog(Get.context!,ref);
           },
         ),
       ],

@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:amax_hr/app/modules/homeTab/controllers/home_tab_controller.dart';
 import 'package:amax_hr/app/modules/navBar/views/nav_bar_view.dart';
 import 'package:amax_hr/app/routes/app_pages.dart';
+import 'package:amax_hr/constant/url.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/manager/auth_manager.dart';
@@ -18,6 +19,7 @@ import 'package:get/get.dart';
 import 'package:frappe_dart/frappe_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
+import 'package:dio/dio.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
@@ -37,7 +39,7 @@ class LoginController extends GetxController {
   void onInit() {
     checkBiometricSupport();
     super.onInit();
-    setData();
+    setData("vignesh");
     //loginLocal();
     //frappeClient = FrappeV15(baseUrl: 'https://plastic.techcloudamax.ai/');
   }
@@ -49,97 +51,133 @@ class LoginController extends GetxController {
     super.onClose();
   }
 
-  loginLocal() async {
+  Future<void> loginLocal() async {
     EasyLoading.show();
     try {
-      var dio = Dio(
-        BaseOptions(
-          connectTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 15),
-        ),
-      );
+      final url = ApiUri.customLoginApi;
+      final data = {
+        'usr': emailController.text,
+        'pwd': passwordController.text,
+      };
 
-      var response = await dio.request(
-        'https://plastic.techcloudamax.ai/api/method/theme1.api.login_api.login_with_permissions?usr=${emailController.text}&pwd=${passwordController.text}',
-        options: Options(method: 'POST'),
-      );
+      final response = await ApiService.post(url, data: data);
 
-      if (response.statusCode == 200) {
-        logger.d("calllll====");
-
-        // ✅ Log data only, not headers object
-        print(json.encode(response.data));
-
-        // Get cookies safely
-        final cookies = response.headers['set-cookie'] ?? [];
-
-        String? sidValue;
-        String? fullName;
-        String? userId;
-
-        for (var cookie in cookies) {
-          var parts = cookie.split(';').first.split('=');
-          if (parts.length == 2) {
-            var key = parts[0];
-            var value = parts[1];
-
-            if (key == 'sid') sidValue = value;
-            if (key == 'full_name') fullName = value;
-            if (key == 'user_id') userId = value;
-          }
-        }
-
-        print('SID: $sidValue');
-        print('Full Name: $fullName');
-        print('User ID: $userId');
-
-        // Store in SharedPreferences
-        final prefs = await SharedPreferences.getInstance();
-        if (sidValue != null) await prefs.setString('sid', sidValue);
-        if (fullName != null) await prefs.setString('full_name', fullName);
-        if (userId != null) await prefs.setString('user_id', userId);
-
-        // ✅ Set default cookie header for future requests
-        dio.options.headers['Cookie'] =
-            'sid=$sidValue; full_name=$fullName; user_id=$userId';
-
-        UserInfo userInfo = UserInfo.fromJson(response.data);
-        logger.d("=========userInfo: ${userInfo.toJson()}");
-
-        List<String> modules = userInfo.message?.modules ?? [];
-        update();
+      if (response == null) {
         EasyLoading.dismiss();
-
-//
-        Get.offAllNamed(Routes.NAV_BAR, arguments: {'modules': modules});
-      } else {
-        EasyLoading.dismiss();
-        print(response.statusMessage);
+        Get.snackbar(
+          'Error',
+          'No response from server',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
       }
+
+      if (response.statusCode != 200) {
+        EasyLoading.dismiss();
+        Get.snackbar(
+          'Error',
+          response.statusMessage ?? 'Unknown error',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      final responseData = response.data;
+      final messageObj = responseData['message'];
+      final errorMessage = messageObj != null ? messageObj['message'] : null;
+
+      if (errorMessage == 'Invalid username or password') {
+        EasyLoading.dismiss();
+        Get.showSnackbar(
+          GetSnackBar(
+            title: "Login Failed",
+            message: errorMessage,
+            duration: Duration(seconds: 2),
+            backgroundColor: Colors.red,
+          ),
+        );
+        return;
+      }
+
+      // Parse cookies
+      final cookies = response.headers['set-cookie'] ?? [];
+      String? sidValue, fullName, userId;
+
+      for (var cookie in cookies) {
+        final parts = cookie.split(';')[0].split('=');
+        if (parts.length == 2) {
+          final key = parts.first.trim();
+          final value = parts[1].trim();
+          if (key == 'sid') sidValue = value;
+          if (key == 'full_name') fullName = value;
+          if (key == 'user_id') userId = value;
+        }
+      }
+
+      final prefs = await SharedPreferences.getInstance();
+
+      if (sidValue != null) await prefs.setString('sid', sidValue);
+      if (fullName != null) await prefs.setString('full_name', fullName);
+      if (userId != null) await prefs.setString('user_id', userId);
+
+      if (sidValue != null && fullName != null && userId != null) {
+        ApiService.dio.options.headers['Cookie'] =
+        'sid=$sidValue; full_name=$fullName; user_id=$userId';
+      }
+
+      UserInfo userInfo = UserInfo.fromJson(responseData);
+      List<String> modules = userInfo.message?.modules ?? [];
+
+      try {
+        await prefs.setStringList(LocalKeys.module, modules);
+        // Optionally verify stored modules
+        print('Stored modules: ${prefs.getStringList(LocalKeys.module)}');
+      } catch (e) {
+        logger.e('Error saving module list: $e');
+      }
+
+      update();
+      EasyLoading.dismiss();
+
+      Get.offAllNamed(Routes.NAV_BAR);
     } catch (e) {
       EasyLoading.dismiss();
       logger.e("Error in loginLocal: $e");
+      Get.snackbar(
+        'Error',
+        'An unexpected error occurred',
+        snackPosition: SnackPosition.BOTTOM,
+      );
     }
   }
 
-  setData() {
- 
-
-     emailController.text = "vignesh@amaxconsultancyservices.com";
-     passwordController.text = "Welcome@@123#";
-
-   // emailController.text = "ankit22@yopmail.com";
-   // passwordController.text = "Test@123";
-  
-    // emailController.text = "test3@gmail.com";
-    // passwordController.text = "test3@123";
-
-    // test3@gmail.com
-    // test3@123
-
-    // emailController.text = "ankit22@yopmail.com";
-    // passwordController.text = "Test@123";
- 
+  void setData(String userType) {
+    switch (userType.toLowerCase()) {
+      case 'emp':
+        emailController.text = "emp@yopmail.com";
+        passwordController.text = "welcome@123";
+        break;
+      case 'hr':
+        emailController.text = "hrvasani@yopmail.com";
+        passwordController.text = "welcome@123";
+        break;
+      case 'test':
+        emailController.text = "test3@gmail.com";
+        passwordController.text = "test3@123";
+        break;
+      case 'ankit':
+        emailController.text = "ankit22@yopmail.com";
+        passwordController.text = "Test@123";
+        break;
+      case 'vignesh':
+        emailController.text = "vignesh@amaxconsultancyservices.com";
+        passwordController.text = "Welcome@@123#";
+        break;
+      default:
+        emailController.clear();
+        passwordController.clear();
+        break;
+    }
   }
 
   void togglePasswordVisibility() {

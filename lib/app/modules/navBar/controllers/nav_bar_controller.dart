@@ -12,10 +12,11 @@ class NavBarController extends GetxController {
   //TODO: Implement NavBarController
 
   final count = 0.obs;
+
   @override
   void onInit() {
     super.onInit();
-    getAllModules();
+    // getAllModules();
     // You can also fetch modules here if needed
   }
 
@@ -43,15 +44,16 @@ class NavBarController extends GetxController {
   void changeTab(int index) {
     currentIndex.value = index;
   }
+
   List<String> modules = [];
-  
+
   Future<void> getAllModules() async {
     final prefs = await SharedPreferences.getInstance();
+
     final args = Get.arguments as Map<String, dynamic>?;
     if (args != null && args['modules'] != null) {
       modules = args['modules'];
       await prefs.setStringList(LocalKeys.module, modules);
-
     }
     update();
     logger.d("modulesget>>>>>>>${modules}");

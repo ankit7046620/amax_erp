@@ -1,5 +1,8 @@
+import 'package:amax_hr/app/modules/login/views/login_view.dart';
+import 'package:amax_hr/main.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const Color primaryColor = Color(0xFF3A7BD5); // Deep Blue
 const Color secondaryColor = Color(0xFF00D2FF); // Aqua
@@ -42,10 +45,21 @@ class ProfileController extends GetxController {
                     child: const Text("Cancel"),
                   ),
                   ElevatedButton(
-                    onPressed: () {
-                      Get.back();
-                      Get.snackbar("Logged out", "You have been logged out.",
-                          backgroundColor: accentColor, colorText: Colors.white);
+                    onPressed: () async {
+                      final prefs = await SharedPreferences.getInstance();
+                      await prefs.clear();
+
+                      final isEmpty = prefs.getKeys().isEmpty;
+
+                      if (isEmpty) {
+                        update();
+                        logger.d("reffrences  clear");
+                        Get.offAll(() => LoginView());
+                      } else {
+                        // Handle the case where preferences are not cleared (optional)
+                        print('Failed to clear preferences');
+                      }
+
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: accentColor,

@@ -1,6 +1,10 @@
 class ApiUri {
   static const baseUrl = "https://plastic.techcloudamax.ai/";
 
+
+
+
+  static const String customLoginApi = "api/method/theme1.api.login_api.login_with_permissions";
   static const String getAllModule = "/api/resource/Module Def";
   static const String getLeadData =   "/api/resource/Lead";
   static const String getProject =   "/api/resource/Project";
