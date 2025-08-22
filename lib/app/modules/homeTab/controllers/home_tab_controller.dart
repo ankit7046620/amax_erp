@@ -57,11 +57,23 @@ class HomeTabController extends GetxController {
   void onInit() {
     super.onInit();
     getAllModules();
+    loadUserRoles();
   //  fetchAndStoreModules();
     //fetchAndStoreModules();
     //sortModuleNamesWithIcons(navBarController.modules);
 
   }
+
+
+  Future<List<String>> loadUserRoles() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> roles = prefs.getStringList(LocalKeys.userRoles) ?? [];
+    print('Loaded User Roles: $roles');  // Print all roles here
+    return roles;
+  }
+
+
+
 
 
   Future<void> getAllModules() async {

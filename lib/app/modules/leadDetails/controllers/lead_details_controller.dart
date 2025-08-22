@@ -218,6 +218,20 @@ class LeadDetailsController extends GetxController {
     update();
   }
 
+  void filterLeads(String query) {
+    if (query.isEmpty) {
+      leads.assignAll(leads);
+    } else {
+      leads.assignAll(
+        leads.where((lead) =>
+        lead.name.toLowerCase().contains(query.toLowerCase()) ||
+            lead.leadName.toLowerCase().contains(query.toLowerCase()) ||
+            lead.companyName.toLowerCase().contains(query.toLowerCase()) ||
+            lead.status.toLowerCase().contains(query.toLowerCase())),
+      );
+    }
+  }
+
   //add event call
   Future<void> addEventApicall({
     required String category,

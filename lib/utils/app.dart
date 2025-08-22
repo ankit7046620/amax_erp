@@ -65,6 +65,8 @@ class LocalKeys {
   static const String module = "module";
 
   static const String eid = "eid";
+  static const String userPermissions = "UserPermissions";
+  static const String userRoles = "user_roles";
 }
 
 enum Module {
@@ -177,6 +179,8 @@ class SpacingType {
 }
 
 enum ImageType { svg, png, network, file, jpg, unknown }
+
+enum GlobalPermissionType { read, write, create, delete, submit, cancel, amend }
 
 extension ImageTypeExtension on String {
   ImageType get imageType {

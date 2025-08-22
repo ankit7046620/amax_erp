@@ -9,6 +9,7 @@ import 'package:amax_hr/vo/event_reqest_vo.dart';
 import 'package:dropdown_search/dropdown_search.dart';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import 'package:shimmer_animation/shimmer_animation.dart';
@@ -35,12 +36,7 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
             padding: EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
-                Expanded(
-                  child: CustomTextField(
-                    controller: controller.searchController,
-                    labelText: '',
-                  ),
-                ),
+                Expanded(child: _searchField()),
                 const SizedBox(width: 10),
                 IconButton(
                   onPressed: () {
@@ -94,6 +90,28 @@ class LeadDetailsView extends GetView<LeadDetailsController> {
           onPressed: () => _showStatusFilterDialog(),
         ),
       ],
+    );
+  }
+
+  Widget _searchField() {
+    return TextFormField(
+      controller: controller.searchController,
+onChanged: (value) {
+        controller.filterLeads(value);
+      },
+      decoration: InputDecoration(
+        labelText: "labelText",
+
+        prefixIcon: const Icon(FontAwesomeIcons.search, size: 16),
+
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+        filled: true,
+        fillColor: Colors.white,
+        contentPadding: const EdgeInsets.symmetric(
+          vertical: 12,
+          horizontal: 16,
+        ),
+      ),
     );
   }
 

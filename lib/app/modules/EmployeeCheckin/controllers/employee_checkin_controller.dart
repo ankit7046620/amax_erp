@@ -1,4 +1,5 @@
 import 'package:amax_hr/manager/api_service.dart' show ApiService;
+import 'package:amax_hr/manager/userpermission.dart';
 import 'package:amax_hr/vo/employee_checkin_model.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -33,7 +34,9 @@ class EmployeeListResponse {
 
   factory EmployeeListResponse.fromJson(Map<String, dynamic> json) {
     var list = json['data'] as List;
-    List<Employee> employees = list.map((item) => Employee.fromJson(item)).toList();
+    List<Employee> employees = list
+        .map((item) => Employee.fromJson(item))
+        .toList();
     return EmployeeListResponse(data: employees);
   }
 }
@@ -56,10 +59,15 @@ class EmployeeCheckinController extends GetxController {
   var selectedDateTime = DateTime.now().obs;
   var searchController = TextEditingController();
   var showEmployeeDropdown = false.obs;
+  RxBool hasHrManagerRole = false.obs;
+  RxString currentemployee = ''.obs;
 
   @override
   void onInit() {
     super.onInit();
+    _getUserRole();
+    fetchEmployees();
+
     fetchEmployeeCheckins();
   }
 
@@ -69,15 +77,24 @@ class EmployeeCheckinController extends GetxController {
     super.onClose();
   }
 
+  _getUserRole() async {
+    hasHrManagerRole.value = await UserRoleService().hasRole('HR Manager');
+  }
+
   // Filter employees based on search
   void filterEmployees(String query) {
     if (query.isEmpty) {
       filteredEmployeeList.value = employeeList;
     } else {
-      filteredEmployeeList.value = employeeList.where((employee) =>
-      employee.employee.toLowerCase().contains(query.toLowerCase()) ||
-          employee.employeeName.toLowerCase().contains(query.toLowerCase())
-      ).toList();
+      filteredEmployeeList.value = employeeList
+          .where(
+            (employee) =>
+                employee.employee.toLowerCase().contains(query.toLowerCase()) ||
+                employee.employeeName.toLowerCase().contains(
+                  query.toLowerCase(),
+                ),
+          )
+          .toList();
     }
   }
 
@@ -116,13 +133,17 @@ class EmployeeCheckinController extends GetxController {
   }
 
   // Fetch employee checkins with date range
-  Future<void> fetchEmployeeCheckins({DateTime? startDate, DateTime? endDate}) async {
+  Future<void> fetchEmployeeCheckins({
+    DateTime? startDate,
+    DateTime? endDate,
+  }) async {
     try {
       isLoading.value = true;
       errorMessage.value = '';
 
       // Set default date range (last 7 days to today)
-      DateTime start = startDate ?? DateTime.now().subtract(const Duration(days: 7));
+      DateTime start =
+          startDate ?? DateTime.now().subtract(const Duration(days: 7));
       DateTime end = endDate ?? DateTime.now();
 
       // Format dates for API
@@ -132,23 +153,22 @@ class EmployeeCheckinController extends GetxController {
       // Construct the API endpoint with filters
       String endpoint = 'api/resource/Employee%20Checkin';
       String filters = '[["time","between",["$startDateStr","$endDateStr"]]]';
-      String fields = '["name","employee","employee_name","log_type","time","device_id"]';
+      String fields =
+          '["name","employee","employee_name","log_type","time","device_id"]';
 
       final response = await ApiService.get(
         endpoint,
-        params: {
-          'filters': filters,
-          'fields': fields,
-          'limit': '100',
-        },
+        params: {'filters': filters, 'fields': fields, 'limit': '100'},
       );
 
       if (response != null && response.data != null) {
         print('✅ API Response: ${response.data}');
 
         // Handle the response data structure
-        Map<String, dynamic> responseData = response.data as Map<String, dynamic>;
-        EmployeeCheckinResponse checkinResponse = EmployeeCheckinResponse.fromJson(responseData);
+        Map<String, dynamic> responseData =
+            response.data as Map<String, dynamic>;
+        EmployeeCheckinResponse checkinResponse =
+            EmployeeCheckinResponse.fromJson(responseData);
         checkinList.value = checkinResponse.data;
 
         print('✅ Parsed ${checkinList.length} checkin records');
@@ -173,19 +193,23 @@ class EmployeeCheckinController extends GetxController {
 
       final response = await ApiService.get(
         endpoint,
-        params: {
-          'fields': fields,
-          'limit_page_length': '1000',
-        },
+        params: {'fields': fields, 'limit_page_length': '1000'},
       );
 
       if (response != null && response.data != null) {
         print('✅ Employees API Response: ${response.data}');
 
-        Map<String, dynamic> responseData = response.data as Map<String, dynamic>;
-        EmployeeListResponse employeeResponse = EmployeeListResponse.fromJson(responseData);
+        Map<String, dynamic> responseData =
+            response.data as Map<String, dynamic>;
+        EmployeeListResponse employeeResponse = EmployeeListResponse.fromJson(
+          responseData,
+        );
         employeeList.value = employeeResponse.data;
+
         filteredEmployeeList.value = employeeResponse.data;
+        if (hasHrManagerRole.value != true) {
+          currentemployee.value = employeeList.first.employee;
+        }
 
         print('✅ Parsed ${employeeList.length} employees');
       } else {
@@ -208,7 +232,7 @@ class EmployeeCheckinController extends GetxController {
         return {
           'latitude': '23.0225',
           'longitude': '72.5714',
-          'location': 'Ahmedabad, Gujarat, India'
+          'location': 'Ahmedabad, Gujarat, India',
         };
       }
 
@@ -219,7 +243,7 @@ class EmployeeCheckinController extends GetxController {
           return {
             'latitude': '23.0225',
             'longitude': '72.5714',
-            'location': 'Ahmedabad, Gujarat, India'
+            'location': 'Ahmedabad, Gujarat, India',
           };
         }
       }
@@ -228,7 +252,7 @@ class EmployeeCheckinController extends GetxController {
         return {
           'latitude': '23.0225',
           'longitude': '72.5714',
-          'location': 'Ahmedabad, Gujarat, India'
+          'location': 'Ahmedabad, Gujarat, India',
         };
       }
 
@@ -239,21 +263,24 @@ class EmployeeCheckinController extends GetxController {
       return {
         'latitude': position.latitude.toString(),
         'longitude': position.longitude.toString(),
-        'location': 'Current Location'
+        'location': 'Current Location',
       };
     } catch (e) {
       print('❌ Error getting location: $e');
       return {
         'latitude': '23.0225',
         'longitude': '72.5714',
-        'location': 'Ahmedabad, Gujarat, India'
+        'location': 'Ahmedabad, Gujarat, India',
       };
     }
   }
 
   // Create new employee checkin
   Future<void> createEmployeeCheckin() async {
-    if (selectedEmployee.value == null) {
+    if (hasHrManagerRole.value == true) {
+      if (selectedEmployee.value == null) {
+        update();
+      }
       Get.snackbar('Error', 'Please select an employee');
       return;
     }
@@ -262,13 +289,19 @@ class EmployeeCheckinController extends GetxController {
       isSubmitting.value = true;
 
       // Use selected date time instead of current time
-      String selectedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(selectedDateTime.value);
+      String selectedTime = DateFormat('yyyy-MM-dd HH:mm:ss').format(
+        hasHrManagerRole.value != true
+            ? DateTime.now()
+            : selectedDateTime.value,
+      );
 
       // Get current location
       Map<String, String> locationData = await _getCurrentLocation();
 
       Map<String, dynamic> requestBody = {
-        'employee': selectedEmployee.value!.employee,
+        'employee': hasHrManagerRole.value == true
+            ? selectedEmployee.value!.employee
+            : currentemployee.value,
         'log_type': selectedLogType.value,
         'time': selectedTime,
         'device_id': 'WEB_APP',
@@ -309,12 +342,11 @@ class EmployeeCheckinController extends GetxController {
 
         // Refresh the checkin list in background
         await refreshData();
-
       } else {
         Get.snackbar(
           'Error',
           'Failed to create employee checkin',
-          backgroundColor: Colors.red,
+          backgroundColor: Colors.grey,
           colorText: Colors.white,
         );
       }
@@ -345,10 +377,7 @@ class EmployeeCheckinController extends GetxController {
       fetchEmployees();
     }
 
-    Get.dialog(
-      NewEmployeeCheckinPopup(),
-      barrierDismissible: false,
-    );
+    Get.dialog(NewEmployeeCheckinPopup(), barrierDismissible: false);
   }
 
   // Refresh data
@@ -407,29 +436,31 @@ class EmployeeCheckinController extends GetxController {
 
   // Get filtered checkins by employee
   List<EmployeeCheckin> getCheckinsByEmployee(String employeeName) {
-    return checkinList.where((checkin) =>
-        checkin.employeeName.toLowerCase().contains(employeeName.toLowerCase())
-    ).toList();
+    return checkinList
+        .where(
+          (checkin) => checkin.employeeName.toLowerCase().contains(
+            employeeName.toLowerCase(),
+          ),
+        )
+        .toList();
   }
 
   // Get today's checkins
   List<EmployeeCheckin> getTodayCheckins() {
     String today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    return checkinList.where((checkin) =>
-        checkin.time.startsWith(today)
-    ).toList();
+    return checkinList
+        .where((checkin) => checkin.time.startsWith(today))
+        .toList();
   }
 
   // Get statistics
   int get totalEntries => checkinList.length;
 
-  int get totalCheckIns => checkinList
-      .where((item) => item.logType.toUpperCase() == 'IN')
-      .length;
+  int get totalCheckIns =>
+      checkinList.where((item) => item.logType.toUpperCase() == 'IN').length;
 
-  int get totalCheckOuts => checkinList
-      .where((item) => item.logType.toUpperCase() == 'OUT')
-      .length;
+  int get totalCheckOuts =>
+      checkinList.where((item) => item.logType.toUpperCase() == 'OUT').length;
 }
 
 // New Employee Checkin Popup Widget
@@ -437,18 +468,14 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
         width: Get.width * 0.9,
-        constraints: BoxConstraints(
-          maxHeight: Get.height * 0.8,
-        ),
+        constraints: BoxConstraints(maxHeight: Get.height * 0.8),
         padding: const EdgeInsets.all(20),
         child: SingleChildScrollView(
           child: Column(
-          //  mainAxisSize: MainAxisSize.min,
+            //  mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
@@ -478,7 +505,7 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                 ],
               ),
               const SizedBox(height: 20),
-          
+
               // Employee Selection with Search
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -503,9 +530,15 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                           controller: controller.searchController,
                           decoration: InputDecoration(
                             hintText: 'Type to search employee...',
-                            prefixIcon: Icon(Icons.search, color: Colors.grey[600]),
+                            prefixIcon: Icon(
+                              Icons.search,
+                              color: Colors.grey[600],
+                            ),
                             border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 12,
+                            ),
                           ),
                           onChanged: (value) {
                             controller.filterEmployees(value);
@@ -516,26 +549,34 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                             controller.showEmployeeDropdown.value = true;
                             // If search field is empty, show all employees
                             if (controller.searchController.text.isEmpty) {
-                              controller.filteredEmployeeList.value = controller.employeeList;
+                              controller.filteredEmployeeList.value =
+                                  controller.employeeList;
                             }
                             // If there are employees but filteredList is empty, show all
-                            if (controller.filteredEmployeeList.isEmpty && controller.employeeList.isNotEmpty) {
-                              controller.filteredEmployeeList.value = controller.employeeList;
+                            if (controller.filteredEmployeeList.isEmpty &&
+                                controller.employeeList.isNotEmpty) {
+                              controller.filteredEmployeeList.value =
+                                  controller.employeeList;
                             }
                           },
                         ),
                         Obx(() {
-                          if (controller.showEmployeeDropdown.value && controller.filteredEmployeeList.isNotEmpty) {
+                          if (controller.showEmployeeDropdown.value &&
+                              controller.filteredEmployeeList.isNotEmpty) {
                             return Container(
                               decoration: BoxDecoration(
-                                border: Border(top: BorderSide(color: Colors.grey[300]!)),
+                                border: Border(
+                                  top: BorderSide(color: Colors.grey[300]!),
+                                ),
                               ),
                               constraints: const BoxConstraints(maxHeight: 200),
                               child: ListView.builder(
                                 shrinkWrap: true,
-                                itemCount: controller.filteredEmployeeList.length,
+                                itemCount:
+                                    controller.filteredEmployeeList.length,
                                 itemBuilder: (context, index) {
-                                  final employee = controller.filteredEmployeeList[index];
+                                  final employee =
+                                      controller.filteredEmployeeList[index];
                                   return ListTile(
                                     dense: true,
                                     title: Text(
@@ -552,7 +593,8 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                                         fontSize: 12,
                                       ),
                                     ),
-                                    onTap: () => controller.selectEmployee(employee),
+                                    onTap: () =>
+                                        controller.selectEmployee(employee),
                                   );
                                 },
                               ),
@@ -565,9 +607,9 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                   ),
                 ],
               ),
-          
+
               const SizedBox(height: 20),
-          
+
               // Time Selection
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -592,12 +634,20 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Obx(() => Text(
-                              DateFormat('dd-MM-yyyy HH:mm:ss').format(controller.selectedDateTime.value),
-                              style: const TextStyle(fontSize: 14),
-                            )),
+                            child: Obx(
+                              () => Text(
+                                DateFormat(
+                                  'dd-MM-yyyy HH:mm:ss',
+                                ).format(controller.selectedDateTime.value),
+                                style: const TextStyle(fontSize: 14),
+                              ),
+                            ),
                           ),
-                          Icon(Icons.calendar_today, color: Colors.grey[600], size: 20),
+                          Icon(
+                            Icons.calendar_today,
+                            color: Colors.grey[600],
+                            size: 20,
+                          ),
                         ],
                       ),
                     ),
@@ -605,16 +655,13 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                   const SizedBox(height: 4),
                   Text(
                     'Asia/Kolkata',
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12),
                   ),
                 ],
               ),
-          
+
               const SizedBox(height: 20),
-          
+
               // Log Type Selection
               Text(
                 'Log Type',
@@ -625,30 +672,44 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                 ),
               ),
               const SizedBox(height: 8),
-              Obx(() => Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[300]!),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: DropdownButtonHideUnderline(
-                  child: DropdownButton<String>(
-                    isExpanded: true,
-                    value: controller.selectedLogType.value,
-                    onChanged: (String? newValue) {
-                      if (newValue != null) {
-                        controller.selectedLogType.value = newValue;
-                      }
-                    },
-                    items: const [
-                      DropdownMenuItem(value: 'IN', child: Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('IN'))),
-                      DropdownMenuItem(value: 'OUT', child: Padding(padding: EdgeInsets.symmetric(horizontal: 12), child: Text('OUT'))),
-                    ],
+              Obx(
+                () => Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[300]!),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButton<String>(
+                      isExpanded: true,
+                      value: controller.selectedLogType.value,
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          controller.selectedLogType.value = newValue;
+                        }
+                      },
+                      items: const [
+                        DropdownMenuItem(
+                          value: 'IN',
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('IN'),
+                          ),
+                        ),
+                        DropdownMenuItem(
+                          value: 'OUT',
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 12),
+                            child: Text('OUT'),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              )),
-          
+              ),
+
               const SizedBox(height: 20),
-          
+
               // Location / Device ID
               Text(
                 'Location / Device ID',
@@ -673,17 +734,13 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                     Expanded(
                       child: Text(
                         'WEB_APP',
-                        style: TextStyle(
-                          color: Colors.grey,
-                          fontSize: 14,
-                        ),
+                        style: TextStyle(color: Colors.grey, fontSize: 14),
                       ),
                     ),
                   ],
                 ),
               ),
 
-          
               // // Skip Auto Attendance Checkbox
               // Row(
               //   children: [
@@ -698,7 +755,7 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
               // ),
               //
               const SizedBox(height: 24),
-          
+
               // Action Buttons
               Row(
                 children: [
@@ -716,29 +773,31 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Obx(() => ElevatedButton(
-                      onPressed: controller.isSubmitting.value
-                          ? null
-                          : () => controller.createEmployeeCheckin(),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.green,
-                        foregroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(vertical: 12),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    child: Obx(
+                      () => ElevatedButton(
+                        onPressed: controller.isSubmitting.value
+                            ? null
+                            : () => controller.createEmployeeCheckin(),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 12),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
                         ),
+                        child: controller.isSubmitting.value
+                            ? const SizedBox(
+                                height: 16,
+                                width: 16,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Text('Save'),
                       ),
-                      child: controller.isSubmitting.value
-                          ? const SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                          : const Text('Save'),
-                    )),
+                    ),
                   ),
                 ],
               ),
@@ -749,4 +808,3 @@ class NewEmployeeCheckinPopup extends GetView<EmployeeCheckinController> {
     );
   }
 }
-

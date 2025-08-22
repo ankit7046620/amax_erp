@@ -10,6 +10,7 @@ import 'package:amax_hr/manager/auth_manager.dart';
 import 'package:amax_hr/manager/shared_pref_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:amax_hr/utils/app_funcation.dart';
+import 'package:amax_hr/vo/doc_type_permission.dart';
 import 'package:amax_hr/vo/user_info.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter/cupertino.dart';
@@ -20,6 +21,8 @@ import 'package:frappe_dart/frappe_dart.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:local_auth/local_auth.dart';
 import 'package:dio/dio.dart';
+
+import '../../../../manager/userpermission.dart';
 
 class LoginController extends GetxController {
   final emailController = TextEditingController();
@@ -39,9 +42,38 @@ class LoginController extends GetxController {
   void onInit() {
     checkBiometricSupport();
     super.onInit();
-    setData("vignesh");
+    setData("emp");
     //loginLocal();
     //frappeClient = FrappeV15(baseUrl: 'https://plastic.techcloudamax.ai/');
+  }
+
+  void setData(String userType) {
+    switch (userType.toLowerCase()) {
+      case 'emp':
+        emailController.text = "emp@yopmail.com";
+        passwordController.text = "welcome@123";
+        break;
+      case 'hr':
+        emailController.text = "hrvasani@yopmail.com";
+        passwordController.text = "welcome@123";
+        break;
+      case 'test':
+        emailController.text = "test3@gmail.com";
+        passwordController.text = "test3@123";
+        break;
+      case 'ankit':
+        emailController.text = "ankit22@yopmail.com";
+        passwordController.text = "Test@123";
+        break;
+      case 'vignesh':
+        emailController.text = "vignesh@amaxconsultancyservices.com";
+        passwordController.text = "Welcome@@123#";
+        break;
+      default:
+        emailController.clear();
+        passwordController.clear();
+        break;
+    }
   }
 
   @override
@@ -122,10 +154,19 @@ class LoginController extends GetxController {
 
       if (sidValue != null && fullName != null && userId != null) {
         ApiService.dio.options.headers['Cookie'] =
-        'sid=$sidValue; full_name=$fullName; user_id=$userId';
+            'sid=$sidValue; full_name=$fullName; user_id=$userId';
       }
 
       UserInfo userInfo = UserInfo.fromJson(responseData);
+
+      logger.d("User Info: ${userInfo.message!.doctypes ?? []}");
+
+      await saveDirectPermissions(userInfo.message?.doctypes ?? []);
+
+      await UserRoleService().saveRoles(
+        List<String>.from(userInfo.message?.user!.roles ?? []),
+      );
+
       List<String> modules = userInfo.message?.modules ?? [];
 
       try {
@@ -151,33 +192,18 @@ class LoginController extends GetxController {
     }
   }
 
-  void setData(String userType) {
-    switch (userType.toLowerCase()) {
-      case 'emp':
-        emailController.text = "emp@yopmail.com";
-        passwordController.text = "welcome@123";
-        break;
-      case 'hr':
-        emailController.text = "hrvasani@yopmail.com";
-        passwordController.text = "welcome@123";
-        break;
-      case 'test':
-        emailController.text = "test3@gmail.com";
-        passwordController.text = "test3@123";
-        break;
-      case 'ankit':
-        emailController.text = "ankit22@yopmail.com";
-        passwordController.text = "Test@123";
-        break;
-      case 'vignesh':
-        emailController.text = "vignesh@amaxconsultancyservices.com";
-        passwordController.text = "Welcome@@123#";
-        break;
-      default:
-        emailController.clear();
-        passwordController.clear();
-        break;
+  Future<void> saveDirectPermissions(List permissionsList) async {
+    final prefs = await SharedPreferences.getInstance();
+    String jsonString = jsonEncode({'doctypes': permissionsList});
+    bool success = await prefs.setString(LocalKeys.userPermissions, jsonString);
+    if (success) {
+      print('Permission saved');
     }
+  }
+
+  Future<void> saveUserRoles(List<String> roles) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setStringList(LocalKeys.userRoles, roles);
   }
 
   void togglePasswordVisibility() {

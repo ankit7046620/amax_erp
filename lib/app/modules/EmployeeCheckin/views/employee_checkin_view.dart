@@ -2156,241 +2156,303 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.grey[50],
-      appBar: AppBar(
-        title: const Text(
-          'Employee Checkin',
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.white,
-          ),
-        ),
-        backgroundColor: Colors.indigo.shade600,
-        elevation: 0,
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.filter_list, color: Colors.white),
-            onPressed: () => _showFilterDialog(context),
-          ),
-          IconButton(
-            icon: const Icon(Icons.refresh, color: Colors.white),
-            onPressed: () => controller.refreshData(),
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Date Filter Header
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.indigo.shade600,
-              borderRadius: const BorderRadius.only(
-                bottomLeft: Radius.circular(20),
-                bottomRight: Radius.circular(20),
+    return GetBuilder<EmployeeCheckinController>(
+      builder: (controller) {
+        return Scaffold(
+          backgroundColor: Colors.grey[50],
+          appBar: AppBar(
+            title: const Text(
+              'Employee Checkin',
+              style: TextStyle(
+                fontWeight: FontWeight.w600,
+                color: Colors.white,
               ),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                ElevatedButton.icon(
-                  onPressed: () {
-                    // Call the popup method from controller
-                    controller.showNewCheckinPopup();
-                  },
-                  icon: const Icon(Icons.person_add_alt_1, size: 18),
-                  label: const Text('Attendance'),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue[700],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
+            backgroundColor: Colors.indigo.shade600,
+            elevation: 0,
+            centerTitle: true,
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.filter_list, color: Colors.white),
+                onPressed: () => _showFilterDialog(context),
+              ),
+              IconButton(
+                icon: const Icon(Icons.refresh, color: Colors.white),
+                onPressed: () => controller.refreshData(),
+              ),
+            ],
+          ),
+          body: Column(
+            children: [
+              // Date Filter Header
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.indigo.shade600,
+                  borderRadius: const BorderRadius.only(
+                    bottomLeft: Radius.circular(20),
+                    bottomRight: Radius.circular(20),
                   ),
                 ),
-                Obx(() => ElevatedButton.icon(
-                  onPressed: () => _selectDate(context),
-                  icon: const Icon(Icons.calendar_today, size: 18),
-                  label: Text(DateFormat('dd MMM yyyy').format(controller.selectedDate.value),),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.white,
-                    foregroundColor: Colors.blue[700],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                ),),
-
-              ],
-            ),
-          ),
-
-          // Statistics Cards
-          Container(
-            padding: const EdgeInsets.all(16),
-            child: Obx(() => Column(
-              children: [
-                // First row with existing statistics
-                Row(
+                child: Row(
+                  mainAxisAlignment:controller.hasHrManagerRole != true?
+                  MainAxisAlignment.center: MainAxisAlignment.spaceBetween,
                   children: [
-                    Expanded(
-                      child: _buildStatCard(
-                        'Total Entries',
-                        controller.checkinList.length.toString(),
-                        Icons.list_alt,
-                        Colors.blue,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        'Check In',
-                        controller.checkinList
-                            .where((item) => item.logType.toUpperCase() == 'IN')
-                            .length
-                            .toString(),
-                        Icons.login,
-                        Colors.green,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildStatCard(
-                        'Check Out',
-                        controller.checkinList
-                            .where((item) => item.logType.toUpperCase() == 'OUT')
-                            .length
-                            .toString(),
-                        Icons.logout,
-                        Colors.red,
-                      ),
-                    ),
+                    if (controller.hasHrManagerRole == true) ...[
+                      _hrMenualAttendanceButton(),
+                    ],
+
+                    _calendarButton(context),
+
                   ],
                 ),
-                const SizedBox(height: 12),
-                // Second row with new Early Checkout and Early Check-in buttons
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildClickableStatCard(
-                        'Early Checkout',
-                        _getEarlyCheckoutCount().toString(),
-                        Icons.schedule,
-                        Colors.orange,
-                            () => _showEarlyCheckoutList(context),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: _buildClickableStatCard(
-                        'Early Check-in',
-                        _getEarlyCheckInCount().toString(),
-                        Icons.login,
-                        Colors.purple,
-                            () => _showEarlyCheckInList(context),
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            )),
-          ),
+              ),
 
-          // Checkin List
-          Expanded(
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(
-                  child: CircularProgressIndicator(),
-                );
-              }
+              const SizedBox(height: 12),
 
-              if (controller.errorMessage.value.isNotEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(
-                        Icons.error_outline,
-                        size: 64,
-                        color: Colors.red[300],
-                      ),
-                      const SizedBox(height: 16),
-                      Text(
-                        controller.errorMessage.value,
-                        textAlign: TextAlign.center,
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.red[600],
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      ElevatedButton.icon(
-                        onPressed: () => controller.fetchEmployeeCheckins(),
-                        icon: const Icon(Icons.refresh),
-                        label: const Text('Retry'),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              if (controller.checkinList.isEmpty) {
-                return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/images/data_not_found.gif',
-                        fit: BoxFit.contain,
-                        // Optional: tint if needed
-                      ),
-                      const SizedBox(height: 5),
-                      Text(
-                        'No checkin records found',
-                        style: TextStyle(
-                          fontSize: 18,
-                          color: Colors.indigo[900],
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        'Try selecting a different date range',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.indigo[900],
-                        ),
-                      ),
-                    ],
-                  ),
-                );
-              }
-
-              // Group checkins by employee name
-              Map<String, List<EmployeeCheckin>> groupedCheckins = _groupCheckinsByEmployee();
-
-              return RefreshIndicator(
-                onRefresh: () => controller.refreshData(),
-                child: ListView.builder(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  itemCount: groupedCheckins.keys.length,
-                  itemBuilder: (context, index) {
-                    String employeeName = groupedCheckins.keys.elementAt(index);
-                    List<EmployeeCheckin> employeeCheckins = groupedCheckins[employeeName]!;
-                    return _buildGroupedCheckinCard(employeeName, employeeCheckins);
-                  },
-                ),
-              );
-            }),
-          ),
+              if(controller.hasHrManagerRole != true)...[
+        _checkinButton(),
         ],
+
+              // Statistics Cards
+              Container(
+                padding: const EdgeInsets.all(16),
+                child: Obx(
+                  () => Column(
+                    children: [
+                      // First row with existing statistics
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildStatCard(
+                              'Total Entries',
+                              controller.checkinList.length.toString(),
+                              Icons.list_alt,
+                              Colors.blue,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              'Check In',
+                              controller.checkinList
+                                  .where(
+                                    (item) =>
+                                        item.logType.toUpperCase() == 'IN',
+                                  )
+                                  .length
+                                  .toString(),
+                              Icons.login,
+                              Colors.green,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildStatCard(
+                              'Check Out',
+                              controller.checkinList
+                                  .where(
+                                    (item) =>
+                                        item.logType.toUpperCase() == 'OUT',
+                                  )
+                                  .length
+                                  .toString(),
+                              Icons.logout,
+                              Colors.red,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 12),
+                      // Second row with new Early Checkout and Early Check-in buttons
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildClickableStatCard(
+                              'Early Checkout',
+                              _getEarlyCheckoutCount().toString(),
+                              Icons.schedule,
+                              Colors.orange,
+                              () => _showEarlyCheckoutList(context),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _buildClickableStatCard(
+                              'Early Check-in',
+                              _getEarlyCheckInCount().toString(),
+                              Icons.login,
+                              Colors.purple,
+                              () => _showEarlyCheckInList(context),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              // Checkin List
+              Expanded(
+                child: Obx(() {
+                  if (controller.isLoading.value) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (controller.errorMessage.value.isNotEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 64,
+                            color: Colors.red[300],
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            controller.errorMessage.value,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.red[600],
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          ElevatedButton.icon(
+                            onPressed: () => controller.fetchEmployeeCheckins(),
+                            icon: const Icon(Icons.refresh),
+                            label: const Text('Retry'),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  if (controller.checkinList.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/data_not_found.gif',
+                            fit: BoxFit.contain,
+                            // Optional: tint if needed
+                          ),
+                          const SizedBox(height: 5),
+                          Text(
+                            'No checkin records found',
+                            style: TextStyle(
+                              fontSize: 18,
+                              color: Colors.indigo[900],
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            'Try selecting a different date range',
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.indigo[900],
+                            ),
+                          ),
+                        ],
+                      ),
+                    );
+                  }
+
+                  // Group checkins by employee name
+                  Map<String, List<EmployeeCheckin>> groupedCheckins =
+                      _groupCheckinsByEmployee();
+
+                  return RefreshIndicator(
+                    onRefresh: () => controller.refreshData(),
+                    child: ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      itemCount: groupedCheckins.keys.length,
+                      itemBuilder: (context, index) {
+                        String employeeName = groupedCheckins.keys.elementAt(
+                          index,
+                        );
+                        List<EmployeeCheckin> employeeCheckins =
+                            groupedCheckins[employeeName]!;
+                        return _buildGroupedCheckinCard(
+                          employeeName,
+                          employeeCheckins,
+                        );
+                      },
+                    ),
+                  );
+                }),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _checkinButton() {
+    return ElevatedButton.icon(
+      onPressed: () {
+
+controller.createEmployeeCheckin();
+      },
+      icon: const Icon(Icons.login, size: 18),
+      label: const Text('Check In'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.blue[700],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       ),
     );
   }
+
+
+  Widget _hrMenualAttendanceButton() {
+    return ElevatedButton.icon(
+      onPressed: () {
+        // Call the popup method from controller
+        controller.showNewCheckinPopup();
+      },
+      icon: const Icon(Icons.person_add_alt_1, size: 18),
+      label: const Text('Attendance'),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.white,
+        foregroundColor: Colors.blue[700],
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      ),
+    );
+  }
+
+  Widget _calendarButton(BuildContext context) {
+    return Obx(() {
+      Widget button = ElevatedButton.icon(
+        onPressed: () => _selectDate(context),
+        icon: const Icon(Icons.calendar_today, size: 18),
+        label: Text(
+          DateFormat('dd MMM yyyy').format(controller.selectedDate.value),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.white,
+          foregroundColor: Colors.blue[700],
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+      );
+
+      // Center button if hasHrManagerRole == true, else return button as is
+      if (controller.hasHrManagerRole == true) {
+        return Center(child: button);
+      } else {
+        return button;
+      }
+    });
+  }
+
 
   // Get early checkout count (checkout before 6:30 PM)
   int _getEarlyCheckoutCount() {
@@ -2507,9 +2569,7 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
           ),
           child: Container(
             width: Get.width * 0.9,
-            constraints: BoxConstraints(
-              maxHeight: Get.height * 0.7,
-            ),
+            constraints: BoxConstraints(maxHeight: Get.height * 0.7),
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2537,42 +2597,42 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                 const SizedBox(height: 8),
                 Text(
                   'Employees who checked out before 6:30 PM',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
                 Expanded(
                   child: earlyCheckouts.isEmpty
                       ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          size: 64,
-                          color: Colors.green[300],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No early checkouts found!',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 64,
+                                color: Colors.green[300],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No early checkouts found!',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  )
+                        )
                       : ListView.builder(
-                    itemCount: earlyCheckouts.length,
-                    itemBuilder: (context, index) {
-                      final checkin = earlyCheckouts[index];
-                      return _buildEmployeeListTile(checkin, Colors.orange);
-                    },
-                  ),
+                          itemCount: earlyCheckouts.length,
+                          itemBuilder: (context, index) {
+                            final checkin = earlyCheckouts[index];
+                            return _buildEmployeeListTile(
+                              checkin,
+                              Colors.orange,
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -2595,9 +2655,7 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
           ),
           child: Container(
             width: Get.width * 0.9,
-            constraints: BoxConstraints(
-              maxHeight: Get.height * 0.7,
-            ),
+            constraints: BoxConstraints(maxHeight: Get.height * 0.7),
             padding: const EdgeInsets.all(16),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -2625,42 +2683,42 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                 const SizedBox(height: 8),
                 Text(
                   'Employees who checked in before 9:30 AM',
-                  style: TextStyle(
-                    fontSize: 14,
-                    color: Colors.grey[600],
-                  ),
+                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
                 ),
                 const SizedBox(height: 16),
                 const Divider(),
                 Expanded(
                   child: earlyCheckIns.isEmpty
                       ? Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.check_circle,
-                          size: 64,
-                          color: Colors.green[300],
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'No early check-ins found!',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.check_circle,
+                                size: 64,
+                                color: Colors.green[300],
+                              ),
+                              const SizedBox(height: 16),
+                              Text(
+                                'No early check-ins found!',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ],
                           ),
-                        ),
-                      ],
-                    ),
-                  )
+                        )
                       : ListView.builder(
-                    itemCount: earlyCheckIns.length,
-                    itemBuilder: (context, index) {
-                      final checkin = earlyCheckIns[index];
-                      return _buildEmployeeListTile(checkin, Colors.purple);
-                    },
-                  ),
+                          itemCount: earlyCheckIns.length,
+                          itemBuilder: (context, index) {
+                            final checkin = earlyCheckIns[index];
+                            return _buildEmployeeListTile(
+                              checkin,
+                              Colors.purple,
+                            );
+                          },
+                        ),
                 ),
               ],
             ),
@@ -2686,27 +2744,18 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
             checkin.employeeName.isNotEmpty
                 ? checkin.employeeName[0].toUpperCase()
                 : 'U',
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
+            style: TextStyle(fontWeight: FontWeight.bold, color: color),
           ),
         ),
         title: Text(
           checkin.employeeName.isNotEmpty
               ? checkin.employeeName
               : 'Unknown Employee',
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
+          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
         ),
         subtitle: Text(
           '${checkin.logType.toUpperCase()} at ${_getFormattedTime(checkin.time)}',
-          style: TextStyle(
-            fontSize: 12,
-            color: Colors.grey[600],
-          ),
+          style: TextStyle(fontSize: 12, color: Colors.grey[600]),
         ),
         trailing: Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -2732,7 +2781,9 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
     Map<String, List<EmployeeCheckin>> grouped = {};
 
     for (var checkin in controller.checkinList) {
-      String employeeName = checkin.employeeName.isNotEmpty ? checkin.employeeName : 'Unknown Employee';
+      String employeeName = checkin.employeeName.isNotEmpty
+          ? checkin.employeeName
+          : 'Unknown Employee';
 
       if (grouped[employeeName] == null) {
         grouped[employeeName] = [];
@@ -2748,10 +2799,17 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
     return grouped;
   }
 
-  Widget _buildGroupedCheckinCard(String employeeName, List<EmployeeCheckin> checkins) {
+  Widget _buildGroupedCheckinCard(
+    String employeeName,
+    List<EmployeeCheckin> checkins,
+  ) {
     // Separate IN and OUT entries
-    List<EmployeeCheckin> checkIns = checkins.where((c) => c.logType.toUpperCase() == 'IN').toList();
-    List<EmployeeCheckin> checkOuts = checkins.where((c) => c.logType.toUpperCase() == 'OUT').toList();
+    List<EmployeeCheckin> checkIns = checkins
+        .where((c) => c.logType.toUpperCase() == 'IN')
+        .toList();
+    List<EmployeeCheckin> checkOuts = checkins
+        .where((c) => c.logType.toUpperCase() == 'OUT')
+        .toList();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
@@ -2779,7 +2837,9 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                   backgroundColor: Colors.indigo.shade100,
                   radius: 20,
                   child: Text(
-                    employeeName.isNotEmpty ? employeeName[0].toUpperCase() : 'U',
+                    employeeName.isNotEmpty
+                        ? employeeName[0].toUpperCase()
+                        : 'U',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
                       color: Colors.indigo.shade700,
@@ -2802,10 +2862,7 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                       ),
                       Text(
                         '${checkins.length} entries',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[600],
-                        ),
+                        style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                       ),
                     ],
                   ),
@@ -2813,7 +2870,10 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                 // Status badges
                 if (checkIns.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     margin: const EdgeInsets.only(right: 4),
                     decoration: BoxDecoration(
                       color: Colors.green.withOpacity(0.1),
@@ -2830,7 +2890,10 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                   ),
                 if (checkOuts.isNotEmpty)
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: BoxDecoration(
                       color: Colors.red.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12),
@@ -2875,31 +2938,35 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                       ),
                       const SizedBox(height: 6),
                       if (checkIns.isNotEmpty)
-                        ...checkIns.map((checkin) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _getFormattedDateTime(checkin.time),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13,
-                                  color: Colors.black87,
+                        ...checkIns
+                            .map(
+                              (checkin) => Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _getFormattedDateTime(checkin.time),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+
+                                    // if (checkin.deviceId.isNotEmpty)
+                                    //   Text(
+                                    //     'Device: ${checkin.deviceId}',
+                                    //     style: TextStyle(
+                                    //       fontSize: 10,
+                                    //       color: Colors.grey[600],
+                                    //     ),
+                                    //   ),
+                                  ],
                                 ),
                               ),
-
-                              // if (checkin.deviceId.isNotEmpty)
-                              //   Text(
-                              //     'Device: ${checkin.deviceId}',
-                              //     style: TextStyle(
-                              //       fontSize: 10,
-                              //       color: Colors.grey[600],
-                              //     ),
-                              //   ),
-                            ],
-                          ),
-                        )).toList()
+                            )
+                            .toList()
                       else
                         Text(
                           'No check-in',
@@ -2942,30 +3009,34 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                       ),
                       const SizedBox(height: 6),
                       if (checkOuts.isNotEmpty)
-                        ...checkOuts.map((checkin) => Padding(
-                          padding: const EdgeInsets.only(bottom: 4),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                _getFormattedDateTime(checkin.time),
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w500,
-                                  fontSize: 13,
-                                  color: Colors.black87,
+                        ...checkOuts
+                            .map(
+                              (checkin) => Padding(
+                                padding: const EdgeInsets.only(bottom: 4),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      _getFormattedDateTime(checkin.time),
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.w500,
+                                        fontSize: 13,
+                                        color: Colors.black87,
+                                      ),
+                                    ),
+                                    if (checkin.deviceId.isNotEmpty)
+                                      Text(
+                                        'Device: ${checkin.deviceId}',
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.grey[600],
+                                        ),
+                                      ),
+                                  ],
                                 ),
                               ),
-                              if (checkin.deviceId.isNotEmpty)
-                                Text(
-                                  'Device: ${checkin.deviceId}',
-                                  style: TextStyle(
-                                    fontSize: 10,
-                                    color: Colors.grey[600],
-                                  ),
-                                ),
-                            ],
-                          ),
-                        )).toList()
+                            )
+                            .toList()
                       else
                         Text(
                           'No check-out',
@@ -2994,7 +3065,11 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.access_time, size: 14, color: Colors.blue[700]),
+                      Icon(
+                        Icons.access_time,
+                        size: 14,
+                        color: Colors.blue[700],
+                      ),
                       const SizedBox(width: 6),
                       Text(
                         'Duration: ${_calculateDuration(checkIns.first, checkOuts.last)}',
@@ -3053,7 +3128,12 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
     }
   }
 
-  Widget _buildStatCard(String title, String value, IconData icon, Color color) {
+  Widget _buildStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+  ) {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -3095,7 +3175,13 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
     );
   }
 
-  Widget _buildClickableStatCard(String title, String value, IconData icon, Color color, VoidCallback onTap) {
+  Widget _buildClickableStatCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+    VoidCallback onTap,
+  ) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -3189,7 +3275,9 @@ class EmployeeCheckinView extends GetView<EmployeeCheckinController> {
                 onTap: () {
                   Navigator.pop(context);
                   DateTime now = DateTime.now();
-                  DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+                  DateTime startOfWeek = now.subtract(
+                    Duration(days: now.weekday - 1),
+                  );
                   controller.filterByDateRange(startOfWeek, now);
                 },
               ),

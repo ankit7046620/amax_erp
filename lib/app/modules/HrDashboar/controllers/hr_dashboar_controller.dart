@@ -2,10 +2,12 @@ import 'package:amax_hr/app/modules/hrAdmin/views/hr_admin_view.dart';
 import 'package:amax_hr/app/modules/hrReqirement/views/hr_reqirement_view.dart';
 import 'package:amax_hr/app/modules/hrSetting/views/hr_setting_view.dart';
 import 'package:amax_hr/constant/url.dart';
+import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
 import 'package:amax_hr/utils/app.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HrDashboarController extends GetxController {
   // Observable variables for dashboard stats
@@ -25,11 +27,52 @@ class HrDashboarController extends GetxController {
   var branchData = <BranchData>[].obs;
   var departmentChartData = <DepartmentChartData>[].obs;
   var designationChartData = <DesignationChartData>[].obs;
+  List<String> localRoles = ["HR Manager"];
+  RxBool isHrManager = false.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchEmployeeData();
+    //loadUserRoles();
+    checkRolesWithLocalListAndRun();
+  }
+
+  Future<void> checkRolesWithLocalListAndRun() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> savedRoles = prefs.getStringList(LocalKeys.userRoles) ?? [];
+
+    // Check if any role in savedRoles matches any in localRoles (case insensitive)
+    isHrManager.value = savedRoles.any(
+      (savedRole) => localRoles.any(
+        (localRole) => localRole.toLowerCase() == savedRole.toLowerCase(),
+      ),
+    );
+    update();
+logger.d("isHrManager: $isHrManager");
+    if (isHrManager==true) {
+      fetchEmployeeData();
+    } else {
+      print('No matching roles found.');
+    }
+  }
+
+  Future<List<String>> loadUserRoles() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> roles = prefs.getStringList(LocalKeys.userRoles) ?? [];
+    print('Loaded User Roles: $roles'); // Print all roles here
+    return roles;
+  }
+
+  Future<bool> hasRole(String roleName) async {
+    final roles = await loadUserRoles();
+    return roles.any((role) => role.toLowerCase() == roleName.toLowerCase());
+  }
+
+  Future<bool> hasAnyRole(List<String> roleNames) async {
+    final roles = await loadUserRoles();
+    return roles.any(
+      (r) => roleNames.any((role) => role.toLowerCase() == r.toLowerCase()),
+    );
   }
 
   Future<void> fetchEmployeeData() async {
@@ -343,7 +386,7 @@ class HrDashboarController extends GetxController {
   }
 }
 
-List<Widget> pages = [HrReqirementView(),HrAdminView(),HrSettingView()];
+List<Widget> pages = [HrReqirementView(), HrAdminView(), HrSettingView()];
 
 // Data models for charts
 class HiringAttritionData {
