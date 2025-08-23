@@ -42,7 +42,7 @@ class LoginController extends GetxController {
   void onInit() {
     checkBiometricSupport();
     super.onInit();
-    setData("emp");
+    setData("hr");
     //loginLocal();
     //frappeClient = FrappeV15(baseUrl: 'https://plastic.techcloudamax.ai/');
   }
@@ -50,7 +50,7 @@ class LoginController extends GetxController {
   void setData(String userType) {
     switch (userType.toLowerCase()) {
       case 'emp':
-        emailController.text = "emp@yopmail.com";
+        emailController.text = "emp2@yopmail.com";
         passwordController.text = "welcome@123";
         break;
       case 'hr':

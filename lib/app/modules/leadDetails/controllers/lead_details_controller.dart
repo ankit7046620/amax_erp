@@ -336,11 +336,11 @@ class LeadDetailsController extends GetxController {
 
     try {
       // Call API using postWithFile method
-      Response? response = await ApiService.postWithFile(
+      Response? response = await ApiService.post(
         ApiUri.createTask,
         data: data,
-        file: controller.file.value, // optional file
-        fileField: 'attachment', // ERPNext field name for file
+        // file: controller.file.value, // optional file
+        // fileField: 'attachment', // ERPNext field name for file
       );
 
       // Check response

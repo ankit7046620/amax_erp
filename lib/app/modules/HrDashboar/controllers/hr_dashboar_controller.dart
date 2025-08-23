@@ -34,6 +34,8 @@ class HrDashboarController extends GetxController {
   void onInit() {
     super.onInit();
     //loadUserRoles();
+    fetchEmployeeData();
+
     checkRolesWithLocalListAndRun();
   }
 

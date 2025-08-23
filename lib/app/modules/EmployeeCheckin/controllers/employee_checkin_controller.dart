@@ -54,7 +54,7 @@ class EmployeeCheckinController extends GetxController {
   var filteredEmployeeList = <Employee>[].obs;
   var isLoadingEmployees = false.obs;
   var selectedEmployee = Rxn<Employee>();
-  var selectedLogType = 'IN'.obs;
+  var selectedLogType = 'OUT'.obs;
   var isSubmitting = false.obs;
   var selectedDateTime = DateTime.now().obs;
   var searchController = TextEditingController();
@@ -79,6 +79,7 @@ class EmployeeCheckinController extends GetxController {
 
   _getUserRole() async {
     hasHrManagerRole.value = await UserRoleService().hasRole('HR Manager');
+    update();
   }
 
   // Filter employees based on search

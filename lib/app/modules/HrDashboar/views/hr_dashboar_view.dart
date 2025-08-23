@@ -95,60 +95,84 @@ class HrDashboarView extends GetView<HrDashboarController> {
                   expandedDashboard: expandedDashboard,
                   content: _buildExpenseClaimsDashboardContent(),
                 ),],
-                Container(
-                  width: double.infinity,
-                  height: 55,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      Get.toNamed(Routes.EMPLOYEE_CHECKIN);
-                      // Get.to(() => EmployeeCheckinView());
-                    },
-                    child: const Text(
-                      'Employee Checkin',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
-                Container(
-                  width: double.infinity,
-                  height: 55,
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.deepOrange,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
-                    onPressed: () {
-                      Get.toNamed(Routes.LEAVE_APPLICATION);
-                      // Get.to(() => EmployeeCheckinView());
-                    },
-                    child: const Text(
-                      'Leave Application',
-                      style: TextStyle(fontSize: 18),
-                    ),
-                  ),
-                ),
+
+
+
+                  _checkInButton(),
+
+
+
+                if (controller.isHrManager.value == false) ...[
+                  _leaveApplicationButton(),
+                ],
+
+
+
+
               ],
             ),
           ),
         );
       },
     );
+  }
+
+
+  Widget _leaveApplicationButton(){
+    return
+      Container(
+        width: double.infinity,
+        height: 55,
+        margin: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepOrange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onPressed: () {
+            Get.toNamed(Routes.LEAVE_APPLICATION);
+            // Get.to(() => EmployeeCheckinView());
+          },
+          child: const Text(
+            'Leave Application',
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+      );
+  }
+
+
+  Widget _checkInButton(){
+    return
+      Container(
+        width: double.infinity,
+        height: 55,
+        margin: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 6,
+        ),
+        child: ElevatedButton(
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.deepOrange,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+          ),
+          onPressed: () {
+            Get.toNamed(Routes.EMPLOYEE_CHECKIN);
+            // Get.to(() => EmployeeCheckinView());
+          },
+          child: const Text(
+            'Employee Checkin',
+            style: TextStyle(fontSize: 18),
+          ),
+        ),
+      );
   }
 
   // Build individual dashboard section with accordion behavior
