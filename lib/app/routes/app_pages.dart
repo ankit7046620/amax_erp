@@ -22,6 +22,8 @@ import '../modules/calendar/bindings/calendar_binding.dart';
 import '../modules/calendar/views/calendar_view.dart';
 import '../modules/crm/bindings/crm_binding.dart';
 import '../modules/crm/views/crm_view.dart';
+import '../modules/employee/bindings/employee_binding.dart';
+import '../modules/employee/views/employee_view.dart';
 import '../modules/empolyeeDashBoard/bindings/empolyee_dash_board_binding.dart';
 import '../modules/empolyeeDashBoard/views/empolyee_dash_board_view.dart';
 import '../modules/home/bindings/home_binding.dart';
@@ -232,6 +234,11 @@ class AppPages {
       name: _Paths.CALENDAR,
       page: () => const CalendarView(),
       binding: CalendarBinding(),
+    ),
+    GetPage(
+      name: _Paths.EMPLOYEE,
+      page: () =>   EmployeeView(),
+      binding: EmployeeBinding(),
     ),
   ];
 }

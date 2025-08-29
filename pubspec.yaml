@@ -56,6 +56,11 @@ dependencies:
   dropdown_search: ^6.0.2
   file_picker: ^10.3.1
   syncfusion_flutter_calendar: ^30.2.6
+  intl: ^0.20.2
+  swipeable_button_view: ^0.0.2
+  geocoding: ^2.2.0
+  shimmer: ^3.0.0
+
 
 
 flutter_launcher_icons:

@@ -42,7 +42,7 @@ class LoginController extends GetxController {
   void onInit() {
     checkBiometricSupport();
     super.onInit();
-    setData("hr");
+    setData("vignesh");
     //loginLocal();
     //frappeClient = FrappeV15(baseUrl: 'https://plastic.techcloudamax.ai/');
   }

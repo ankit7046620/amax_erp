@@ -3,6 +3,7 @@ import 'package:amax_hr/app/modules/HrDashboar/views/hr_dashboar_view.dart';
 import 'package:amax_hr/app/modules/StockDashboard/views/stock_dashboard_view.dart';
 import 'package:amax_hr/app/modules/accounts/views/accounts_view.dart';
 import 'package:amax_hr/app/modules/crm/views/crm_view.dart';
+import 'package:amax_hr/app/modules/employee/views/employee_view.dart';
 import 'package:amax_hr/app/modules/hrView/views/hr_view_view.dart';
 import 'package:amax_hr/app/modules/payroll/views/payroll_view.dart';
 import 'package:amax_hr/app/modules/projectBoard/views/project_board_view.dart';
@@ -56,6 +57,7 @@ class HomeTabController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    checkUSerRole();
     getAllModules();
     loadUserRoles();
   //  fetchAndStoreModules();
@@ -111,6 +113,22 @@ class HomeTabController extends GetxController {
   }
 
   void increment() => count.value++;
+
+
+
+
+
+  RxBool isHrManager = false.obs;
+  List<String> localRoles = ["HR Manager"];
+  void checkUSerRole() async {
+    final prefs = await SharedPreferences.getInstance();
+    List<String> savedRoles = prefs.getStringList(LocalKeys.userRoles) ?? [];
+    isHrManager.value = savedRoles.any(
+          (savedRole) => localRoles.any(
+            (localRole) => localRole.toLowerCase() == savedRole.toLowerCase(),
+      ),
+    );
+  }
 
 
   Future<void> fetchAndStoreModules() async {
@@ -192,7 +210,8 @@ class HomeTabController extends GetxController {
         break;
 
       case Module.hr:
-        Get.to(() => HrDashboarView());
+        _gotoHrView();
+      //  Get.to(() => HrDashboarView());
 
         break;
       case Module.assets:
@@ -220,6 +239,16 @@ class HomeTabController extends GetxController {
     }
   }
 
+
+  void _gotoHrView() {
+    if (isHrManager.value == true) {
+      Get.to(() => HrDashboarView());
+    } else {
+      Get.to(()=>EmployeeView());
+
+
+    }
+  }
   void showSnackbar(
     String title,
     String message, {

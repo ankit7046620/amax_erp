@@ -15,12 +15,14 @@ class ChartFilterType {
 
 class PurchaseOrdersDashboardController extends GetxController {
   final RxBool isLoading = true.obs;
-  final RxDouble totalPurchaseAmount = 0.0.obs;
-  final RxInt pOrdersToReceive = 0.obs;
+  RxDouble totalPurchaseAmount = 0.0.obs;
+
+    RxInt pOrdersToReceive = 0.obs;
   final RxInt pOrdersToBill = 0.obs;
   final RxInt activeSuppliers = 0.obs;
 
   List<PurchaseOrderDataList> purchaseOrders = [];
+  List<PurchaseOrderDataList> filterPurchaseOrders = [];
   List<Map<String, dynamic>> purchaseOrdersData = [];
 
   static const List<String> chartFilters = [
@@ -41,7 +43,13 @@ class PurchaseOrdersDashboardController extends GetxController {
   RxString selectedYear = '2025'.obs;
 
   static List<String> yearOptions = [
-    '2022', '2023', '2024', '2025', '2026', '2027', '2028',
+    '2022',
+    '2023',
+    '2024',
+    '2025',
+    '2026',
+    '2027',
+    '2028',
   ];
 
   @override
@@ -63,12 +71,11 @@ class PurchaseOrdersDashboardController extends GetxController {
             .map((e) => PurchaseOrderDataList.fromJson(e))
             .toList();
 
-        purchaseOrders = list;
-        purchaseOrdersData = list.map((e) => e.toJson()).toList();
-        printAllPurchaseTotals(list);
+        logger.d("✅ Purchases loaded: ${list.length}");
 
-        updateAll();
-        logger.d("✅ Purchases loaded: \${list.length}");
+        filterCountData(data: list,filterType:ChartFilterType.yearly.obs );
+
+
       } else {
         logger.e("❌ Failed to fetch purchases");
       }
@@ -79,6 +86,88 @@ class PurchaseOrdersDashboardController extends GetxController {
       EasyLoading.dismiss();
     }
   }
+    void filterCountData({
+      required List<PurchaseOrderDataList> data,
+      required RxString filterType, // "daily", "weekly", "monthly", "quarterly", "yea
+      // rly"
+    }) {
+      filterPurchaseOrders.clear();
+      final now = DateTime.now();
+
+      for (var e in data) {
+        const excludedStatuses = ["Draft", "Cancelled", "Closed"];
+
+        if (!excludedStatuses.contains(e.status) &&
+            e.docstatus == 1 &&
+            e.company == GlobalCompany.acd) {
+
+          // ✅ make sure we always parse safely
+          final date = DateTime.tryParse(e.transactionDate.toString());
+          if (date == null) continue; // skip if invalid date
+
+          bool matches = false;
+
+          switch (filterType.toLowerCase()) {
+            case "daily":
+              matches = date.year == now.year &&
+                  date.month == now.month &&
+                  date.day == now.day;
+              break;
+
+            case "weekly":
+              final startOfWeek = DateTime(now.year, now.month, now.day)
+                  .subtract(Duration(days: now.weekday - 1));
+              final endOfWeek = startOfWeek.add(const Duration(days: 6));
+              matches = !date.isBefore(startOfWeek) && !date.isAfter(endOfWeek);
+              break;
+
+            case "monthly":
+              matches = date.year == now.year && date.month == now.month;
+              break;
+
+            case "quarterly":
+              final currentQuarter = ((now.month - 1) ~/ 3) + 1;
+              final dateQuarter = ((date.month - 1) ~/ 3) + 1;
+              matches = date.year == now.year && dateQuarter == currentQuarter;
+              break;
+
+            case "yearly":
+            default: // fallback to yearly
+              matches = date.year == now.year;
+              break;
+          }
+
+          if (matches) {
+            filterPurchaseOrders.add(e);
+          }
+        }
+      }
+
+      totalPurchaseAmount.value = filterPurchaseOrders.fold(
+        0.0,
+            (sum, e) => sum + e.baseNetTotal,
+      );
+
+
+      logger.d("FilterType=$filterType | Count=${filterPurchaseOrders.length} |"
+          " Total=$totalPurchaseAmount");
+      _gettoRecevideBillCount() ;
+
+      update();
+    }
+
+  _gettoRecevideBillCount() {
+    pOrdersToReceive.value = filterPurchaseOrders.where((e) =>
+    // combine all conditions with &&
+    (e.status == "Bill,To Bill" || e.status == "To Receive") &&
+
+        e.docstatus == 1
+    ).length;
+
+    logger.d("Closed Orders Count: ${pOrdersToReceive.value}");
+  }
+
+
 
   void onYearChanged(String? year) {
     if (year != null) {
@@ -151,7 +240,6 @@ class PurchaseOrdersDashboardController extends GetxController {
     }
   }
 
-
   void printAllPurchaseTotals(List<PurchaseOrderDataList> orders) {
     final now = DateTime.now();
 
@@ -162,7 +250,9 @@ class PurchaseOrdersDashboardController extends GetxController {
       },
       'Weekly': {
         'start': now.subtract(Duration(days: now.weekday - 1)),
-        'end': now.subtract(Duration(days: now.weekday - 1)).add(Duration(days: 6)),
+        'end': now
+            .subtract(Duration(days: now.weekday - 1))
+            .add(Duration(days: 6)),
       },
       'Monthly': {
         'start': DateTime(now.year, now.month, 1),
@@ -194,7 +284,8 @@ class PurchaseOrdersDashboardController extends GetxController {
         final status = order.status?.toLowerCase().trim();
 
         if (date == null || amount == null) continue;
-        if (status == 'draft' || status == 'cancelled' || status == 'closed') continue;
+        if (status == 'draft' || status == 'cancelled' || status == 'closed')
+          continue;
         if (date.isBefore(start) || date.isAfter(end)) continue;
 
         total += amount;
@@ -204,13 +295,11 @@ class PurchaseOrdersDashboardController extends GetxController {
     }
   }
 
-
-
   double calculateTotalPurchase(
-      List<PurchaseOrderDataList> orders,
-      String filterType, {
-        required RxString selectedYear,
-      }) {
+    List<PurchaseOrderDataList> orders,
+    String filterType, {
+    required RxString selectedYear,
+  }) {
     double total = 0.0;
     int year = int.tryParse(selectedYear.value) ?? DateTime.now().year;
     DateTime baseStart = getStartDate(
@@ -224,18 +313,22 @@ class PurchaseOrdersDashboardController extends GetxController {
       final status = order.status?.toLowerCase().trim();
 
       if (date == null || baseNetTotal == null) continue;
-      if (status == 'draft' || status == 'cancelled' || status == 'closed') continue;
+      if (status == 'draft' || status == 'cancelled' || status == 'closed')
+        continue;
 
       bool withinRange = switch (filterType.toLowerCase()) {
-        'daily' => date.year == baseStart.year &&
-            date.month == baseStart.month &&
-            date.day == baseStart.day,
-        'weekly' => date.isAfter(baseStart.subtract(const Duration(days: 1))) &&
-            date.isBefore(baseStart.add(const Duration(days: 7))),
-        'monthly' => date.year == baseStart.year &&
-            date.month == baseStart.month,
-        'quarterly' => date.year == baseStart.year &&
-            ((date.month - 1) ~/ 3) == ((baseStart.month - 1) ~/ 3),
+        'daily' =>
+          date.year == baseStart.year &&
+              date.month == baseStart.month &&
+              date.day == baseStart.day,
+        'weekly' =>
+          date.isAfter(baseStart.subtract(const Duration(days: 1))) &&
+              date.isBefore(baseStart.add(const Duration(days: 7))),
+        'monthly' =>
+          date.year == baseStart.year && date.month == baseStart.month,
+        'quarterly' =>
+          date.year == baseStart.year &&
+              ((date.month - 1) ~/ 3) == ((baseStart.month - 1) ~/ 3),
         'yearly' => date.year == year,
         _ => false,
       };
@@ -250,28 +343,33 @@ class PurchaseOrdersDashboardController extends GetxController {
   }
 
   int countOrdersToReceive(
-      List<PurchaseOrderDataList> orders,
-      String filterType,
-      RxString selectedYear,
-      ) {
-    return _countOrdersByStatus(orders, filterType, selectedYear, ["to receive"]);
+    List<PurchaseOrderDataList> orders,
+    String filterType,
+    RxString selectedYear,
+  ) {
+    return _countOrdersByStatus(orders, filterType, selectedYear, [
+      "to receive",
+    ]);
   }
 
   int countOrdersToBill(
-      List<PurchaseOrderDataList> orders,
-      String filterType,
-      RxString selectedYear,
-      ) {
+    List<PurchaseOrderDataList> orders,
+    String filterType,
+    RxString selectedYear,
+  ) {
     return _countOrdersByStatus(orders, filterType, selectedYear, ["to bill"]);
   }
 
   int getActiveSuppliers(
-      List<PurchaseOrderDataList> orders,
-      String filterType,
-      RxString selectedYear,
-      ) {
+    List<PurchaseOrderDataList> orders,
+    String filterType,
+    RxString selectedYear,
+  ) {
     final suppliers = <String>{};
-    DateTime start = getStartDate(selectedType: filterType, selectedYear: selectedYear);
+    DateTime start = getStartDate(
+      selectedType: filterType,
+      selectedYear: selectedYear,
+    );
     DateTime end = _getEndDate(start, filterType);
 
     for (var order in orders) {
@@ -302,11 +400,11 @@ class PurchaseOrdersDashboardController extends GetxController {
   }
 
   int _countOrdersByStatus(
-      List<PurchaseOrderDataList> orders,
-      String filterType,
-      RxString selectedYear,
-      List<String> statuses,
-      ) {
+    List<PurchaseOrderDataList> orders,
+    String filterType,
+    RxString selectedYear,
+    List<String> statuses,
+  ) {
     DateTime start = getStartDate(
       selectedType: filterType,
       selectedYear: selectedYear,

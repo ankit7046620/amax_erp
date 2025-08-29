@@ -99,12 +99,8 @@ class HrDashboarView extends GetView<HrDashboarController> {
 
 
                   _checkInButton(),
+                _leaveApplicationButton(),
 
-
-
-                if (controller.isHrManager.value == false) ...[
-                  _leaveApplicationButton(),
-                ],
 
 
 

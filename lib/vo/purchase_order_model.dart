@@ -235,6 +235,7 @@ class PurchaseOrderDataList {
 
   factory PurchaseOrderDataList.fromJson(Map<String, dynamic> json) => PurchaseOrderDataList(
     name: json["name"],
+    docstatus: json['docstatus'],
     owner: json["owner"],
     creation: json["creation"] == null ? null : DateTime.tryParse(json["creation"]),
     modified: json["modified"] == null ? null : DateTime.tryParse(json["modified"]),
@@ -260,6 +261,7 @@ class PurchaseOrderDataList {
 
   Map<String, dynamic> toJson() => {
     "name": name,
+    "docstatus":docstatus,
     "owner": owner,
     "creation": creation?.toIso8601String(),
     "modified": modified?.toIso8601String(),
