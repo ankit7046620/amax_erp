@@ -4,6 +4,8 @@ import '../modules/AssetDashboar/bindings/asset_dashboar_binding.dart';
 import '../modules/AssetDashboar/views/asset_dashboar_view.dart';
 import '../modules/AttendanceDashboard/bindings/attendance_dashboard_binding.dart';
 import '../modules/AttendanceDashboard/views/attendance_dashboard_view.dart';
+import '../modules/AttendanceList/bindings/attendance_list_binding.dart';
+import '../modules/AttendanceList/views/attendance_list_view.dart';
 import '../modules/EmployeeCheckin/bindings/employee_checkin_binding.dart';
 import '../modules/EmployeeCheckin/views/employee_checkin_view.dart';
 import '../modules/LeaveApplication/bindings/leave_application_binding.dart';
@@ -232,6 +234,11 @@ class AppPages {
       name: _Paths.CALENDAR,
       page: () => const CalendarView(),
       binding: CalendarBinding(),
+    ),
+    GetPage(
+      name: _Paths.ATTENDANCE_LIST,
+      page: () => const AttendanceListView(),
+      binding: AttendanceListBinding(),
     ),
   ];
 }

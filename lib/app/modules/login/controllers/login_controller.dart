@@ -101,6 +101,7 @@ class LoginController extends GetxController {
 
       // Parse cookies
       final cookies = response.headers['set-cookie'] ?? [];
+      print("Logincookies"+cookies.toString());
       String? sidValue, fullName, userId;
 
       for (var cookie in cookies) {

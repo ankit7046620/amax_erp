@@ -126,7 +126,27 @@ class HrDashboarView extends GetView<HrDashboarController> {
                 ),
               ),
             ),
-
+            Container(
+              width: double.infinity,
+              height: 55,
+              margin: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.deepOrange,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                onPressed: () {
+                  Get.toNamed(Routes.ATTENDANCE_LIST);
+                  // Get.to(() => EmployeeCheckinView());
+                },
+                child: const Text(
+                  'Attendance',
+                  style: TextStyle(fontSize: 18),
+                ),
+              ),
+            ),
           ],
         ),
       ),

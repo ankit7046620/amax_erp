@@ -47,6 +47,7 @@ abstract class Routes {
 
   static const TASK = _Paths.TASK;
   static const CALENDAR = _Paths.CALENDAR;
+  static const ATTENDANCE_LIST = _Paths.ATTENDANCE_LIST;
 }
 
 abstract class _Paths {
@@ -94,4 +95,5 @@ abstract class _Paths {
 
   static const TASK = '/task';
   static const CALENDAR = '/calendar';
+  static const ATTENDANCE_LIST = '/attendance-list';
 }
