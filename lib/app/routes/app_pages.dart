@@ -8,6 +8,8 @@ import '../modules/AttendanceList/bindings/attendance_list_binding.dart';
 import '../modules/AttendanceList/views/attendance_list_view.dart';
 import '../modules/EmployeeCheckin/bindings/employee_checkin_binding.dart';
 import '../modules/EmployeeCheckin/views/employee_checkin_view.dart';
+import '../modules/HolidayList/bindings/holiday_list_binding.dart';
+import '../modules/HolidayList/views/holiday_list_view.dart';
 import '../modules/LeaveApplication/bindings/leave_application_binding.dart';
 import '../modules/LeaveApplication/views/leave_application_view.dart';
 import '../modules/Onboarding/bindings/onboarding_binding.dart';
@@ -239,6 +241,11 @@ class AppPages {
       name: _Paths.ATTENDANCE_LIST,
       page: () => const AttendanceListView(),
       binding: AttendanceListBinding(),
+    ),
+    GetPage(
+      name: _Paths.HOLIDAY_LIST,
+      page: () => const HolidayListView(),
+      binding: HolidayListBinding(),
     ),
   ];
 }

@@ -452,28 +452,6 @@ class AttendanceFormController extends GetxController {
     }
   }
 
-  // void _populateFormForEdit() {
-  //   if (currentAttendance != null) {
-  //     selectedEmployee.value = currentAttendance!.employee;
-  //     selectedEmployeeName.value = currentAttendance!.employeeName;
-  //     attendanceDateController.text = _formatDate(DateTime.parse(currentAttendance!.attendanceDate));
-  //     companyController.text = currentAttendance!.company ?? 'Vasani Polymers';
-  //     selectedStatus.value = currentAttendance!.status;
-  //     selectedShift.value = currentAttendance!.shift ?? '';
-  //     lateEntry.value = currentAttendance!.lateEntry == 1;
-  //     earlyExit.value = currentAttendance!.earlyExit == 1;
-  //
-  //     // Set leave type if status is On Leave or Half Day
-  //     if (currentAttendance!.status == 'On Leave' || currentAttendance!.status == 'Half Day') {
-  //       selectedLeaveType.value = currentAttendance!.leaveType ?? '';
-  //     }
-  //
-  //     // Set half day period if applicable
-  //     if (currentAttendance!.status == 'Half Day' && currentAttendance!.halfDayDate != null) {
-  //       selectedHalfDayPeriod.value = currentAttendance!.halfDayDate!;
-  //     }
-  //   }
-  // }
 
   Future<void> _initializeData() async {
     isLoading.value = true;
@@ -634,88 +612,6 @@ class AttendanceFormController extends GetxController {
     }
     return displayDate;
   }
-
-  // Future<void> submitAttendance() async {
-  //   if (!formKey.currentState!.validate()) {
-  //     return;
-  //   }
-  //
-  //   // Additional validation for Half Day
-  //   if (selectedStatus.value == 'Half Day' && selectedHalfDayPeriod.value.isEmpty) {
-  //     Get.snackbar('Validation Error', 'Please select half day period');
-  //     return;
-  //   }
-  //
-  //   isSubmitting.value = true;
-  //
-  //   try {
-  //     Map<String, dynamic> requestData = {
-  //       'employee': selectedEmployee.value,
-  //       'attendance_date': _formatDateForAPI(attendanceDateController.text),
-  //       'company': companyController.text,
-  //       'status': selectedStatus.value,
-  //       'late_entry': lateEntry.value ? 1 : 0,
-  //       'early_exit': earlyExit.value ? 1 : 0,
-  //     };
-  //
-  //     // Add optional fields
-  //     if (selectedShift.value.isNotEmpty) {
-  //       requestData['shift'] = selectedShift.value;
-  //     }
-  //
-  //     if (selectedStatus.value == 'On Leave' || selectedStatus.value == 'Half Day') {
-  //       if (selectedLeaveType.value.isNotEmpty) {
-  //         requestData['leave_type'] = selectedLeaveType.value;
-  //       }
-  //     }
-  //
-  //     // Add half day period if selected
-  //     if (selectedStatus.value == 'Half Day' && selectedHalfDayPeriod.value.isNotEmpty) {
-  //       requestData['half_day_date'] = selectedHalfDayPeriod.value;
-  //     }
-  //
-  //     dynamic response;
-  //
-  //     if (isEditMode.value && attendanceId != null) {
-  //       // Update existing attendance
-  //       response = await ApiService.put(
-  //         '/api/resource/Attendance/$attendanceId',
-  //         data: requestData,
-  //       );
-  //     } else {
-  //       // Create new attendance
-  //       response = await ApiService.post(
-  //         '/api/resource/Attendance',
-  //         data: requestData,
-  //       );
-  //     }
-  //
-  //     if (response != null) {
-  //       Get.snackbar(
-  //         'Success',
-  //         isEditMode.value ? 'Attendance updated successfully' : 'Attendance created successfully',
-  //         backgroundColor: Colors.green[100],
-  //         colorText: Colors.green[800],
-  //       );
-  //
-  //       // Go back to list and refresh
-  //       Get.back(result: true);
-  //     } else {
-  //       throw Exception('Failed to submit attendance');
-  //     }
-  //
-  //   } catch (e) {
-  //     print('Error submitting attendance: $e');
-  //     Get.snackbar(
-  //       'Error',
-  //       'Failed to ${isEditMode.value ? 'update' : 'create'} attendance: ${e.toString()}',
-  //       backgroundColor: Colors.red[100],
-  //       colorText: Colors.red[800],
-  //     );
-  //   } finally {
-  //     isSubmitting.value = false;
-  //   }
-  // }
 
   Future<void> submitAttendance() async {
     if (!formKey.currentState!.validate()) {
