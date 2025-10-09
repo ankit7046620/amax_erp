@@ -20,7 +20,7 @@ void main() async {
       designSize: MediaQueryData.fromView(
         WidgetsBinding.instance.platformDispatcher.views.first,
       ).size,
-      minTextAdapt: true,
+      minTextAdapt: false,
       splitScreenMode: true,
       builder: (BuildContext context, Widget? child) {
         return const MyApp();

@@ -159,7 +159,7 @@ class HrDashboarView extends GetView<HrDashboarController> {
                   ),
                 ),
                 onPressed: () {
-                  Get.toNamed(Routes.ATTENDANCE_LIST);
+                  Get.toNamed(Routes.HOLIDAY_LIST);
                   // Get.to(() => EmployeeCheckinView());
                 },
                 child: const Text(

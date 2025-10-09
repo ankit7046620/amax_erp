@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "443097347120",
+    "project_id": "erpapp-2e5f8",
+    "storage_bucket": "erpapp-2e5f8.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:443097347120:android:3daaf6c8d8cb1d028069f5",
+        "android_client_info": {
+          "package_name": "com.example.amax_erp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBYP13o0wQ0w3TpFsRRZEYILJUzgVvdXso"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

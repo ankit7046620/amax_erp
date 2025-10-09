@@ -70,6 +70,8 @@ import '../modules/splash/bindings/splash_binding.dart';
 import '../modules/splash/views/splash_view.dart';
 import '../modules/task/bindings/task_binding.dart';
 import '../modules/task/views/task_view.dart';
+import '../modules/userList/bindings/user_list_binding.dart';
+import '../modules/userList/views/user_list_view.dart';
 
 part 'app_routes.dart';
 
@@ -246,6 +248,11 @@ class AppPages {
       name: _Paths.HOLIDAY_LIST,
       page: () => const HolidayListView(),
       binding: HolidayListBinding(),
+    ),
+    GetPage(
+      name: _Paths.USER_LIST,
+      page: () => const UserListView(),
+      binding: UserListBinding(),
     ),
   ];
 }

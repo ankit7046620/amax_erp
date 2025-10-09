@@ -8,6 +8,7 @@ import 'package:amax_hr/app/modules/payroll/views/payroll_view.dart';
 import 'package:amax_hr/app/modules/projectBoard/views/project_board_view.dart';
 import 'package:amax_hr/app/modules/purchaseOrdersDashboard/views/purchase_orders_dashboard_view.dart';
 import 'package:amax_hr/app/modules/saleDashboard/views/sale_dashboard_view.dart';
+import 'package:amax_hr/app/modules/userList/views/user_list_view.dart';
 import 'package:amax_hr/constant/url.dart';
 import 'package:amax_hr/main.dart';
 import 'package:amax_hr/manager/api_service.dart';
@@ -191,14 +192,16 @@ class HomeTabController extends GetxController {
         Get.to(() => ProjectBoardView());
         break;
 
-
-
       case Module.payroll:
         Get.to(() => PayrollChartView());
         break;
 
       case Module.accounts:
         Get.to(() => AccountsView());
+        break;
+
+      case Module.geo:
+        Get.to(() => UserListView());
         break;
 
     // Add remaining cases as needed

@@ -1,3 +1,4 @@
+
 // import 'package:flutter/material.dart';
 // import 'package:get/get.dart';
 // import '../controllers/leave_application_controller.dart';
@@ -27,6 +28,15 @@
 //             onPressed: controller.refreshData,
 //           ),
 //         ],
+//       ),
+//       floatingActionButton: FloatingActionButton.extended(
+//         onPressed: () => _showAddLeaveDialog(context),
+//         backgroundColor: const Color(0xFF4CAF50),
+//         icon: const Icon(Icons.add, color: Colors.white),
+//         label: const Text(
+//           'Add Leave',
+//           style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600),
+//         ),
 //       ),
 //       body: Column(
 //         children: [
@@ -243,126 +253,421 @@
 //           ),
 //         ],
 //       ),
-//       child: Padding(
-//         padding: const EdgeInsets.all(16),
-//         child: Row(
-//           children: [
-//             // Checkbox
-//             // Container(
-//             //   width: 20,
-//             //   height: 20,
-//             //   decoration: BoxDecoration(
-//             //     border: Border.all(color: Colors.grey.shade400),
-//             //     borderRadius: BorderRadius.circular(4),
-//             //   ),
-//             //   child: const Icon(
-//             //     Icons.check_box_outline_blank,
-//             //     size: 16,
-//             //     color: Colors.grey,
-//             //   ),
-//             // ),
-//
-//             // Content
-//             Expanded(
-//               child: Column(
-//                 crossAxisAlignment: CrossAxisAlignment.start,
-//                 children: [
-//                   // Employee Name and Status Row
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       Expanded(
-//                         child: Text(
-//                           application.employeeName,
-//                           style: const TextStyle(
-//                             fontWeight: FontWeight.w600,
-//                             fontSize: 16,
-//                             color: Colors.black87,
-//                           ),
-//                         ),
-//                       ),
-//                       Container(
-//                         padding: const EdgeInsets.symmetric(
-//                           horizontal: 8,
-//                           vertical: 4,
-//                         ),
-//                         decoration: BoxDecoration(
-//                           color: controller.getStatusColor(application.status),
-//                           borderRadius: BorderRadius.circular(12),
-//                         ),
-//                         child: Text(
-//                           application.status,
-//                           style: const TextStyle(
-//                             color: Colors.white,
-//                             fontSize: 12,
-//                             fontWeight: FontWeight.w500,
-//                           ),
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                   const SizedBox(height: 8),
-//                   // Date and ID Row
-//                   Row(
-//                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
-//                     children: [
-//                       Text(
-//                         application.fromDate,
-//                         style: TextStyle(
-//                           color: Colors.grey.shade600,
-//                           fontSize: 14,
-//                         ),
-//                       ),
-//                       Text(
-//                         application.name,
-//                         style: TextStyle(
-//                           color: Colors.grey.shade600,
-//                           fontSize: 12,
-//                         ),
-//                       ),
-//                     ],
-//                   ),
-//                 ],
-//               ),
-//             ),
-//             const SizedBox(width: 16),
-//             // Time ago and actions
-//             Column(
+//       child: Material(
+//         color: Colors.transparent,
+//         child: InkWell(
+//           borderRadius: BorderRadius.circular(12),
+//           onTap: () => _showEditLeaveDialog(Get.context!, application),
+//           child: Padding(
+//             padding: const EdgeInsets.all(16),
+//             child: Row(
 //               children: [
-//                 Text(
-//                   controller.getTimeAgo(application.fromDate),
-//                   style: TextStyle(
-//                     color: Colors.grey.shade600,
-//                     fontSize: 12,
+//                 // Content
+//                 Expanded(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       // Employee Name and Status Row
+//                       Row(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Expanded(
+//                             child: Text(
+//                               application.employeeName,
+//                               style: const TextStyle(
+//                                 fontWeight: FontWeight.w600,
+//                                 fontSize: 16,
+//                                 color: Colors.black87,
+//                               ),
+//                             ),
+//                           ),
+//                           Container(
+//                             padding: const EdgeInsets.symmetric(
+//                               horizontal: 8,
+//                               vertical: 4,
+//                             ),
+//                             decoration: BoxDecoration(
+//                               color: controller.getStatusColor(application.status),
+//                               borderRadius: BorderRadius.circular(12),
+//                             ),
+//                             child: Text(
+//                               application.status,
+//                               style: const TextStyle(
+//                                 color: Colors.white,
+//                                 fontSize: 12,
+//                                 fontWeight: FontWeight.w500,
+//                               ),
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                       const SizedBox(height: 8),
+//                       // Date and ID Row
+//                       Row(
+//                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                         children: [
+//                           Text(
+//                             application.fromDate,
+//                             style: TextStyle(
+//                               color: Colors.grey.shade600,
+//                               fontSize: 14,
+//                             ),
+//                           ),
+//                           Text(
+//                             application.name,
+//                             style: TextStyle(
+//                               color: Colors.grey.shade600,
+//                               fontSize: 12,
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//                     ],
 //                   ),
 //                 ),
-//                 const SizedBox(height: 8),
-//                 Row(
+//                 const SizedBox(width: 16),
+//                 // Time ago and actions
+//                 Column(
 //                   children: [
-//                     Icon(
-//                       Icons.chat_bubble_outline,
-//                       size: 16,
-//                       color: Colors.grey.shade400,
-//                     ),
-//                     const SizedBox(width: 4),
 //                     Text(
-//                       '0',
+//                       controller.getTimeAgo(application.fromDate),
 //                       style: TextStyle(
-//                         color: Colors.grey.shade400,
+//                         color: Colors.grey.shade600,
 //                         fontSize: 12,
 //                       ),
 //                     ),
-//                     const SizedBox(width: 8),
-//                     Icon(
-//                       Icons.favorite_border,
-//                       size: 16,
-//                       color: Colors.grey.shade400,
+//                     const SizedBox(height: 8),
+//                     Row(
+//                       children: [
+//                         Icon(
+//                           Icons.chat_bubble_outline,
+//                           size: 16,
+//                           color: Colors.grey.shade400,
+//                         ),
+//                         const SizedBox(width: 4),
+//                         Text(
+//                           '0',
+//                           style: TextStyle(
+//                             color: Colors.grey.shade400,
+//                             fontSize: 12,
+//                           ),
+//                         ),
+//                         const SizedBox(width: 8),
+//                         Icon(
+//                           Icons.favorite_border,
+//                           size: 16,
+//                           color: Colors.grey.shade400,
+//                         ),
+//                       ],
 //                     ),
 //                   ],
 //                 ),
 //               ],
 //             ),
-//           ],
+//           ),
+//         ),
+//       ),
+//     );
+//   }
+//
+//   void _showAddLeaveDialog(BuildContext context) {
+//     controller.clearForm();
+//     controller.fetchEmployees();
+//     controller.fetchLeaveTypes();
+//
+//     _showLeaveDialog(context, null, isEdit: false);
+//   }
+//
+//   void _showEditLeaveDialog(BuildContext context, LeaveApplication application) {
+//     controller.populateFormForEdit(application);
+//     controller.fetchEmployees();
+//     controller.fetchLeaveTypes();
+//
+//     _showLeaveDialog(context, application, isEdit: true);
+//   }
+//
+//   void _showLeaveDialog(BuildContext context, LeaveApplication? application, {required bool isEdit}) {
+//     bool isEditable = !isEdit || (application?.status.toLowerCase() == 'open');
+//
+//     showDialog(
+//       context: context,
+//       builder: (context) => Dialog(
+//         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+//         child: Container(
+//           width: MediaQuery.of(context).size.width * 0.8,
+//           height: MediaQuery.of(context).size.height * 0.8,
+//           padding: const EdgeInsets.all(15),
+//           child: Column(
+//             crossAxisAlignment: CrossAxisAlignment.start,
+//             children: [
+//               // Header
+//               Row(
+//                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+//                 children: [
+//                   Text(
+//                     isEdit ? 'Edit Leave Application' : 'Add Leave Application',
+//                     style: const TextStyle(
+//                       fontSize: 20,
+//                       fontWeight: FontWeight.w600,
+//                     ),
+//                   ),
+//                   IconButton(
+//                     onPressed: () => Navigator.of(context).pop(),
+//                     icon: const Icon(Icons.close),
+//                   ),
+//                 ],
+//               ),
+//               const SizedBox(height: 20),
+//
+//               // Form Content
+//               Expanded(
+//                 child: SingleChildScrollView(
+//                   child: Column(
+//                     crossAxisAlignment: CrossAxisAlignment.start,
+//                     children: [
+//                       // Employee Dropdown
+//                       const Text(
+//                         'Employee *',
+//                         style: TextStyle(fontWeight: FontWeight.w500),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Obx(() => DropdownButtonFormField<String>(
+//                         value: controller.selectedEmployee.value.isEmpty ? null : controller.selectedEmployee.value,
+//                         items: controller.employeeList.map((employee) {
+//                           return DropdownMenuItem(
+//                             value: employee.name,
+//                             child: Text(employee.employeeName),
+//                           );
+//                         }).toList(),
+//                         onChanged: isEditable ? (value) {
+//                           if (value != null) {
+//                             controller.selectedEmployee.value = value;
+//                           }
+//                         } : null,
+//                         decoration: InputDecoration(
+//                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+//                           hintText: 'Select Employee',
+//                           filled: !isEditable,
+//                           fillColor: !isEditable ? Colors.grey.shade200 : null,
+//                         ),
+//                       )),
+//                       const SizedBox(height: 16),
+//
+//                       // Leave Type Dropdown
+//                       const Text(
+//                         'Leave Type *',
+//                         style: TextStyle(fontWeight: FontWeight.w500),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Obx(() => DropdownButtonFormField<String>(
+//                         value: controller.selectedLeaveType.value.isEmpty ? null : controller.selectedLeaveType.value,
+//                         items: controller.leaveTypes.map((type) {
+//                           return DropdownMenuItem(
+//                             value: type,
+//                             child: Text(type),
+//                           );
+//                         }).toList(),
+//                         onChanged: isEditable ? (value) {
+//                           if (value != null) {
+//                             controller.selectedLeaveType.value = value;
+//                           }
+//                         } : null,
+//                         decoration: InputDecoration(
+//                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+//                           hintText: 'Select Leave Type',
+//                           filled: !isEditable,
+//                           fillColor: !isEditable ? Colors.grey.shade200 : null,
+//                         ),
+//                       )),
+//                       const SizedBox(height: 16),
+//
+//                       // Date Row
+//                       // Date Row
+//                       Row(
+//                         children: [
+//                           // From Date
+//                           Expanded(
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 const Text(
+//                                   'From Date *',
+//                                   style: TextStyle(fontWeight: FontWeight.w500),
+//                                 ),
+//                                 const SizedBox(height: 8),
+//                                 TextFormField(
+//                                   controller: controller.fromDateController,
+//                                   readOnly: true,
+//                                   enabled: isEditable,
+//                                   onTap: isEditable ? () => controller.selectFromDate(context) : null,
+//                                   decoration: InputDecoration(
+//                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+//                                     suffixIcon: const Icon(Icons.calendar_today),
+//                                     hintText: 'Select Date',
+//                                     filled: !isEditable,
+//                                     fillColor: !isEditable ? Colors.grey.shade200 : null,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                           const SizedBox(width: 16),
+//                           // To Date
+//                           Expanded(
+//                             child: Column(
+//                               crossAxisAlignment: CrossAxisAlignment.start,
+//                               children: [
+//                                 const Text(
+//                                   'To Date *',
+//                                   style: TextStyle(fontWeight: FontWeight.w500),
+//                                 ),
+//                                 const SizedBox(height: 8),
+//                                 TextFormField(
+//                                   controller: controller.toDateController,
+//                                   readOnly: true,
+//                                   enabled: isEditable,
+//                                   onTap: isEditable ? () => controller.selectToDate(context) : null,
+//                                   decoration: InputDecoration(
+//                                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+//                                     suffixIcon: const Icon(Icons.calendar_today),
+//                                     hintText: 'Select Date',
+//                                     filled: !isEditable,
+//                                     fillColor: !isEditable ? Colors.grey.shade200 : null,
+//                                   ),
+//                                 ),
+//                               ],
+//                             ),
+//                           ),
+//                         ],
+//                       ),
+//
+//                       const SizedBox(height: 16),
+//
+//                       // Half Day Checkbox
+//                       Obx(() => Row(
+//                         children: [
+//                           Checkbox(
+//                             value: controller.isHalfDay.value,
+//                             onChanged: isEditable ? (value) {
+//                               controller.isHalfDay.value = value ?? false;
+//                             } : null,
+//                           ),
+//                           const Text('Half Day'),
+//                         ],
+//                       )),
+//                       const SizedBox(height: 16),
+//
+//                       // Reason
+//                       const Text(
+//                         'Reason',
+//                         style: TextStyle(fontWeight: FontWeight.w500),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       TextFormField(
+//                         controller: controller.reasonController,
+//                         enabled: isEditable,
+//                         maxLines: 3,
+//                         decoration: InputDecoration(
+//                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+//                           hintText: 'Enter reason for leave',
+//                           filled: !isEditable,
+//                           fillColor: !isEditable ? Colors.grey.shade200 : null,
+//                         ),
+//                       ),
+//                       const SizedBox(height: 16),
+//
+//                       // Leave Approver
+//                       const Text(
+//                         'Leave Approver *',
+//                         style: TextStyle(fontWeight: FontWeight.w500),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       TextFormField(
+//                         controller: controller.leaveApproverController,
+//                         enabled: isEditable,
+//                         decoration: InputDecoration(
+//                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+//                           hintText: 'Enter approver email',
+//                           filled: !isEditable,
+//                           fillColor: !isEditable ? Colors.grey.shade200 : null,
+//                         ),
+//                       ),
+//                       const SizedBox(height: 16),
+//
+//                       // Status Dropdown
+//                       const Text(
+//                         'Status *',
+//                         style: TextStyle(fontWeight: FontWeight.w500),
+//                       ),
+//                       const SizedBox(height: 8),
+//                       Obx(() => DropdownButtonFormField<String>(
+//                         value: controller.selectedStatusForm.value.isEmpty ? null : controller.selectedStatusForm.value,
+//                         items: controller.statusOptions.map((status) {
+//                           return DropdownMenuItem(
+//                             value: status,
+//                             child: Text(status),
+//                           );
+//                         }).toList(),
+//                         onChanged: isEditable ? (value) {
+//                           if (value != null) {
+//                             controller.selectedStatusForm.value = value;
+//                           }
+//                         } : null,
+//                         decoration: InputDecoration(
+//                           border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+//                           hintText: 'Select Status',
+//                           filled: !isEditable,
+//                           fillColor: !isEditable ? Colors.grey.shade200 : null,
+//                         ),
+//                       )),
+//                       const SizedBox(height: 20),
+//                     ],
+//                   ),
+//                 ),
+//               ),
+//
+//               // Action Buttons
+//               if (isEditable)
+//                 Row(
+//                   children: [
+//                     Expanded(
+//                       child: OutlinedButton(
+//                         onPressed: () => Navigator.of(context).pop(),
+//                         child: const Text('Cancel'),
+//                       ),
+//                     ),
+//                     const SizedBox(width: 16),
+//                     Expanded(
+//                       child: Obx(() => ElevatedButton(
+//                         onPressed: controller.isSubmitting.value
+//                             ? null
+//                             : () {
+//                           if (isEdit) {
+//                             controller.updateLeaveApplication(application!.name);
+//                           } else {
+//                             controller.addLeaveApplication();
+//                           }
+//                         },
+//                         style: ElevatedButton.styleFrom(
+//                           backgroundColor: const Color(0xFF4CAF50),
+//                           foregroundColor: Colors.white,
+//                         ),
+//                         child: controller.isSubmitting.value
+//                             ? const SizedBox(
+//                           height: 16,
+//                           width: 16,
+//                           child: CircularProgressIndicator(
+//                             strokeWidth: 2,
+//                             valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+//                           ),
+//                         )
+//                             : Text(isEdit ? 'Update' : 'Save'),
+//                       )),
+//                     ),
+//                   ],
+//                 ),
+//             ],
+//           ),
 //         ),
 //       ),
 //     );
@@ -629,13 +934,16 @@ class LeaveApplicationView extends GetView<LeaveApplicationController> {
                     ),
                   ],
                 ),
+                const SizedBox(height: 16),
+                // Leave Balance Cards
+                _buildLeaveBalanceSection(),
               ],
             ),
           ),
           // Results Count
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 5),
             color: const Color(0xFFF0F4F8),
             child: Obx(() => Text(
               '${controller.filteredApplications.length} of ${controller.leaveApplications.length}',
@@ -694,6 +1002,160 @@ class LeaveApplicationView extends GetView<LeaveApplicationController> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildLeaveBalanceSection() {
+    // Sample leave types data - replace with actual data from controller
+    final leaveBalanceData = [
+      {
+        'type': 'Casual Leave',
+        'icon': Icons.event_available,
+        'total': 12,
+        'used': 3,
+        'color': Colors.blue,
+      },
+      {
+        'type': 'Sick Leave',
+        'icon': Icons.local_hospital,
+        'total': 10,
+        'used': 2,
+        'color': Colors.red,
+      },
+      {
+        'type': 'Privilege Leave',
+        'icon': Icons.star,
+        'total': 15,
+        'used': 5,
+        'color': Colors.purple,
+      },
+      {
+        'type': 'Leave Without Pay',
+        'icon': Icons.money_off,
+        'total': 0,
+        'used': 1,
+        'color': Colors.orange,
+      },
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 12,
+            mainAxisSpacing: 12,
+            childAspectRatio: 2.3,
+          ),
+          itemCount: leaveBalanceData.length,
+          itemBuilder: (context, index) {
+            final data = leaveBalanceData[index];
+            final available = (data['total'] as int) - (data['used'] as int);
+
+            return Container(
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+
+                    Text(
+                      data['type'] as String,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'Total',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              '${data['total']}',
+                              style: const TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: Colors.black87,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Text(
+                              'Used',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              '${data['used']}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: data['color'] as Color,
+                              ),
+                            ),
+                          ],
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            Text(
+                              'Balance',
+                              style: TextStyle(
+                                fontSize: 10,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                            Text(
+                              '${available >= 0 ? available : 0}',
+                              style: TextStyle(
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                color: available >= 0 ? Colors.green : Colors.red,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 
@@ -939,7 +1401,6 @@ class LeaveApplicationView extends GetView<LeaveApplicationController> {
                       )),
                       const SizedBox(height: 16),
 
-                      // Date Row
                       // Date Row
                       Row(
                         children: [
